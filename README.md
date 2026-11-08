@@ -28,6 +28,14 @@ uv run pre-commit install    # turn on the checks that run on every commit
 uv run pytest                # run the tests
 ```
 
+Download the data:
+
+```bash
+uv run partd-download        # Medicare Part D, 2018 to the latest year CMS has published
+```
+
+This downloads about 33 GB of CSVs from data.cms.gov, one file at a time, and stores them as about 4.6 GB of Parquet in `data/raw/`. Allow about 10 GB of free disk space while it runs. Re-running only fetches years that are new or that CMS has re-published.
+
 ## Project layout
 
 ```
