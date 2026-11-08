@@ -22,7 +22,8 @@ import csv
 import json
 import logging
 import sys
-from collections.abc import Iterable
+import time
+from collections.abc import Callable, Iterable
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -100,16 +101,52 @@ def find_releases(catalog: dict, dataset: str) -> dict[int, Release]:
 
 
 def fetch_catalog(client: httpx.Client) -> dict:
-    response = client.get(CATALOG_URL)
-    response.raise_for_status()
-    return response.json()
+    return with_retries(lambda: _get_json(client, CATALOG_URL), CATALOG_URL)
 
 
 def fetch_expected_columns(client: httpx.Client, release: Release) -> list[str]:
     """Column names from the CMS data dictionary for this release."""
-    response = client.get(release.dictionary_url)
+    data = with_retries(lambda: _get_json(client, release.dictionary_url), release.dictionary_url)
+    return [field["name"] for field in data["data"]["fields"]]
+
+
+def _get_json(client: httpx.Client, url: str) -> dict:
+    response = client.get(url)
     response.raise_for_status()
-    return [field["name"] for field in response.json()["data"]["fields"]]
+    return response.json()
+
+
+# --- Retrying ------------------------------------------------------------------------------
+
+RETRY_STATUSES = {429, 500, 502, 503, 504}  # "slow down" and temporary server errors
+MAX_ATTEMPTS = 6
+
+
+def with_retries[T](
+    action: Callable[[], T], what: str, sleep: Callable[[float], None] = time.sleep
+) -> T:
+    """Run `action`, retrying temporary failures with exponential backoff (2, 4, 8, ... seconds).
+
+    Retries network errors, rate limiting (429) and temporary server errors (5xx). If the
+    server says how long to wait (a Retry-After header), that wait is used instead.
+    Anything else, such as 404 Not Found, fails straight away.
+    """
+    for attempt in range(1, MAX_ATTEMPTS + 1):
+        try:
+            return action()
+        except (httpx.TransportError, httpx.HTTPStatusError) as error:
+            if isinstance(error, httpx.HTTPStatusError):
+                if error.response.status_code not in RETRY_STATUSES:
+                    raise
+                retry_after = error.response.headers.get("Retry-After", "")
+                wait = float(retry_after) if retry_after.isdigit() else 2.0**attempt
+            else:
+                wait = 2.0**attempt
+            if attempt == MAX_ATTEMPTS:
+                raise
+            log.warning("%s failed (%s); retrying in %.0f s", what, error, wait)
+            sleep(wait)
+    raise AssertionError("unreachable")
 
 
 # --- Downloading ---------------------------------------------------------------------------
@@ -233,11 +270,13 @@ def ingest_release(
 
     out_dir.mkdir(parents=True, exist_ok=True)
     csv_path = out_dir / "download.csv"
+    # Fetch the small data dictionary first, so a failure here doesn't waste a 4 GB download.
+    expected_columns = fetch_expected_columns(client, release)
     log.info("Downloading %s %s", release.dataset, release.year)
-    download_file(client, release.csv_url, csv_path)
+    with_retries(lambda: download_file(client, release.csv_url, csv_path), release.csv_url)
     try:
         header = read_header(csv_path)
-        check_columns(header, fetch_expected_columns(client, release), csv_path.name)
+        check_columns(header, expected_columns, csv_path.name)
         log.info("Converting %s %s to Parquet", release.dataset, release.year)
         repaired_lines = 0
         try:

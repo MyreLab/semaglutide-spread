@@ -244,3 +244,65 @@ def test_ingest_release_repairs_invalid_utf8_instead_of_dropping_rows(tmp_path):
     out = tmp_path / "partd_by_provider_and_drug" / "year=2024"
     assert rows == 3
     assert json.loads((out / "_source.json").read_text())["repaired_lines"] == 1
+
+
+# --- retries -------------------------------------------------------------------------------
+
+
+def _flaky(failures, status=429, headers=None):
+    """A fake server that fails `failures` times with `status`, then succeeds."""
+    calls = {"n": 0}
+
+    def handler(request):
+        calls["n"] += 1
+        if calls["n"] <= failures:
+            return httpx.Response(status, headers=headers or {})
+        return httpx.Response(200, json={"ok": True})
+
+    return handler, calls
+
+
+def test_with_retries_recovers_from_rate_limiting():
+    handler, calls = _flaky(failures=2)
+    waits = []
+    with httpx.Client(transport=httpx.MockTransport(handler)) as client:
+        result = partd.with_retries(
+            lambda: partd._get_json(client, "https://example.org/x"), "x", sleep=waits.append
+        )
+    assert result == {"ok": True}
+    assert calls["n"] == 3
+    assert waits == [2.0, 4.0]  # exponential backoff
+
+
+def test_with_retries_respects_retry_after_header():
+    handler, _ = _flaky(failures=1, headers={"Retry-After": "30"})
+    waits = []
+    with httpx.Client(transport=httpx.MockTransport(handler)) as client:
+        partd.with_retries(
+            lambda: partd._get_json(client, "https://example.org/x"), "x", sleep=waits.append
+        )
+    assert waits == [30.0]
+
+
+def test_with_retries_does_not_retry_permanent_errors():
+    handler, calls = _flaky(failures=1, status=404)
+    with (
+        httpx.Client(transport=httpx.MockTransport(handler)) as client,
+        pytest.raises(httpx.HTTPStatusError),
+    ):
+        partd.with_retries(
+            lambda: partd._get_json(client, "https://example.org/x"), "x", sleep=lambda s: None
+        )
+    assert calls["n"] == 1
+
+
+def test_with_retries_gives_up_eventually():
+    handler, calls = _flaky(failures=100, status=503)
+    with (
+        httpx.Client(transport=httpx.MockTransport(handler)) as client,
+        pytest.raises(httpx.HTTPStatusError),
+    ):
+        partd.with_retries(
+            lambda: partd._get_json(client, "https://example.org/x"), "x", sleep=lambda s: None
+        )
+    assert calls["n"] == partd.MAX_ATTEMPTS
