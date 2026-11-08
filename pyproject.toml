@@ -15,6 +15,7 @@ dependencies = [
 
 [project.scripts]
 partd-download = "semaglutide_spread.sources.partd:main"
+census-download = "semaglutide_spread.sources.census:main"
 
 [dependency-groups]
 dev = [
