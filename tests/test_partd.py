@@ -147,15 +147,49 @@ def test_ingest_release_saves_parquet_and_metadata_and_removes_csv(tmp_path):
 
 
 def test_ingest_release_skips_years_already_saved(tmp_path):
-    out = tmp_path / "partd_by_provider_and_drug" / "year=2024"
-    out.mkdir(parents=True)
-    (out / "data.parquet").write_bytes(b"already here")
+    with httpx.Client(transport=httpx.MockTransport(_cms_server)) as client:
+        partd.ingest_release(client, _release(), raw_dir=tmp_path)
 
     def fail(request):
         raise AssertionError("should not download")
 
     with httpx.Client(transport=httpx.MockTransport(fail)) as client:
         assert partd.ingest_release(client, _release(), raw_dir=tmp_path) is None
+
+
+def test_ingest_release_downloads_again_when_cms_republishes_a_year(tmp_path):
+    with httpx.Client(transport=httpx.MockTransport(_cms_server)) as client:
+        partd.ingest_release(client, _release(), raw_dir=tmp_path)
+        republished = partd.Release(
+            dataset="by_provider_and_drug",
+            year=2024,
+            csv_url="https://example.org/data-v2.csv",
+            dictionary_url="https://example.org/dictionary",
+            modified="2027-05-20",
+        )
+        assert partd.ingest_release(client, republished, raw_dir=tmp_path) == 3
+
+    out = tmp_path / "partd_by_provider_and_drug" / "year=2024"
+    assert json.loads((out / "_source.json").read_text())["csv_url"].endswith("data-v2.csv")
+
+
+def test_ingest_release_downloads_again_if_metadata_is_missing(tmp_path):
+    # A Parquet file without its _source.json can't be trusted (e.g. an interrupted run).
+    out = tmp_path / "partd_by_provider_and_drug" / "year=2024"
+    out.mkdir(parents=True)
+    (out / "data.parquet").write_bytes(b"unknown origin")
+    with httpx.Client(transport=httpx.MockTransport(_cms_server)) as client:
+        assert partd.ingest_release(client, _release(), raw_dir=tmp_path) == 3
+
+
+def test_select_years_defaults_to_every_published_year_from_2018():
+    # When CMS publishes 2025, it is picked up without any code change.
+    assert partd.select_years([2016, 2017, 2018, 2024, 2025], None) == [2018, 2024, 2025]
+
+
+def test_select_years_rejects_unpublished_years():
+    with pytest.raises(ValueError, match="2026"):
+        partd.select_years([2018, 2024, 2025], [2025, 2026])
 
 
 def test_ingest_release_cleans_up_when_columns_are_wrong(tmp_path):

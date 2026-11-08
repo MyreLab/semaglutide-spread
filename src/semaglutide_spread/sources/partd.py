@@ -10,7 +10,11 @@ Parquet with every column kept as text, and the CSV is deleted. Types are assign
 the dbt staging models, so nothing is lost or misread at this stage (for example, the
 leading zero in state FIPS code "06").
 
+Re-running is safe and cheap: years already saved are skipped unless CMS has re-published
+them, and a newly published year is picked up automatically.
+
 Usage:
+    uv run partd-download                      # 2018 to the latest year CMS has published
     uv run partd-download --years 2018-2024
     uv run partd-download --dataset by_provider --years 2024 --force
 """
@@ -42,7 +46,7 @@ DATASET_TITLES = {
     "by_provider": "Medicare Part D Prescribers - by Provider",
 }
 
-DEFAULT_YEARS = range(2018, 2025)  # semaglutide (Ozempic) was approved in December 2017
+FIRST_YEAR = 2018  # semaglutide (Ozempic) was approved in December 2017
 
 TIMEOUT = httpx.Timeout(60.0, read=300.0)
 # Identify the project to the servers we download from (some block anonymous clients).
@@ -258,14 +262,49 @@ def release_dir(raw_dir: Path, release: Release) -> Path:
     return raw_dir / f"partd_{release.dataset}" / f"year={release.year}"
 
 
+def is_up_to_date(out_dir: Path, release: Release) -> bool:
+    """True if this exact release is already saved.
+
+    CMS re-publishes past years from time to time (corrections, new methodology). A new
+    publication gets a new file URL, so comparing the saved URL with the catalog's tells us
+    whether the copy we have is still the current one.
+    """
+    source = out_dir / "_source.json"
+    if not (out_dir / "data.parquet").exists() or not source.exists():
+        return False
+    saved = json.loads(source.read_text())
+    if saved.get("csv_url") != release.csv_url:
+        log.info(
+            "%s %s was re-published by CMS (%s -> %s); downloading the new version",
+            release.dataset,
+            release.year,
+            saved.get("modified", "unknown date"),
+            release.modified or "unknown date",
+        )
+        return False
+    return True
+
+
+def select_years(available: Iterable[int], requested: list[int] | None) -> list[int]:
+    """The years to download: those requested, or every year from FIRST_YEAR to the latest
+    one CMS has published, so a newly released year is picked up without changing the code."""
+    available = sorted(available)
+    if requested is None:
+        return [y for y in available if y >= FIRST_YEAR]
+    missing = [y for y in requested if y not in available]
+    if missing:
+        raise ValueError(f"CMS has no release for {missing}; latest is {available[-1]}")
+    return requested
+
+
 def ingest_release(
     client: httpx.Client, release: Release, raw_dir: Path = RAW_DIR, force: bool = False
 ) -> int | None:
     """Download, check and convert one release. Returns the row count, or None if skipped."""
     out_dir = release_dir(raw_dir, release)
     parquet_path = out_dir / "data.parquet"
-    if parquet_path.exists() and not force:
-        log.info("%s %s already saved; skipping", release.dataset, release.year)
+    if not force and is_up_to_date(out_dir, release):
+        log.info("%s %s is up to date; skipping", release.dataset, release.year)
         return None
 
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -330,10 +369,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--years",
         type=parse_years,
-        default=list(DEFAULT_YEARS),
-        help="e.g. 2018-2024 or 2019,2021 (default: 2018-2024)",
+        default=None,
+        help=f"e.g. 2018-2024 or 2019,2021 (default: {FIRST_YEAR} to the latest published year)",
     )
-    parser.add_argument("--force", action="store_true", help="download again even if saved")
+    parser.add_argument(
+        "--force", action="store_true", help="download again even if already up to date"
+    )
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -343,11 +384,12 @@ def main(argv: list[str] | None = None) -> int:
         catalog = fetch_catalog(client)
         for dataset in datasets:
             releases = find_releases(catalog, dataset)
-            missing = [y for y in args.years if y not in releases]
-            if missing:
-                log.error("%s has no release for: %s", dataset, missing)
+            try:
+                years = select_years(releases, args.years)
+            except ValueError as error:
+                log.error("%s: %s", dataset, error)
                 return 1
-            for year in args.years:
+            for year in years:
                 ingest_release(client, releases[year], force=args.force)
     return 0
 
