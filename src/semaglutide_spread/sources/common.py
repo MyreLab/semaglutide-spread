@@ -115,13 +115,17 @@ def read_header(csv_path: Path, delimiter: str = ",") -> list[str]:
     return [name.strip() for name in next(csv.reader([first_line], delimiter=delimiter))]
 
 
-def check_columns(found: list[str], expected: Iterable[str], source: str) -> None:
+def check_columns(
+    found: list[str], expected: Iterable[str], source: str, warn_extra: bool = True
+) -> None:
+    """Fail if any expected column is missing. With `warn_extra`, also log columns that were
+    not expected (useful when `expected` is a publisher's complete data dictionary)."""
     expected = list(expected)
     missing = [c for c in expected if c not in found]
     if missing:
         raise SchemaMismatchError(f"{source} is missing columns: {', '.join(missing)}")
     extra = [c for c in found if c not in set(expected)]
-    if extra:
+    if extra and warn_extra:
         log.warning("%s has columns not in the expected list: %s", source, ", ".join(extra))
 
 
