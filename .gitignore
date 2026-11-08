@@ -1,0 +1,27 @@
+# Data: large, and rebuilt by the pipeline. Only the folder's README is committed.
+data/**
+!data/README.md
+*.duckdb
+*.duckdb.wal
+
+# dbt build output
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+build/
+dist/
+
+# Tool caches
+.pytest_cache/
+.ruff_cache/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
