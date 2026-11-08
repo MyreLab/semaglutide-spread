@@ -44,6 +44,8 @@ DATASET_TITLES = {
 DEFAULT_YEARS = range(2018, 2025)  # semaglutide (Ozempic) was approved in December 2017
 
 TIMEOUT = httpx.Timeout(60.0, read=300.0)
+# Identify the project to the servers we download from (some block anonymous clients).
+HEADERS = {"User-Agent": "semaglutide-spread (+https://github.com/MyreLab/semaglutide-spread)"}
 CHUNK_SIZE = 8 * 1024 * 1024  # 8 MB
 
 
@@ -141,8 +143,10 @@ def download_file(client: httpx.Client, url: str, dest: Path) -> None:
 
 
 def read_header(csv_path: Path) -> list[str]:
-    with csv_path.open(newline="", encoding="utf-8-sig") as f:
-        return next(csv.reader(f))
+    # Read only the first line as bytes, so a broken byte further down can't trip this up.
+    with csv_path.open("rb") as f:
+        first_line = f.readline().decode("utf-8-sig")
+    return next(csv.reader([first_line]))
 
 
 def check_columns(found: list[str], expected: Iterable[str], source: str) -> None:
@@ -171,10 +175,36 @@ def csv_to_parquet(csv_path: Path, parquet_path: Path) -> int:
             """
         )
         (rows,) = con.execute(f"SELECT count(*) FROM read_parquet({_sql_str(tmp)})").fetchone()
+    except Exception:
+        tmp.unlink(missing_ok=True)
+        raise
     finally:
         con.close()
     tmp.rename(parquet_path)
     return rows
+
+
+def repair_utf8(csv_path: Path) -> int:
+    """Replace bytes that aren't valid UTF-8 with "�" (U+FFFD), line by line, in place.
+
+    The CMS files are UTF-8 but can contain the odd corrupted line: the 2020 "by Provider and
+    Drug" file has one city name with broken bytes. Rather than dropping that row, the bad
+    bytes become "�", the same character CMS itself already uses elsewhere in its files.
+    Returns the number of lines changed.
+    """
+    fixed = csv_path.with_name(csv_path.name + ".utf8")
+    repaired = 0
+    with csv_path.open("rb") as src, fixed.open("wb") as dst:
+        for line in src:
+            if not line.isascii():
+                try:
+                    line.decode("utf-8")
+                except UnicodeDecodeError:
+                    line = line.decode("utf-8", errors="replace").encode("utf-8")
+                    repaired += 1
+            dst.write(line)
+    fixed.replace(csv_path)
+    return repaired
 
 
 def _sql_str(path: Path) -> str:
@@ -209,13 +239,27 @@ def ingest_release(
         header = read_header(csv_path)
         check_columns(header, fetch_expected_columns(client, release), csv_path.name)
         log.info("Converting %s %s to Parquet", release.dataset, release.year)
-        rows = csv_to_parquet(csv_path, parquet_path)
+        repaired_lines = 0
+        try:
+            rows = csv_to_parquet(csv_path, parquet_path)
+        except duckdb.InvalidInputException as error:
+            if "unicode" not in str(error).lower():
+                raise
+            repaired_lines = repair_utf8(csv_path)
+            log.warning(
+                "%s %s: replaced invalid UTF-8 bytes on %d line(s)",
+                release.dataset,
+                release.year,
+                repaired_lines,
+            )
+            rows = csv_to_parquet(csv_path, parquet_path)
     finally:
         csv_path.unlink(missing_ok=True)
 
     metadata = {
         **asdict(release),
         "rows": rows,
+        "repaired_lines": repaired_lines,
         "columns": header,
         "downloaded_at": datetime.now(UTC).isoformat(timespec="seconds"),
     }
@@ -256,7 +300,7 @@ def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     datasets = list(DATASET_TITLES) if args.dataset == "all" else [args.dataset]
 
-    with httpx.Client(timeout=TIMEOUT, follow_redirects=True) as client:
+    with httpx.Client(timeout=TIMEOUT, follow_redirects=True, headers=HEADERS) as client:
         catalog = fetch_catalog(client)
         for dataset in datasets:
             releases = find_releases(catalog, dataset)

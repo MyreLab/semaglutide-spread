@@ -205,3 +205,42 @@ def test_partitioned_years_read_back_with_a_year_column(tmp_path):
 )
 def test_parse_years(text, expected):
     assert partd.parse_years(text) == expected
+
+
+# --- invalid UTF-8 -------------------------------------------------------------------------
+
+# A row shaped like the real one in the 2020 file: the city name contains bytes that are not
+# valid UTF-8. Another row uses CMS's own "�" character, which is valid and must stay as is.
+BROKEN_CSV = (
+    b"Prscrbr_NPI,Prscrbr_State_FIPS,Gnrc_Name,Tot_Clms\n"
+    b"1811527914,72,Mayag\xe3\x9cez,35\n"
+    b"1407855091,72,Concepci\xef\xbf\xbdn,12\n"
+    b"1003000126,06,Semaglutide,11\n"
+)
+
+
+def test_repair_utf8_replaces_only_the_broken_bytes(tmp_path):
+    csv_path = tmp_path / "broken.csv"
+    csv_path.write_bytes(BROKEN_CSV)
+
+    assert partd.repair_utf8(csv_path) == 1
+
+    lines = csv_path.read_text(encoding="utf-8").splitlines()
+    assert lines[1] == "1811527914,72,Mayag�ez,35"
+    assert lines[2] == "1407855091,72,Concepci�n,12"
+    assert lines[3] == "1003000126,06,Semaglutide,11"
+
+
+def test_ingest_release_repairs_invalid_utf8_instead_of_dropping_rows(tmp_path):
+    def server(request):
+        if request.url.path == "/dictionary":
+            fields = [{"name": c} for c in SAMPLE_COLUMNS]
+            return httpx.Response(200, json={"data": {"fields": fields}})
+        return httpx.Response(200, content=BROKEN_CSV)
+
+    with httpx.Client(transport=httpx.MockTransport(server)) as client:
+        rows = partd.ingest_release(client, _release(), raw_dir=tmp_path)
+
+    out = tmp_path / "partd_by_provider_and_drug" / "year=2024"
+    assert rows == 3
+    assert json.loads((out / "_source.json").read_text())["repaired_lines"] == 1
