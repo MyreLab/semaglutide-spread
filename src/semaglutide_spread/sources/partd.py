@@ -22,20 +22,25 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import csv
 import json
 import logging
 import sys
-import time
-from collections.abc import Callable, Iterable
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
-import duckdb
 import httpx
 
 from semaglutide_spread.paths import RAW_DIR
+from semaglutide_spread.sources.common import (
+    check_columns,
+    convert_csv,
+    download_with_retries,
+    get_json,
+    new_client,
+    read_header,
+)
 
 log = logging.getLogger(__name__)
 
@@ -47,15 +52,6 @@ DATASET_TITLES = {
 }
 
 FIRST_YEAR = 2018  # semaglutide (Ozempic) was approved in December 2017
-
-TIMEOUT = httpx.Timeout(60.0, read=300.0)
-# Identify the project to the servers we download from (some block anonymous clients).
-HEADERS = {"User-Agent": "semaglutide-spread (+https://github.com/MyreLab/semaglutide-spread)"}
-CHUNK_SIZE = 8 * 1024 * 1024  # 8 MB
-
-
-class SchemaMismatchError(Exception):
-    """A downloaded file is missing columns that the CMS data dictionary says it should have."""
 
 
 @dataclass(frozen=True)
@@ -105,152 +101,12 @@ def find_releases(catalog: dict, dataset: str) -> dict[int, Release]:
 
 
 def fetch_catalog(client: httpx.Client) -> dict:
-    return with_retries(lambda: _get_json(client, CATALOG_URL), CATALOG_URL)
+    return get_json(client, CATALOG_URL)
 
 
 def fetch_expected_columns(client: httpx.Client, release: Release) -> list[str]:
     """Column names from the CMS data dictionary for this release."""
-    data = with_retries(lambda: _get_json(client, release.dictionary_url), release.dictionary_url)
-    return [field["name"] for field in data["data"]["fields"]]
-
-
-def _get_json(client: httpx.Client, url: str) -> dict:
-    response = client.get(url)
-    response.raise_for_status()
-    return response.json()
-
-
-# --- Retrying ------------------------------------------------------------------------------
-
-RETRY_STATUSES = {429, 500, 502, 503, 504}  # "slow down" and temporary server errors
-MAX_ATTEMPTS = 6
-
-
-def with_retries[T](
-    action: Callable[[], T], what: str, sleep: Callable[[float], None] = time.sleep
-) -> T:
-    """Run `action`, retrying temporary failures with exponential backoff (2, 4, 8, ... seconds).
-
-    Retries network errors, rate limiting (429) and temporary server errors (5xx). If the
-    server says how long to wait (a Retry-After header), that wait is used instead.
-    Anything else, such as 404 Not Found, fails straight away.
-    """
-    for attempt in range(1, MAX_ATTEMPTS + 1):
-        try:
-            return action()
-        except (httpx.TransportError, httpx.HTTPStatusError) as error:
-            if isinstance(error, httpx.HTTPStatusError):
-                if error.response.status_code not in RETRY_STATUSES:
-                    raise
-                retry_after = error.response.headers.get("Retry-After", "")
-                wait = float(retry_after) if retry_after.isdigit() else 2.0**attempt
-            else:
-                wait = 2.0**attempt
-            if attempt == MAX_ATTEMPTS:
-                raise
-            log.warning("%s failed (%s); retrying in %.0f s", what, error, wait)
-            sleep(wait)
-    raise AssertionError("unreachable")
-
-
-# --- Downloading ---------------------------------------------------------------------------
-
-
-def download_file(client: httpx.Client, url: str, dest: Path) -> None:
-    """Stream `url` to `dest`, resuming a partial download if one exists.
-
-    Data is written to `dest` + ".part" and renamed only when complete, so a file at `dest`
-    is never a half-finished download.
-    """
-    part = dest.with_name(dest.name + ".part")
-    already = part.stat().st_size if part.exists() else 0
-    headers = {"Range": f"bytes={already}-"} if already else {}
-
-    with client.stream("GET", url, headers=headers) as response:
-        if response.status_code == 416:  # nothing left to fetch: the .part file is complete
-            part.rename(dest)
-            return
-        response.raise_for_status()
-        resuming = response.status_code == 206
-        if already and not resuming:
-            log.info("Server ignored the resume request; starting %s again", dest.name)
-        with part.open("ab" if resuming else "wb") as f:
-            for chunk in response.iter_bytes(CHUNK_SIZE):
-                f.write(chunk)
-    part.rename(dest)
-
-
-# --- Converting ----------------------------------------------------------------------------
-
-
-def read_header(csv_path: Path) -> list[str]:
-    # Read only the first line as bytes, so a broken byte further down can't trip this up.
-    with csv_path.open("rb") as f:
-        first_line = f.readline().decode("utf-8-sig")
-    return next(csv.reader([first_line]))
-
-
-def check_columns(found: list[str], expected: Iterable[str], source: str) -> None:
-    missing = [c for c in expected if c not in found]
-    if missing:
-        raise SchemaMismatchError(f"{source} is missing columns: {', '.join(missing)}")
-    extra = [c for c in found if c not in set(expected)]
-    if extra:
-        log.warning("%s has columns not in the data dictionary: %s", source, ", ".join(extra))
-
-
-def csv_to_parquet(csv_path: Path, parquet_path: Path) -> int:
-    """Convert a CSV to a zstd-compressed Parquet file, keeping every column as text.
-
-    Returns the number of rows written.
-    """
-    tmp = parquet_path.with_name(parquet_path.name + ".tmp")
-    con = duckdb.connect()
-    try:
-        con.execute("SET preserve_insertion_order = false")  # lets DuckDB stream with less memory
-        con.execute(
-            f"""
-            COPY (
-                SELECT * FROM read_csv({_sql_str(csv_path)}, header = true, all_varchar = true)
-            ) TO {_sql_str(tmp)} (FORMAT parquet, COMPRESSION zstd)
-            """
-        )
-        (rows,) = con.execute(f"SELECT count(*) FROM read_parquet({_sql_str(tmp)})").fetchone()
-    except Exception:
-        tmp.unlink(missing_ok=True)
-        raise
-    finally:
-        con.close()
-    tmp.rename(parquet_path)
-    return rows
-
-
-def repair_utf8(csv_path: Path) -> int:
-    """Replace bytes that aren't valid UTF-8 with "�" (U+FFFD), line by line, in place.
-
-    The CMS files are UTF-8 but can contain the odd corrupted line: the 2020 "by Provider and
-    Drug" file has one city name with broken bytes. Rather than dropping that row, the bad
-    bytes become "�", the same character CMS itself already uses elsewhere in its files.
-    Returns the number of lines changed.
-    """
-    fixed = csv_path.with_name(csv_path.name + ".utf8")
-    repaired = 0
-    with csv_path.open("rb") as src, fixed.open("wb") as dst:
-        for line in src:
-            if not line.isascii():
-                try:
-                    line.decode("utf-8")
-                except UnicodeDecodeError:
-                    line = line.decode("utf-8", errors="replace").encode("utf-8")
-                    repaired += 1
-            dst.write(line)
-    fixed.replace(csv_path)
-    return repaired
-
-
-def _sql_str(path: Path) -> str:
-    """Quote a file path as a SQL string literal."""
-    return "'" + str(path).replace("'", "''") + "'"
+    return [field["name"] for field in get_json(client, release.dictionary_url)["data"]["fields"]]
 
 
 # --- One release, end to end ---------------------------------------------------------------
@@ -312,25 +168,14 @@ def ingest_release(
     # Fetch the small data dictionary first, so a failure here doesn't waste a 4 GB download.
     expected_columns = fetch_expected_columns(client, release)
     log.info("Downloading %s %s", release.dataset, release.year)
-    with_retries(lambda: download_file(client, release.csv_url, csv_path), release.csv_url)
+    download_with_retries(client, release.csv_url, csv_path)
     try:
         header = read_header(csv_path)
         check_columns(header, expected_columns, csv_path.name)
         log.info("Converting %s %s to Parquet", release.dataset, release.year)
-        repaired_lines = 0
-        try:
-            rows = csv_to_parquet(csv_path, parquet_path)
-        except duckdb.InvalidInputException as error:
-            if "unicode" not in str(error).lower():
-                raise
-            repaired_lines = repair_utf8(csv_path)
-            log.warning(
-                "%s %s: replaced invalid UTF-8 bytes on %d line(s)",
-                release.dataset,
-                release.year,
-                repaired_lines,
-            )
-            rows = csv_to_parquet(csv_path, parquet_path)
+        rows, repaired_lines = convert_csv(
+            csv_path, parquet_path, label=f"{release.dataset} {release.year}"
+        )
     finally:
         csv_path.unlink(missing_ok=True)
 
@@ -380,7 +225,7 @@ def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     datasets = list(DATASET_TITLES) if args.dataset == "all" else [args.dataset]
 
-    with httpx.Client(timeout=TIMEOUT, follow_redirects=True, headers=HEADERS) as client:
+    with new_client() as client:
         catalog = fetch_catalog(client)
         for dataset in datasets:
             releases = find_releases(catalog, dataset)
