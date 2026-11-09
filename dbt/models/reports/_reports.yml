@@ -5,3 +5,13 @@ models:
     description: >
       Match-rate report: prescriber-years by year and location method, with each method's
       share of the year.
+
+  - name: rpt_adoption_curve
+    description: >
+      The epidemic curve, one row per year: population at risk, susceptible prescribers, new
+      adopters, incidence and prevalence of adoption, cumulative adopters, and the same
+      prevalence among all Part D prescribers (sensitivity analysis). Column definitions are
+      at the top of the model's SQL.
+    columns:
+      - name: year
+        data_tests: [unique, not_null]

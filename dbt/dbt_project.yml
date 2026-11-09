@@ -18,8 +18,16 @@ models:
       # Intermediate models join and apply logic, and are reused by several later models,
       # so they are stored as tables.
       +materialized: table
+    marts:
+      # The analysis tables: population at risk and adopters.
+      +materialized: table
     reports:
       +materialized: table
+
+vars:
+  # The drug whose spread is tracked, exactly as Part D writes its generic name. Changing it
+  # (e.g. to "Tirzepatide") re-runs the whole analysis for another drug.
+  target_generic_name: Semaglutide
 
 seeds:
   semaglutide_spread:
