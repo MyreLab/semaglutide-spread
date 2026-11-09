@@ -39,7 +39,7 @@ def raw_dir(tmp_path):
                 Prscrbr_City, Prscrbr_State_Abrvtn, Prscrbr_Zip5, Prscrbr_Cntry))
                 TO '{out / "data.parquet"}' (FORMAT parquet)"""
         )
-    gaz = tmp_path / "census_zcta_gazetteer_2020"
+    gaz = tmp_path / "census_zcta2020_gazetteer"
     gaz.mkdir()
     values = ", ".join(f"('{z}')" for z in ZCTAS)
     target = gaz / "data.parquet"
@@ -160,6 +160,7 @@ def test_saves_cache_and_does_not_resend_addresses(raw_dir):
     out = raw_dir / "census_geocoder"
     summary = json.loads((out / "_source.json").read_text())
     assert summary["addresses"] == 3
+    assert summary["addresses_cached"] == 3
     assert summary["by_status"] == {"Match": 2, "No_Match": 1}
     assert summary["matched_on_line"] == {"st1": 1, "st2": 1}
 
@@ -179,3 +180,19 @@ def test_cached_values_round_trip_as_text(raw_dir):
     assert match.county_fips == "39035"  # leading digits kept as text
     unmatched = next(r for r in cache.values() if r.zip5 == "37232")
     assert unmatched.latitude is None
+
+
+def test_summary_counts_only_addresses_still_needed(raw_dir):
+    with httpx.Client(transport=httpx.MockTransport(FakeGeocoder())) as client:
+        geocoder.run(client, raw_dir=raw_dir)
+    # Cleveland's ZIP code becomes a ZCTA, so its address is no longer needed.
+    gaz = raw_dir / "census_zcta2020_gazetteer" / "data.parquet"
+    zctas = "SELECT * FROM (VALUES ('94612'), ('44195')) AS t(GEOID)"
+    duckdb.connect().execute(f"COPY ({zctas}) TO '{gaz}' (FORMAT parquet)")
+    with httpx.Client(transport=httpx.MockTransport(FakeGeocoder())) as client:
+        results = geocoder.run(client, raw_dir=raw_dir)
+
+    summary = json.loads((raw_dir / "census_geocoder" / "_source.json").read_text())
+    assert sorted(r.zip5 for r in results.values()) == ["21287", "37232"]
+    assert summary["addresses"] == 2
+    assert summary["addresses_cached"] == 3  # still kept, in case it is needed again

@@ -16,7 +16,7 @@ Steps:
 5. Save every result, matched or not, to the cache, so no address is sent twice.
 
 Inputs:  data/raw/partd_by_provider/year=*/data.parquet
-         data/raw/census_zcta_gazetteer_2020/data.parquet
+         data/raw/census_zcta2020_gazetteer/data.parquet
 Output:  data/raw/census_geocoder/data.parquet (one row per address) and _source.json
 
 Usage:
@@ -42,6 +42,7 @@ import duckdb
 import httpx
 
 from semaglutide_spread.paths import RAW_DIR
+from semaglutide_spread.sources.census import GAZETTEER
 from semaglutide_spread.sources.common import new_client, sql_str, with_retries
 
 log = logging.getLogger(__name__)
@@ -105,7 +106,7 @@ COLUMNS = [f.name for f in fields(GeocodeResult)]
 def find_unplaced_addresses(raw_dir: Path = RAW_DIR) -> list[Address]:
     """Distinct prescriber addresses whose ZIP code is not a 2020 ZCTA."""
     providers = raw_dir / "partd_by_provider" / "*" / "data.parquet"
-    gazetteer = raw_dir / "census_zcta_gazetteer_2020" / "data.parquet"
+    gazetteer = raw_dir / f"census_{GAZETTEER.name}" / "data.parquet"
     military = ", ".join(sql_str(s) for s in MILITARY_STATES)
     rows = duckdb.sql(
         f"""
@@ -225,8 +226,14 @@ def load_cache(path: Path) -> dict[str, GeocodeResult]:
     return {row[0]: GeocodeResult(*row) for row in rows}
 
 
-def save_cache(results: dict[str, GeocodeResult], out_dir: Path) -> None:
-    """Write all results as text-only Parquet, plus a summary in _source.json."""
+def save_cache(
+    results: dict[str, GeocodeResult], out_dir: Path, current_ids: set[str] | None = None
+) -> None:
+    """Write all results as text-only Parquet, plus a summary in _source.json.
+
+    The cache keeps every address ever geocoded, in case it is needed again. The summary
+    describes only `current_ids`, the addresses the current data needs (all, if not given).
+    """
     out_dir.mkdir(parents=True, exist_ok=True)
     csv_path = out_dir / "results.csv"
     parquet_path = out_dir / "data.parquet"
@@ -249,13 +256,15 @@ def save_cache(results: dict[str, GeocodeResult], out_dir: Path) -> None:
         csv_path.unlink(missing_ok=True)
     tmp.replace(parquet_path)
 
-    statuses = Counter(r.status for r in results.values())
-    lines = Counter(r.matched_line for r in results.values() if r.status == "Match")
+    current = [r for r in results.values() if current_ids is None or r.address_id in current_ids]
+    statuses = Counter(r.status for r in current)
+    lines = Counter(r.matched_line for r in current if r.status == "Match")
     summary = {
         "url": BATCH_URL,
         "benchmark": BENCHMARK,
         "vintage": VINTAGE,
-        "addresses": len(results),
+        "addresses_cached": len(results),
+        "addresses": len(current),
         "by_status": dict(sorted(statuses.items())),
         "matched_on_line": dict(sorted(lines.items())),
         "updated_at": datetime.now(UTC).isoformat(timespec="seconds"),
@@ -275,8 +284,9 @@ def run(
     )
     if new:
         cache.update(geocode_addresses(client, new, batch_size))
-        save_cache(cache, out_dir)
-    return cache
+    current_ids = {a.address_id for a in addresses}
+    save_cache(cache, out_dir, current_ids)
+    return {address_id: cache[address_id] for address_id in current_ids}
 
 
 def main(argv: list[str] | None = None) -> int:

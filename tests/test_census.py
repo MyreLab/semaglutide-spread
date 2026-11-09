@@ -1,3 +1,4 @@
+import dataclasses
 import io
 import json
 import zipfile
@@ -40,7 +41,9 @@ def _server(request: httpx.Request) -> httpx.Response:
     return httpx.Response(200, content=RELATIONSHIP_TXT.encode())
 
 
-GAZETTEER, RELATIONSHIP = census.REFERENCE_FILES
+# The real gazetteer must have 33,791 rows; the two-row fixture stands in for it.
+GAZETTEER = dataclasses.replace(census.GAZETTEER, expected_rows=2)
+RELATIONSHIP = census.COUNTIES
 
 
 def _read(path):
@@ -56,7 +59,7 @@ def test_gazetteer_is_unzipped_and_padding_removed_from_column_names(tmp_path):
     with httpx.Client(transport=httpx.MockTransport(_server)) as client:
         rows = census.ingest_reference_file(client, GAZETTEER, raw_dir=tmp_path)
 
-    out = tmp_path / "census_zcta_gazetteer_2020"
+    out = tmp_path / "census_zcta2020_gazetteer"
     assert rows == 2
     assert sorted(p.name for p in out.iterdir()) == ["_source.json", "data.parquet"]
     columns, data = _read(out / "data.parquet")
@@ -68,7 +71,7 @@ def test_relationship_file_keeps_county_parts_outside_any_zcta(tmp_path):
     with httpx.Client(transport=httpx.MockTransport(_server)) as client:
         census.ingest_reference_file(client, RELATIONSHIP, raw_dir=tmp_path)
 
-    columns, data = _read(tmp_path / "census_zcta_county_2020" / "data.parquet")
+    columns, data = _read(tmp_path / "census_zcta2020_counties" / "data.parquet")
     assert columns[0] == "OID_ZCTA5_20"  # byte-order mark removed
     assert len(data) == 2
     assert data[0][1] is None  # the raw layer keeps it; staging decides what to do with it
@@ -89,7 +92,7 @@ def test_records_provenance(tmp_path):
     with httpx.Client(transport=httpx.MockTransport(_server)) as client:
         census.ingest_reference_file(client, GAZETTEER, raw_dir=tmp_path)
 
-    metadata = json.loads((tmp_path / "census_zcta_gazetteer_2020" / "_source.json").read_text())
+    metadata = json.loads((tmp_path / "census_zcta2020_gazetteer" / "_source.json").read_text())
     assert metadata["url"] == GAZETTEER.url
     assert metadata["rows"] == 2
 
@@ -103,7 +106,7 @@ def test_fails_clearly_when_expected_columns_are_missing(tmp_path):
         pytest.raises(SchemaMismatchError, match="GEOID_ZCTA5_20"),
     ):
         census.ingest_reference_file(client, RELATIONSHIP, raw_dir=tmp_path)
-    assert list((tmp_path / "census_zcta_county_2020").iterdir()) == []
+    assert list((tmp_path / "census_zcta2020_counties").iterdir()) == []
 
 
 def test_extract_single_file_rejects_archives_with_several_files(tmp_path):
@@ -115,3 +118,19 @@ def test_extract_single_file_rejects_archives_with_several_files(tmp_path):
     zip_path.write_bytes(buffer.getvalue())
     with pytest.raises(ValueError, match="one file"):
         census.extract_single_file(zip_path, tmp_path / "out.txt")
+
+
+def test_fails_when_a_file_covers_the_wrong_set_of_zctas(tmp_path):
+    wrong_vintage = dataclasses.replace(census.GAZETTEER, expected_rows=33_791)
+    with (
+        httpx.Client(transport=httpx.MockTransport(_server)) as client,
+        pytest.raises(census.UnexpectedRowCountError, match="2 rows; expected 33,791"),
+    ):
+        census.ingest_reference_file(client, wrong_vintage, raw_dir=tmp_path)
+    assert list((tmp_path / "census_zcta2020_gazetteer").iterdir()) == []
+
+
+def test_uses_a_gazetteer_with_the_2020_zctas():
+    # The file named "2020 Gazetteer" lists the 2010 ZCTAs; 2020 ZCTAs start with the 2021 one.
+    assert "2020_Gaz_zcta" not in census.GAZETTEER.url
+    assert census.GAZETTEER.expected_rows == 33_791
