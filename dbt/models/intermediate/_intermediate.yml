@@ -1,0 +1,43 @@
+version: 2
+
+models:
+  - name: int_zcta_primary_county
+    description: >
+      One row per 2020 ZCTA, with its internal point and the 2020 county holding most of its
+      land area.
+    columns:
+      - name: zcta
+        data_tests: [unique, not_null]
+      - name: county_fips
+        data_tests: [not_null]
+
+  - name: int_prescriber_locations
+    description: >
+      One row per prescriber x year, with a map location and 2020 county. `location_method`
+      records how each was placed (see the model's SQL for the order of methods).
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [year, npi]
+    columns:
+      - name: location_method
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - zcta_centroid
+                  - geocoded_address
+                  - zip_geocoded_median
+                  - zip3_median
+                  - unplaced
+      - name: unplaced_reason
+        description: Why a prescriber-year has no location. Null when placed.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [outside_us, military_mail, no_zip_code, no_nearby_zcta]
+      - name: latitude
+        data_tests: [{at_least: {arguments: {min_value: -15}}}]
+      - name: county_fips
+        description: 2020 county FIPS code (5 digits).

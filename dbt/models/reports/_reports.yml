@@ -1,0 +1,7 @@
+version: 2
+
+models:
+  - name: rpt_prescriber_location_coverage
+    description: >
+      Match-rate report: prescriber-years by year and location method, with each method's
+      share of the year.
