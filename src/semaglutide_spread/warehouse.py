@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import os
 import sys
+from pathlib import Path
 
 from dbt.cli.main import dbtRunner
 
@@ -23,13 +24,15 @@ from semaglutide_spread.paths import DATA_DIR, PROJECT_ROOT
 DBT_DIR = PROJECT_ROOT / "dbt"
 
 
-def dbt_args(command: str, extra: list[str]) -> list[str]:
+def dbt_args(command: str, extra: list[str], work_dir: Path = DBT_DIR) -> list[str]:
+    """dbt command-line arguments. `work_dir` is where dbt writes its logs and compiled SQL
+    (tests pass a temporary folder)."""
     return [
         command,
         "--project-dir", str(DBT_DIR),
         "--profiles-dir", str(DBT_DIR),
-        "--log-path", str(DBT_DIR / "logs"),
-        "--target-path", str(DBT_DIR / "target"),
+        "--log-path", str(work_dir / "logs"),
+        "--target-path", str(work_dir / "target"),
         *extra,
     ]  # fmt: skip
 
