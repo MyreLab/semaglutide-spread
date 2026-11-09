@@ -9,6 +9,8 @@ authors = [{ name = "Myrela Bauman" }]
 requires-python = ">=3.12"
 # Runtime libraries are added by the pull request that first needs them.
 dependencies = [
+    "dbt-core>=1.12.6",
+    "dbt-duckdb>=1.11.1",
     "duckdb>=2.0.0",
     "httpx>=0.28.1",
 ]
@@ -17,6 +19,7 @@ dependencies = [
 partd-download = "semaglutide_spread.sources.partd:main"
 census-download = "semaglutide_spread.sources.census:main"
 geocode-addresses = "semaglutide_spread.sources.geocoder:main"
+build-warehouse = "semaglutide_spread.warehouse:main"
 
 [dependency-groups]
 dev = [

@@ -1,0 +1,97 @@
+version: 2
+
+models:
+  - name: stg_partd__prescriber_drugs
+    description: >
+      One row per prescriber (NPI) x drug (brand and generic name) x year, from Medicare Part D
+      "by Provider and Drug". Each row aggregates 11 or more claims.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [year, npi, brand_name, generic_name]
+    columns:
+      - name: year
+        data_tests: [not_null, {at_least: {arguments: {min_value: 2018}}}]
+      - name: npi
+        description: National Provider Identifier (10 digits).
+        data_tests: [not_null]
+      - name: generic_name
+        data_tests: [not_null]
+      - name: total_claims
+        description: >
+          Claims, counting refills. CMS publishes only rows with 11 or more; this test checks it.
+        data_tests: [not_null, {at_least: {arguments: {min_value: 11}}}]
+      - name: total_drug_cost
+        description: Gross drug cost paid at the pharmacy, before manufacturer rebates.
+        data_tests: [{at_least: {arguments: {min_value: 0}}}]
+      - name: total_beneficiaries
+        description: Distinct patients. Null where CMS suppressed a count below 11.
+        data_tests: [{at_least: {arguments: {min_value: 11}}}]
+
+  - name: stg_partd__prescribers
+    description: >
+      One row per prescriber x year from Medicare Part D "by Provider": practice address, ZIP code,
+      specialty and total prescribing.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [year, npi]
+    columns:
+      - name: year
+        data_tests: [not_null, {at_least: {arguments: {min_value: 2018}}}]
+      - name: npi
+        data_tests: [not_null]
+      - name: entity_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [individual, organization]
+      - name: zip5
+        description: 5-digit ZIP code. Null for some prescribers outside the US.
+      - name: ruca_code
+        description: Rural-Urban Commuting Area code of the prescriber's ZIP code.
+
+  - name: stg_census__zcta_centroids
+    description: One row per 2020 ZIP Code Tabulation Area (ZCTA), with its internal point.
+    columns:
+      - name: zcta
+        data_tests: [unique, not_null]
+      - name: latitude
+        data_tests: [not_null]
+      - name: longitude
+        data_tests: [not_null]
+
+  - name: stg_census__zcta_counties
+    description: >
+      One row per part of a 2020 ZCTA lying in a 2020 county. A ZCTA that crosses county lines
+      has several rows.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [zcta, county_fips]
+    columns:
+      - name: zcta
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_census__zcta_centroids')
+                field: zcta
+      - name: county_fips
+        data_tests: [not_null]
+
+  - name: stg_census__geocoded_addresses
+    description: >
+      One row per prescriber address sent to the Census geocoder (those whose ZIP code is not a
+      ZCTA), matched or not.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [street_1, street_2, city, state, zip5]
+    columns:
+      - name: geocode_status
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [Match, No_Match, Tie]

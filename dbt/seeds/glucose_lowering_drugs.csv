@@ -1,0 +1,94 @@
+generic_name,included,atc_group,drug_class,note
+Acarbose,true,A10BF,Alpha-glucosidase inhibitor,
+Albiglutide,true,A10BJ,GLP-1 receptor agonist,Withdrawn from the US market in 2018
+Alogliptin Benz/Metformin Hcl,true,A10BD,Combination: DPP-4 inhibitor + biguanide,
+Alogliptin Benz/Pioglitazone,true,A10BD,Combination: DPP-4 inhibitor + thiazolidinedione,
+Alogliptin Benzoate,true,A10BH,DPP-4 inhibitor,
+"Bolus Insulin Pump, 200 Unit",false,,,Device (insulin pump) not a drug
+Bromocriptine Mesylate,false,,,"Not in ATC A10. The Cycloset brand is approved for type 2 diabetes, but the generic name is shared with Parkinson's and prolactin uses"
+Canagliflozin,true,A10BK,SGLT2 inhibitor,
+Canagliflozin/Metformin Hcl,true,A10BD,Combination: SGLT2 inhibitor + biguanide,
+Chlorpropamide,true,A10BB,Sulfonylurea,
+Colesevelam Hcl,false,,,"Not in ATC A10 (C10AC, bile acid sequestrant). Approved for type 2 diabetes but mostly prescribed for cholesterol"
+Dapaglifloz Propaned/Metformin,true,A10BD,Combination: SGLT2 inhibitor + biguanide,
+Dapagliflozin Propanediol,true,A10BK,SGLT2 inhibitor,Also prescribed for heart failure and kidney disease
+Dapagliflozin/Metformin Hcl,true,A10BD,Combination: SGLT2 inhibitor + biguanide,
+Dapagliflozin/Saxagliptin Hcl,true,A10BD,Combination: SGLT2 inhibitor + DPP-4 inhibitor,
+Dulaglutide,true,A10BJ,GLP-1 receptor agonist,
+Empaglifloz/Linaglip/Metformin,true,A10BD,Combination: SGLT2 inhibitor + DPP-4 inhibitor + biguanide,
+Empagliflozin,true,A10BK,SGLT2 inhibitor,Also prescribed for heart failure and kidney disease
+Empagliflozin/Linagliptin,true,A10BD,Combination: SGLT2 inhibitor + DPP-4 inhibitor,
+Empagliflozin/Metformin Hcl,true,A10BD,Combination: SGLT2 inhibitor + biguanide,
+Ertugliflozin Pidolate,true,A10BK,SGLT2 inhibitor,
+Ertugliflozin/Metformin,true,A10BD,Combination: SGLT2 inhibitor + biguanide,
+Ertugliflozin/Sitagliptin,true,A10BD,Combination: SGLT2 inhibitor + DPP-4 inhibitor,
+Ertugliflozin/Sitagliptin Phos,true,A10BD,Combination: SGLT2 inhibitor + DPP-4 inhibitor,
+Exenatide,true,A10BJ,GLP-1 receptor agonist,
+Exenatide Microspheres,true,A10BJ,GLP-1 receptor agonist,
+Glimepiride,true,A10BB,Sulfonylurea,
+Glipizide,true,A10BB,Sulfonylurea,
+Glipizide/Metformin Hcl,true,A10BD,Combination: sulfonylurea + biguanide,
+Glyburide,true,A10BB,Sulfonylurea,
+"Glyburide,micronized",true,A10BB,Sulfonylurea,
+Glyburide/Metformin Hcl,true,A10BD,Combination: sulfonylurea + biguanide,
+Insulin Admin. Supplies,false,,,Device (insulin pen) not a drug
+Insulin Aspart,true,A10AB,Insulin: fast-acting,
+Insulin Aspart (Niacinamide),true,A10AB,Insulin: fast-acting,
+Insulin Aspart Prot/Insuln Asp,true,A10AD,Insulin: premixed,
+Insulin Degludec,true,A10AE,Insulin: long-acting,
+Insulin Degludec/Liraglutide,true,A10AE,Combination: insulin + GLP-1 receptor agonist,
+Insulin Detemir,true,A10AE,Insulin: long-acting,
+"Insulin Glargine,hum.Rec.Anlog",true,A10AE,Insulin: long-acting,
+Insulin Glargine-Aglr,true,A10AE,Insulin: long-acting,Biosimilar
+Insulin Glargine-Yfgn,true,A10AE,Insulin: long-acting,Biosimilar
+Insulin Glargine/Lixisenatide,true,A10AE,Combination: insulin + GLP-1 receptor agonist,
+Insulin Glulisine,true,A10AB,Insulin: fast-acting,
+Insulin Lispro,true,A10AB,Insulin: fast-acting,
+Insulin Lispro Protamin/Lispro,true,A10AD,Insulin: premixed,
+Insulin Lispro-Aabc,true,A10AB,Insulin: fast-acting,
+Insulin Nph Hum/Reg Insulin Hm,true,A10AD,Insulin: premixed,
+Insulin Nph Human Isophane,true,A10AC,Insulin: intermediate-acting,
+"Insulin Pen,reusable,bt Lispro",false,,,Device (insulin pen) not a drug
+"Insulin Pen,reusable,bt,aspart",false,,,Device (insulin pen) not a drug
+"Insulin Pmp Cart,aut,g6/7,cntr",false,,,Device (insulin pump cartridge) not a drug
+"Insulin Pump Cart,auto,bt,g6/7",false,,,Device (insulin pump cartridge) not a drug
+"Insulin Pump Cart,auto,bt/Cntr",false,,,Device (insulin pump cartridge) not a drug
+"Insulin Pump Cart,automated,bt",false,,,Device (insulin pump cartridge) not a drug
+"Insulin Pump Cart,cont Inf,bt",false,,,Device (insulin pump cartridge) not a drug
+"Insulin Pump Cart,cont Inf,rf",false,,,Device (insulin pump cartridge) not a drug
+Insulin Pump Cartridge,false,,,Device (insulin pump cartridge) not a drug
+Insulin Regular In 0.9 % Nacl,true,A10AB,Insulin: fast-acting,Intravenous
+"Insulin Regular, Human",true,A10AB,Insulin: fast-acting,Includes inhaled insulin (Afrezza)
+Linagliptin,true,A10BH,DPP-4 inhibitor,
+Linagliptin/Metformin Hcl,true,A10BD,Combination: DPP-4 inhibitor + biguanide,
+Liraglutide,true,A10BJ,GLP-1 receptor agonist,
+Lixisenatide,true,A10BJ,GLP-1 receptor agonist,
+Metformin Hcl,true,A10BA,Biguanide,
+Metolazone,false,,,Diuretic; matched the name search only by spelling
+Miglitol,true,A10BF,Alpha-glucosidase inhibitor,
+Nateglinide,true,A10BX,Meglitinide,
+Pioglitazone Hcl,true,A10BG,Thiazolidinedione,
+Pioglitazone Hcl/Glimepiride,true,A10BD,Combination: thiazolidinedione + sulfonylurea,
+Pioglitazone Hcl/Metformin Hcl,true,A10BD,Combination: thiazolidinedione + biguanide,
+Pramlintide Acetate,true,A10BX,Amylin analogue,
+Repaglinide,true,A10BX,Meglitinide,
+Rosiglitazone Maleate,true,A10BG,Thiazolidinedione,
+Saxagliptin Hcl,true,A10BH,DPP-4 inhibitor,
+Saxagliptin Hcl/Metformin Hcl,true,A10BD,Combination: DPP-4 inhibitor + biguanide,
+Semaglutide,true,A10BJ,GLP-1 receptor agonist,"Ozempic, Rybelsus and Wegovy"
+Sitagliptin,true,A10BH,DPP-4 inhibitor,
+Sitagliptin Phos/Metformin Hcl,true,A10BD,Combination: DPP-4 inhibitor + biguanide,
+Sitagliptin Phosphate,true,A10BH,DPP-4 inhibitor,
+Sotagliflozin,true,A10BK,SGLT2 inhibitor,"In the US (Inpefa), approved for heart failure rather than diabetes"
+"Sub-Q Insulin Device, 20 Unit",false,,,Device (insulin patch) not a drug
+"Sub-Q Insulin Device, 30 Unit",false,,,Device (insulin patch) not a drug
+"Sub-Q Insulin Device, 40 Unit",false,,,Device (insulin patch) not a drug
+Subcutaneous Insulin Pump,false,,,Device (insulin pump) not a drug
+"Syr,ndl,insulin,1ml-Sharps Bin",false,,,Device (syringe) not a drug
+"Syringe And Needle,insulin,1ml",false,,,Device (syringe) not a drug
+"Syringe With Needle, Insulin",false,,,Device (syringe) not a drug
+"Syringe,insulin,needless 1 Ml",false,,,Device (syringe) not a drug
+"Syringe-Needle,insulin,0.5 Ml",false,,,Device (syringe) not a drug
+Tirzepatide,true,A10BX,GIP/GLP-1 receptor agonist,"Mounjaro and Zepbound"
+Tolazamide,true,A10BB,Sulfonylurea,
+Tolbutamide,true,A10BB,Sulfonylurea,

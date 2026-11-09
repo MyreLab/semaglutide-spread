@@ -1,0 +1,11 @@
+# Where dbt builds the warehouse. `uv run build-warehouse` sets SEMAGLUTIDE_DATA_DIR to the
+# repo's data/ folder; the default assumes dbt is run from inside dbt/.
+semaglutide_spread:
+  target: local
+  outputs:
+    local:
+      type: duckdb
+      path: "{{ env_var('SEMAGLUTIDE_DATA_DIR', '../data') }}/warehouse.duckdb"
+      threads: 2
+      settings:
+        preserve_insertion_order: false

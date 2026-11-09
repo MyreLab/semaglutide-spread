@@ -1,0 +1,36 @@
+version: 2
+
+# Every raw table is Parquet written by the downloaders in src/semaglutide_spread/sources/.
+# All columns are text; the staging models assign types. SEMAGLUTIDE_DATA_DIR is set by
+# `uv run build-warehouse`.
+
+sources:
+  - name: partd
+    description: >
+      Medicare Part D Prescribers (CMS), one folder per data year, downloaded by
+      `partd-download`. Rows with fewer than 11 claims are not published.
+    meta:
+      external_location: "read_parquet('{{ env_var('SEMAGLUTIDE_DATA_DIR', '../data') }}/raw/partd_{name}/*/data.parquet', hive_partitioning = true)"
+    tables:
+      - name: by_provider_and_drug
+        description: One row per prescriber x drug (brand and generic name) x year.
+      - name: by_provider
+        description: One row per prescriber x year, with address and ZIP code.
+
+  - name: census
+    description: Census Bureau reference files and geocoder results.
+    tables:
+      - name: zcta2020_gazetteer
+        description: One row per 2020 ZIP Code Tabulation Area (ZCTA), with its internal point.
+        meta:
+          external_location: "read_parquet('{{ env_var('SEMAGLUTIDE_DATA_DIR', '../data') }}/raw/census_zcta2020_gazetteer/data.parquet')"
+      - name: zcta2020_counties
+        description: One row per part of a 2020 ZCTA that lies in a 2020 county.
+        meta:
+          external_location: "read_parquet('{{ env_var('SEMAGLUTIDE_DATA_DIR', '../data') }}/raw/census_zcta2020_counties/data.parquet')"
+      - name: geocoder
+        description: >
+          Census batch geocoder results for prescriber addresses whose ZIP code is not a ZCTA,
+          written by `geocode-addresses`. One row per distinct address, matched or not.
+        meta:
+          external_location: "read_parquet('{{ env_var('SEMAGLUTIDE_DATA_DIR', '../data') }}/raw/census_geocoder/data.parquet')"

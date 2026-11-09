@@ -1,0 +1,19 @@
+version: 2
+
+seeds:
+  - name: glucose_lowering_drugs
+    description: >
+      Every Part D generic name that looks like a diabetes drug or supply, classified by hand.
+      Included = in WHO ATC group A10 "Drugs used in diabetes" (https://atcddd.fhi.no/atc_ddd_index/?code=A10).
+      Excluded = devices and supplies, and drugs outside A10, each with a reason in `note`.
+      Used to define the population at risk: prescribers of any included drug.
+    columns:
+      - name: generic_name
+        description: Exactly as in Part D's Gnrc_Name.
+        data_tests: [unique, not_null]
+      - name: included
+        data_tests: [not_null]
+      - name: atc_group
+        description: WHO ATC level-4 group, e.g. A10BJ (GLP-1 receptor agonists). Blank if excluded.
+      - name: drug_class
+        description: Pharmacological class used in this project's charts and substitution analysis.

@@ -10,6 +10,20 @@ Each row of "by Provider and Drug" is one prescriber x one drug (brand) x one ye
 - **Effect on "adoption":** suppression applies to each prescriber x brand row separately. A prescriber with 6 Ozempic and 6 Rybelsus claims (12 semaglutide claims) does not appear at all. Adoption is therefore defined as *the first year with 11+ claims for at least one semaglutide brand*.
 - **Wording:** the 181.8 million rows represent 9.38 billion claims (sum of `Tot_Clms`). The project never handles individual claims.
 
+### Beneficiary counts are suppressed separately
+`Tot_Benes` (distinct patients) is blank in 103.5 million of the 181.8 million rows (57%): CMS also hides patient counts below 11, even when the row has 11 or more claims. This project counts prescribers and claims, not patients.
+
+### Not every "generic name" is a drug
+Searching the generic names for diabetes drugs also finds devices and supplies, and drugs that only share letters:
+
+- Devices: insulin syringes ("Syringe-Needle,insulin,0.5 Ml"), pump cartridges ("Insulin Pump Cart,auto,bt,g6/7", sold as Omnipod), reusable pens, insulin patches (V-Go)
+- Metolazone, a diuretic, which contains "tolaz" like the old sulfonylurea tolazamide
+- Colesevelam and bromocriptine: each has a brand approved for type 2 diabetes, but both are mostly prescribed for other conditions (cholesterol; Parkinson's and prolactin disorders), and Part D's generic name doesn't tell the uses apart
+
+**Decision:** the list of glucose-lowering drugs (`dbt/seeds/glucose_lowering_drugs.csv`) includes exactly the drugs in WHO ATC group A10, "Drugs used in diabetes": 70 of the 93 matching generic names. The other 23 are listed as excluded, each with a reason. A test fails if CMS publishes a new diabetes-like generic name that isn't classified, and another if a listed name doesn't exist in Part D.
+
+SGLT2 inhibitors (empagliflozin, dapagliflozin) are also prescribed for heart failure and kidney disease, so cardiologists and nephrologists who prescribe them are in the population at risk. That is intended: they could prescribe semaglutide too, and since 2024 it has a cardiovascular indication.
+
 ### Two further suppression markers in the 65-and-over columns
 `GE65_Sprsn_Flag` and `GE65_Bene_Sprsn_Flag` replace values with `*` or `#` (81.0 million rows carry one of them), so these columns are not numeric as published. This project does not use the 65-and-over breakdown.
 

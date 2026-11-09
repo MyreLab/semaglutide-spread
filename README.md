@@ -38,6 +38,12 @@ uv run census-download       # Census ZIP-area (ZCTA) reference files, ~2 MB
 uv run geocode-addresses     # place prescribers whose ZIP code has no ZIP area (~4 minutes)
 ```
 
+Build the warehouse (types, tests, and later the analysis tables):
+
+```bash
+uv run build-warehouse       # dbt build: ~1.5 minutes, writes data/warehouse.duckdb
+```
+
 The Part D download is about 33 GB of CSVs from data.cms.gov, one file at a time, and stores them as about 4.6 GB of Parquet in `data/raw/`. Allow about 10 GB of free disk space while it runs. Re-running only fetches years that are new or that CMS has re-published.
 
 Problems found in the source data, and how they are handled, are documented in [docs/data-notes.md](docs/data-notes.md).
@@ -45,7 +51,8 @@ Problems found in the source data, and how they are handled, are documented in [
 ## Project layout
 
 ```
-src/semaglutide_spread/   Python code: downloads, maps, animations
+src/semaglutide_spread/   Python code: downloads, geocoding, maps, animations
+dbt/                      SQL models that clean and combine the data, with data tests
 tests/                    automated tests
 docs/                     notes on the data
 data/                     downloaded and built data (not committed; see data/README.md)
