@@ -97,3 +97,14 @@ def test_adoption_curve(built):
         # 150 + A, B, C, D, G; F no longer at risk (no diabetes drugs), so 4 of 5 adopters
         (2020, 155, 153, 2, 4, 5, 206),
     ]
+
+
+def test_night_lights_gif_from_the_built_warehouse(built, tmp_path):
+    from PIL import Image
+
+    from semaglutide_spread.viz import night_lights
+
+    gif, png = night_lights.render(built, out_dir=tmp_path, width=320, frames_per_year=2)
+    with Image.open(gif) as image:
+        assert image.n_frames == 6  # 3 years x 2 frames
+    assert png.name == "us_night_lights_2020.png"
