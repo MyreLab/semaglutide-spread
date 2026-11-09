@@ -23,3 +23,6 @@ seeds:
       atc_group: varchar
       drug_class: varchar
       note: varchar
+
+flags:
+  send_anonymous_usage_stats: false
