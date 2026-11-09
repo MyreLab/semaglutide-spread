@@ -107,7 +107,24 @@ Placement of all 9.12 million prescriber-years after geocoding:
 | Not placed (geocoding failed) | 0.63% |
 | Not attempted (military mail, foreign, no ZIP) | 0.03% |
 
-Among semaglutide prescribers, 0.27% are not placed in 2024 and 0.38% in 2018. The failures concentrate in a few medical-centre ZIP codes (03756 Lebanon NH, 27157 Winston-Salem, 68198 Omaha, 06030 Farmington CT, 87131 Albuquerque). **Plan:** a fallback in the prescriber location model: first the median of successfully geocoded addresses in the same ZIP code, then the centre of the ZCTAs sharing the ZIP code's first three digits (99.6% of failures have one).
+Among semaglutide prescribers, 0.27% are not placed by these two methods in 2024 and 0.38% in 2018. The failures concentrate in a few medical-centre ZIP codes (03756 Lebanon NH, 27157 Winston-Salem, 68198 Omaha, 06030 Farmington CT, 87131 Albuquerque).
+
+### Fallbacks, and the final placement
+The prescriber location model (`int_prescriber_locations`) places each prescriber-year with the first method that works:
+
+| Method | Prescriber-years | Share |
+|---|---|---|
+| 1. ZCTA internal point | 8,949,272 | 98.15% |
+| 2. Geocoded street address | 108,544 | 1.19% |
+| 3. Median of geocoded addresses with the same ZIP code | 52,149 | 0.57% |
+| 4. Median location of prescribers sharing the first three ZIP digits | 5,142 | 0.06% |
+| Not placed | 2,909 | 0.03% |
+
+Method 3 works because a medical centre's unique ZIP code usually has some addresses the geocoder could match: for 03756 (Dartmouth Health, Lebanon NH), the failed addresses get the median point of the ones that matched. Method 4 uses the first three digits, which identify a postal sorting area, and takes the median location of prescribers there who were placed by method 1.
+
+Not placed: military mail (1,487), addresses outside the US (1,188), no ZIP code (10), and 224 whose ZIP code has no ZCTA within its sorting area. Most of these 224 are military ZIP codes (09xxx and 962xx, used for overseas bases) that CMS lists with a state, e.g. "09244, NY". In 2024, 18 of 174,885 semaglutide prescribers (0.01%) are not placed. A test fails the build if more than 1% of any year is not placed.
+
+Each ZCTA is assigned to the 2020 county holding most of its land; geocoded addresses carry their own county. In 631 placed prescriber-years (0.007%), the assigned county is in a different state from CMS's state code, including the inconsistent rows below.
 
 Of the geocoded matches, 75% are "Non_Exact" (the geocoder adjusted the address, for example dropping a suite number or correcting the ZIP code). For a national map, a street-level match of either kind is more precise than a ZIP-area centre point.
 

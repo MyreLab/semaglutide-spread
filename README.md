@@ -41,7 +41,7 @@ uv run geocode-addresses     # place prescribers whose ZIP code has no ZIP area 
 Build the warehouse (types, tests, and later the analysis tables):
 
 ```bash
-uv run build-warehouse       # dbt build: ~1.5 minutes, writes data/warehouse.duckdb
+uv run build-warehouse       # dbt build: ~3 minutes, writes data/warehouse.duckdb
 ```
 
 The Part D download is about 33 GB of CSVs from data.cms.gov, one file at a time, and stores them as about 4.6 GB of Parquet in `data/raw/`. Allow about 10 GB of free disk space while it runs. Re-running only fetches years that are new or that CMS has re-published.
