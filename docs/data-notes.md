@@ -69,6 +69,26 @@ Semaglutide prescribers by group, 2018 and 2024:
 ### Coverage rules shape what "adoption" means
 Medicare Part D may not pay for drugs used for weight loss. Ozempic and Rybelsus are approved for type 2 diabetes and appear from 2018 and 2020. Wegovy, approved for weight management, appears for only 2 prescribers in 2023, then for 3,956 in 2024, after its March 2024 cardiovascular approval allowed plans to cover it for that use. US adoption in this project therefore means adoption for covered uses, mainly diabetes. People who paid privately are not in the data.
 
+### What "first year" can and cannot mean
+- **It is the first year a prescriber becomes visible, not their first prescription.** A prescriber who wrote 5 semaglutide prescriptions in 2019 and 40 in 2020 adopts in 2020 here. Early, light use is hidden by the 11-claim rule, so adoption years lean later than the real first prescription, most for prescribers who start slowly.
+- **2018 is the true start.** Ozempic was approved in December 2017 and launched in early 2018, so the data begin at the drug's launch: nobody adopted before the first year of data. (For the UK this has to be checked separately.)
+- **Adoption is counted once.** A prescriber who prescribes semaglutide in 2019, stops, and starts again in 2023 adopted in 2019.
+- **The population at risk changes every year.** Prescribers retire, start practice, or stop prescribing diabetes drugs. Each year's denominator is that year's prescribers of any glucose-lowering drug; adopters who stop prescribing diabetes drugs drop out of it. `cumulative_adopters` in `rpt_adoption_curve` counts everyone who has ever adopted, wherever they are now.
+
+The result, 2018-2024 (`rpt_adoption_curve`):
+
+| Year | Population at risk | New adopters | Adopted this year, of those not yet adopted | Ever adopted, of this year's population at risk |
+|---|---|---|---|---|
+| 2018 | 248,364 | 1,065 | 0.4% | 0.4% |
+| 2019 | 252,322 | 11,798 | 4.7% | 5.1% |
+| 2020 | 256,006 | 16,287 | 6.7% | 11.3% |
+| 2021 | 263,017 | 22,872 | 9.7% | 19.4% |
+| 2022 | 278,371 | 35,016 | 15.3% | 30.4% |
+| 2023 | 298,483 | 63,477 | 29.2% | 48.4% |
+| 2024 | 316,559 | 51,114 | 28.5% | 59.6% |
+
+201,629 prescribers adopted between 2018 and 2024. Out of every Part D prescriber, whatever they prescribe (the sensitivity analysis), 14.0% had adopted by 2024.
+
 ### Catalog quirks
 In the CMS catalog (`data.json`) the latest year of each dataset is listed with two API entries (its own and "latest"). data.cms.gov also rate-limits requests (HTTP 429), so downloads retry with backoff.
 

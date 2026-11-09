@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: population_at_risk
+    description: >
+      The population at risk (denominator). One row per prescriber x year with 11+ Part D claims
+      for at least one glucose-lowering drug (WHO ATC A10, the `included` rows of the
+      glucose_lowering_drugs seed), the target drug included. Carries the prescriber's
+      specialty and location in that year.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [year, npi]
+    columns:
+      - name: glucose_lowering_claims
+        description: Claims for all glucose-lowering drugs, summed over the rows CMS publishes.
+        data_tests: [not_null, {at_least: {arguments: {min_value: 11}}}]
+      - name: target_drug_claims
+        description: Claims for the target drug (0 if none).
+        data_tests: [not_null]
+      - name: target_drug_brands
+        description: Brands of the target drug prescribed that year, comma-separated.
+      - name: specialty_group
+        description: Null only if the prescriber-year is missing from int_prescriber_years.
+        data_tests: [not_null]
+      - name: location_method
+        data_tests: [not_null]
+
+  - name: adopters
+    description: >
+      The adopters (numerator). One row per prescriber who ever had 11+ Part D claims for the
+      target drug, with the first such year (adoption year) and their specialty and location
+      in that year.
+    columns:
+      - name: npi
+        data_tests: [unique, not_null]
+      - name: adoption_year
+        data_tests: [not_null, {at_least: {arguments: {min_value: 2018}}}]
+      - name: adoption_brands
+        data_tests: [not_null]
+      - name: adoption_year_claims
+        data_tests: [not_null, {at_least: {arguments: {min_value: 11}}}]
+      - name: specialty_group
+        data_tests: [not_null]
