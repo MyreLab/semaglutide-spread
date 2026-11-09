@@ -236,14 +236,16 @@ def save_cache(results: dict[str, GeocodeResult], out_dir: Path) -> None:
         writer.writerow(COLUMNS)
         for result in sorted(results.values(), key=lambda r: r.address_id):
             writer.writerow(["" if v is None else v for v in asdict(result).values()])
+    con = duckdb.connect()
     try:
-        duckdb.sql(
+        con.execute(
             f"""
             COPY (SELECT * FROM read_csv({sql_str(csv_path)}, header = true, all_varchar = true))
             TO {sql_str(tmp)} (FORMAT parquet, COMPRESSION zstd)
             """
         )
     finally:
+        con.close()
         csv_path.unlink(missing_ok=True)
     tmp.replace(parquet_path)
 
