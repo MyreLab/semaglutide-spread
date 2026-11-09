@@ -1,0 +1,25 @@
+name: semaglutide_spread
+version: "0.1.0"
+profile: semaglutide_spread
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+clean-targets: ["target", "logs"]
+
+models:
+  semaglutide_spread:
+    staging:
+      # Staging models only rename, type and select columns, so they are views: nothing is
+      # copied, and each query reads the Parquet files directly.
+      +materialized: view
+
+seeds:
+  semaglutide_spread:
+    +column_types:
+      generic_name: varchar
+      included: boolean
+      atc_group: varchar
+      drug_class: varchar
+      note: varchar
