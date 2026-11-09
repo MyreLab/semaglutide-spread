@@ -2,10 +2,14 @@
 
 CMS gives each prescriber's 5-digit ZIP code. ZIP codes are mail routes, not areas, so the
 Census Bureau publishes ZIP Code Tabulation Areas (ZCTAs): the closest area-based equivalent.
-Two 2020 files are used:
+ZCTAs are redrawn after each census; this project uses the 2020 ZCTAs throughout. Two files:
 
-- ZCTA gazetteer: one row per ZCTA, with its centre point (latitude/longitude)
-- ZCTA-to-county relationship file: which counties each ZCTA overlaps, and by how much land
+- ZCTA gazetteer: one row per ZCTA, with its internal point (latitude/longitude). The 2021
+  release is used because the file named "2020 Gazetteer" still lists the 2010 ZCTAs
+  (33,144 of them); the 2021 release is the first with the 33,791 2020 ZCTAs, and its land
+  areas are the closest to the 2020 relationship file.
+- ZCTA-to-county relationship file: which 2020 counties each 2020 ZCTA overlaps, and by how
+  much land.
 
 They are stored, like every source, as text-only Parquet under data/raw/census_<name>/.
 
@@ -39,26 +43,33 @@ from semaglutide_spread.sources.common import (
 log = logging.getLogger(__name__)
 
 
+class UnexpectedRowCountError(Exception):
+    """A reference file has a different number of rows than the geography it should cover."""
+
+
 @dataclass(frozen=True)
 class ReferenceFile:
     name: str
     url: str
     delimiter: str
     expected_columns: tuple[str, ...]
+    # Guards against a file from the wrong delineation (e.g. 2010 ZCTAs instead of 2020).
+    expected_rows: int | None = None
 
 
 REFERENCE_FILES = (
     ReferenceFile(
-        name="zcta_gazetteer_2020",
+        name="zcta2020_gazetteer",
         url=(
             "https://www2.census.gov/geo/docs/maps-data/data/gazetteer/"
-            "2020_Gazetteer/2020_Gaz_zcta_national.zip"
+            "2021_Gazetteer/2021_Gaz_zcta_national.zip"
         ),
         delimiter="\t",
         expected_columns=("GEOID", "ALAND", "INTPTLAT", "INTPTLONG"),
+        expected_rows=33_791,  # the number of 2020 ZCTAs
     ),
     ReferenceFile(
-        name="zcta_county_2020",
+        name="zcta2020_counties",
         url=(
             "https://www2.census.gov/geo/docs/maps-data/data/rel2020/zcta520/"
             "tab20_zcta520_county20_natl.txt"
@@ -72,6 +83,9 @@ REFERENCE_FILES = (
         ),
     ),
 )
+
+
+GAZETTEER, COUNTIES = REFERENCE_FILES
 
 
 def extract_single_file(zip_path: Path, dest: Path) -> None:
@@ -115,6 +129,11 @@ def ingest_reference_file(
         rows, repaired_lines = convert_csv(
             text_path, parquet_path, label=ref.name, delimiter=ref.delimiter
         )
+        if ref.expected_rows is not None and rows != ref.expected_rows:
+            parquet_path.unlink()
+            raise UnexpectedRowCountError(
+                f"{ref.name} has {rows:,} rows; expected {ref.expected_rows:,}"
+            )
     finally:
         download_path.unlink(missing_ok=True)
         text_path.unlink(missing_ok=True)

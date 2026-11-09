@@ -46,29 +46,41 @@ In the CMS catalog (`data.json`) the latest year of each dataset is listed with 
 
 ## Census reference files
 
+### The "2020" ZIP-area file lists the 2010 ZIP areas
+ZIP Code Tabulation Areas (ZCTAs) are redrawn after each census. The Census Bureau's file named "2020 Gazetteer" has 33,144 ZCTAs: the **2010** set. The 2020 set (33,791 ZCTAs, matching the 2020 ZCTA-to-county file) first appears in the 2021 Gazetteer:
+
+| Gazetteer release | ZCTAs | Same land areas as the 2020 county file |
+|---|---|---|
+| 2020 | 33,144 | 511 |
+| 2021 | 33,791 | 30,131 |
+| 2022 | 33,791 | 24,293 |
+| 2024 | 33,791 | 17,253 |
+
+This project first used the 2020 file; a test comparing the two Census files caught the mismatch (851 ZCTAs in the county file were missing from the gazetteer). It now uses the 2021 release, the closest to the 2020 county file, and the downloader checks the row count is exactly 33,791. Every figure below uses the 2020 ZCTAs.
+
 ### ZIP codes are not areas
-CMS gives a 5-digit ZIP code. The Census Bureau's ZIP Code Tabulation Areas (ZCTAs) approximate the areas ZIP codes serve, but not every ZIP has one. 3.2% of prescriber-years have a ZIP code with no ZCTA. The largest are unique ZIP codes assigned to big medical centres:
+CMS gives a 5-digit ZIP code. ZCTAs approximate the areas ZIP codes serve, but not every ZIP has one. 1.84% of prescriber-years have a ZIP code with no ZCTA. The largest are unique ZIP codes assigned to big medical centres:
 
 | ZIP | City | Prescriber-years |
 |---|---|---|
 | 44195 | Cleveland, OH | 20,146 |
-| 37232 | Nashville, TN | 16,162 |
-| 21287 | Baltimore, MD | 13,329 |
-| 29425 | Charleston, SC | 10,869 |
-| 14642 | Rochester, NY | 10,759 |
-| 94143 | San Francisco, CA | 10,124 |
+| 94143 | San Francisco, CA | 10,139 |
+| 27157 | Winston-Salem, NC | 9,309 |
+| 01655 | Worcester, MA | 8,698 |
+| 68198 | Omaha, NE | 7,874 |
+| 03756 | Lebanon, NH | 7,490 |
 
-Checked whether this biases the adoption map: in 2024, 1.4% of semaglutide prescribers are unmatched (1.3% of 2018's early adopters), against 3.2% of all prescribers. Endocrinologists are more affected (5.0%).
+Checked whether this biases the adoption map: in 2024, 0.73% of semaglutide prescribers have a ZIP code with no ZCTA (1.03% of 2018's early adopters), against 1.82% of all prescribers. Endocrinologists are more affected (3.14%).
 
 ### Geocoding the rest
-The 20,716 distinct addresses behind those prescriber-years (in the 50 states, DC and the territories) were sent to the Census Bureau's batch geocoder. Military mail (APO/FPO/DPO) and foreign addresses were not: they have no US street location.
+The 12,391 distinct addresses behind those prescriber-years (in the 50 states, DC and the territories) are sent to the Census Bureau's batch geocoder. Military mail (APO/FPO/DPO) and foreign addresses are not: they have no US street location.
 
 | Result | Addresses |
 |---|---|
-| Matched on street line 1 | 11,271 |
-| Matched on street line 2, after line 1 failed | 1,532 |
-| Two equally good candidates ("Tie"), so no location | 592 |
-| No match | 7,321 |
+| Matched on street line 1 | 6,205 |
+| Matched on street line 2, after line 1 failed | 709 |
+| Two equally good candidates ("Tie"), so no location | 454 |
+| No match | 5,023 |
 
 Line 2 helps because many records put a department or building in line 1 and the street in line 2 (e.g. "Kent State University Health Services" / "Eastway Drive"). Addresses that fail are mostly not street addresses: "Department Of Psychiatry Child Psychiatry", "988480 Nebraska Medical Ctr", PO boxes.
 
@@ -76,20 +88,20 @@ Placement of all 9.12 million prescriber-years after geocoding:
 
 | Method | Share |
 |---|---|
-| ZCTA centre point | 96.83% |
-| Geocoded street address | 2.14% |
-| Not placed (geocoding failed) | 1.01% |
+| ZCTA centre point | 98.15% |
+| Geocoded street address | 1.19% |
+| Not placed (geocoding failed) | 0.63% |
 | Not attempted (military mail, foreign, no ZIP) | 0.03% |
 
-Among semaglutide prescribers, 0.46% are not placed in 2024 and 0.66% in 2018. The failures concentrate in a few medical-centre ZIP codes (37232 Nashville, 03756 Lebanon NH, 27157 Winston-Salem, 22908 Charlottesville, 68198 Omaha). **Plan:** a fallback in the prescriber location model: first the median of successfully geocoded addresses in the same ZIP code, then the centre of the ZCTAs sharing the ZIP code's first three digits (99.8% of failures have one).
+Among semaglutide prescribers, 0.27% are not placed in 2024 and 0.38% in 2018. The failures concentrate in a few medical-centre ZIP codes (03756 Lebanon NH, 27157 Winston-Salem, 68198 Omaha, 06030 Farmington CT, 87131 Albuquerque). **Plan:** a fallback in the prescriber location model: first the median of successfully geocoded addresses in the same ZIP code, then the centre of the ZCTAs sharing the ZIP code's first three digits (99.6% of failures have one).
 
-Of the geocoded matches, 58% are "Non_Exact" (the geocoder adjusted the address, for example dropping a suite number or correcting the ZIP code). For a national map, a street-level match of either kind is more precise than a ZIP-area centre point.
+Of the geocoded matches, 75% are "Non_Exact" (the geocoder adjusted the address, for example dropping a suite number or correcting the ZIP code). For a national map, a street-level match of either kind is more precise than a ZIP-area centre point.
 
 ### State code and state name disagree
 In 3,155 prescriber-years (0.03%), CMS's state FIPS code and state abbreviation point to different states. Examples: "Houston, TN" with Texas's code and a Houston, Texas ZIP code (77079); "Fort Campbell, KY" with Tennessee's code (Fort Campbell straddles the border). Location is taken from the ZIP code or street address, not from either state field, so this does not move dots on the map; state-level summaries will use the state of the assigned location.
 
 ### Formatting quirks
-- The 2020 ZCTA gazetteer pads every line and its last column name with trailing spaces (`INTPTLONG` followed by over 100 spaces).
+- The ZCTA gazetteer pads every line and its last column name with trailing spaces (`INTPTLONG` followed by over 100 spaces). The 2025 release switched from tabs to pipes and added a column.
 - The ZCTA-to-county relationship file is pipe-separated and starts with an invisible byte-order mark.
 - 903 of its 47,863 rows are parts of counties that lie in no ZCTA (blank ZCTA columns).
 - 10,186 ZCTAs overlap more than one county. **Decision (to confirm):** assign each ZCTA to the county containing most of its land area.
