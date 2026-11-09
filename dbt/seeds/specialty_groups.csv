@@ -1,0 +1,264 @@
+prescriber_type,specialty,specialty_group
+Acupuncturist,Acupuncturist,Other prescriber
+Addiction Medicine,Addiction Medicine,Other physician specialty
+Adult Companion,Adult Companion,Other prescriber
+Adult Congenital Heart Disease,Adult Congenital Heart Disease,Cardiology
+Advanced Heart Failure and Transplant Cardiology,Advanced Heart Failure and Transplant Cardiology,Cardiology
+Advanced Practice Dental Therapist,Advanced Practice Dental Therapist,Other prescriber
+Allergy/ Immunology,Allergy/Immunology,Other physician specialty
+Ambulance Service Provider,Ambulance Service Provider,Organization or unknown
+Ambulatory Surgical Center,Ambulatory Surgical Center,Organization or unknown
+Anaplastologist,Anaplastologist,Other prescriber
+Anesthesiology,Anesthesiology,Other physician specialty
+Anesthesiology Assistant,Anesthesiology Assistant,Other prescriber
+Art Therapist,Art Therapist,Other prescriber
+"Assistant, Podiatric","Assistant, Podiatric",Other prescriber
+Assisted Living Facility,Assisted Living Facility,Organization or unknown
+Audiologist,Audiologist,Other prescriber
+Audiologist-Hearing Aid Fitter,Audiologist-Hearing Aid Fitter,Other prescriber
+Behavior Analyst,Behavior Analyst,Other prescriber
+Cardiac Surgery,Cardiac Surgery,Other physician specialty
+Cardiology,Cardiology,Cardiology
+Case Management,Case Management,Organization or unknown
+Case Manager/Care Coordinator,Case Manager/Care Coordinator,Other prescriber
+Centralized Flu,Centralized Flu,Organization or unknown
+Certified Clinical Nurse Specialist,Certified Clinical Nurse Specialist,Advanced practice nurse
+Certified Nurse Midwife,Certified Nurse Midwife,Advanced practice nurse
+Certified Registered Nurse Anesthetist (CRNA),Certified Registered Nurse Anesthetist (CRNA),Advanced practice nurse
+Chiropractic,Chiropractic,Other prescriber
+Chore Provider,Chore Provider,Other prescriber
+Chronic Disease Hospital,Chronic Disease Hospital,Organization or unknown
+Clinic or Group Practice,Clinic or Group Practice,Organization or unknown
+Clinic/Center,Clinic/Center,Organization or unknown
+Clinical Cardiac Electrophysiology,Clinical Cardiac Electrophysiology,Cardiology
+Clinical Laboratory,Clinical Laboratory,Organization or unknown
+Clinical Medical Laboratory,Clinical Medical Laboratory,Organization or unknown
+Clinical Neuropsychologist,Clinical Neuropsychologist,Other prescriber
+Clinical Pharmacology,Clinical Pharmacology,Other physician specialty
+Colon & Rectal Surgery,Colorectal Surgery (Proctology),Other physician specialty
+Colorectal Surgery (Proctology),Colorectal Surgery (Proctology),Other physician specialty
+"Community Based Residential Treatment Facility, Intellectual and/or Develop","Community Based Residential Treatment Facility, Intellectual and/or Develop",Organization or unknown
+"Community Based Residential Treatment Facility, Mental Illness","Community Based Residential Treatment Facility, Mental Illness",Organization or unknown
+"Community Based Residential Treatment Facility, Mental Retardation and/or D","Community Based Residential Treatment Facility, Mental Retardation and/or D",Organization or unknown
+Community Health Worker,Community Health Worker,Other prescriber
+Community/Behavioral Health,Community/Behavioral Health,Organization or unknown
+Contractor,Contractor,Organization or unknown
+Counselor,Counselor,Other prescriber
+Critical Care (Intensivists),Critical Care (Intensivists),Hospital and emergency medicine
+Day Training/Habilitation Specialist,Day Training/Habilitation Specialist,Other prescriber
+Dental Assistant,Dental Assistant,Other prescriber
+Dental Hygienist,Dental Hygienist,Other prescriber
+Dental Laboratory Technician,Dental Laboratory Technician,Other prescriber
+Dental Therapist,Dental Therapist,Other prescriber
+Dentist,Dentist,Other prescriber
+Denturist,Denturist,Other prescriber
+Dermatology,Dermatology,Other physician specialty
+Developmental Therapist,Developmental Therapist,Other prescriber
+Diagnostic Radiology,Diagnostic Radiology,Other physician specialty
+Dietary Manager,Dietary Manager,Other prescriber
+"Dietetic Technician, Registered","Dietetic Technician, Registered",Other prescriber
+Doula,Doula,Other prescriber
+Driver,Driver,Other prescriber
+Durable Medical Equipment & Medical Supplies,Durable Medical Equipment & Medical Supplies,Organization or unknown
+Early Intervention Provider Agency,Early Intervention Provider Agency,Organization or unknown
+Electrodiagnostic Medicine,Electrodiagnostic Medicine,Other physician specialty
+"Emergency Medical Technician, Basic","Emergency Medical Technician, Basic",Other prescriber
+"Emergency Medical Technician, Intermediate","Emergency Medical Technician, Intermediate",Other prescriber
+"Emergency Medical Technician, Paramedic","Emergency Medical Technician, Paramedic",Other prescriber
+Emergency Medicine,Emergency Medicine,Hospital and emergency medicine
+Endocrinology,Endocrinology,Endocrinology
+Epileptologists,Epileptologists,Other physician specialty
+Exclusive Provider Organization,Exclusive Provider Organization,Organization or unknown
+Eyewear Supplier,Eyewear Supplier,Organization or unknown
+Family Medicine,Family Practice,Primary care physician
+Family Practice,Family Practice,Primary care physician
+Gastroenterology,Gastroenterology,Other physician specialty
+General Acute Care Hospital,General Acute Care Hospital,Organization or unknown
+General Practice,General Practice,Primary care physician
+General Surgery,General Surgery,Other physician specialty
+"Genetic Counselor, MS","Genetic Counselor, MS",Other prescriber
+Geriatric Medicine,Geriatric Medicine,Primary care physician
+Geriatric Psychiatry,Geriatric Psychiatry,Other physician specialty
+Gynecological Oncology,Gynecological Oncology,Other physician specialty
+Hand Surgery,Hand Surgery,Other physician specialty
+Health & Wellness Coach,Health & Wellness Coach,Other prescriber
+Health Educator,Health Educator,Other prescriber
+Health Maintenance Organization,Health Maintenance Organization,Organization or unknown
+Hearing Instrument Specialist,Hearing Instrument Specialist,Other prescriber
+Hematology,Hematology,Other physician specialty
+Hematology-Oncology,Hematology-Oncology,Other physician specialty
+Hematopoietic Cell Transplantation and Cellular Therapy,Hematopoietic Cell Transplantation and Cellular Therapy,Other physician specialty
+Home Delivered Meals,Home Delivered Meals,Organization or unknown
+Home Health,Home Health,Organization or unknown
+Home Health Agency,Home Health Agency,Organization or unknown
+Home Health Aide,Home Health Aide,Other prescriber
+Homemaker,Homemaker,Other prescriber
+Homeopath,Homeopath,Other prescriber
+Hospice and Palliative Care,Hospice and Palliative Care,Other physician specialty
+Hospital,Hospital,Organization or unknown
+Hospitalist,Hospitalist,Hospital and emergency medicine
+In Home Supportive Care,In Home Supportive Care,Other prescriber
+Independent Diagnostic Testing Facility (IDTF),Independent Diagnostic Testing Facility (IDTF),Organization or unknown
+Independent Medical Examiner,Independent Medical Examiner,Other physician specialty
+Infectious Disease,Infectious Disease,Other physician specialty
+Integrative Medicine,Integrative Medicine,Other physician specialty
+Intensive Cardiac Rehabilitation,Intensive Cardiac Rehabilitation,Organization or unknown
+Internal Medicine,Internal Medicine,Primary care physician
+Interpreter,Interpreter,Other prescriber
+Interventional Cardiology,Interventional Cardiology,Cardiology
+Interventional Pain Management,Interventional Pain Management,Other physician specialty
+Interventional Radiology,Interventional Radiology,Other physician specialty
+"Lactation Consultant, Non-RN","Lactation Consultant, Non-RN",Other prescriber
+Legal Medicine,Legal Medicine,Other physician specialty
+Licensed Clinical Social Worker,Licensed Clinical Social Worker,Other prescriber
+Licensed Practical Nurse,Licensed Practical Nurse,Other prescriber
+Licensed Professional Counselor,Licensed Professional Counselor,Other prescriber
+Licensed Psychiatric Technician,Licensed Psychiatric Technician,Other prescriber
+Licensed Vocational Nurse,Licensed Vocational Nurse,Other prescriber
+Local Education Agency (LEA),Local Education Agency (LEA),Organization or unknown
+Lodging,Lodging,Organization or unknown
+Marriage & Family Therapist,Marriage & Family Therapist,Other prescriber
+Marriage and Family Therapist,Marriage & Family Therapist,Other prescriber
+Mass Immunizer Roster Biller,Mass Immunizer Roster Biller,Organization or unknown
+Massage Therapist,Massage Therapist,Other prescriber
+Maxillofacial Surgery,Oral and Maxillofacial Surgery,Other prescriber
+Mechanotherapist,Mechanotherapist,Other prescriber
+Medical Genetics,Medical Genetics,Other physician specialty
+Medical Genetics and Genomics,Medical Genetics,Other physician specialty
+"Medical Genetics, Ph.D. Medical Genetics",Medical Genetics,Other physician specialty
+Medical Oncology,Medical Oncology,Other physician specialty
+Medical Toxicology,Medical Toxicology,Other physician specialty
+Medicare Diabetes Preventive Program,Medicare Diabetes Preventive Program,Organization or unknown
+Micrographic Dermatologic Surgery,Micrographic Dermatologic Surgery,Other physician specialty
+Midwife,Midwife,Other prescriber
+"Midwife, Lay",Midwife,Other prescriber
+Military Health Care Provider,Military Health Care Provider,Organization or unknown
+Military Hospital,Military Hospital,Organization or unknown
+Music Therapist,Music Therapist,Other prescriber
+Naprapath,Naprapath,Other prescriber
+Naturopath,Naturopath,Other prescriber
+Nephrology,Nephrology,Nephrology
+Neurological Surgery,Neurosurgery,Other physician specialty
+Neurology,Neurology,Other physician specialty
+"Neuromusculoskeletal Medicine, Sports Medicine",Sports Medicine,Other physician specialty
+Neuropsychiatry,Neuropsychiatry,Other physician specialty
+Neurosurgery,Neurosurgery,Other physician specialty
+Non-Pharmacy Dispensing Site,Non-Pharmacy Dispensing Site,Organization or unknown
+Non-emergency Medical Transport (VAN),Non-emergency Medical Transport (VAN),Organization or unknown
+Nuclear Medicine,Nuclear Medicine,Other physician specialty
+Nurse Practitioner,Nurse Practitioner,Advanced practice nurse
+Nurse's Aide,Nurse's Aide,Other prescriber
+Nursing Care,Nursing Care,Other prescriber
+Nursing Home Administrator,Nursing Home Administrator,Other prescriber
+Nutritionist,Nutritionist,Other prescriber
+Obstetrics & Gynecology,Obstetrics & Gynecology,Obstetrics and gynecology
+Occupational Therapist in Private Practice,Occupational Therapist in Private Practice,Other prescriber
+Occupational Therapy Assistant,Occupational Therapy Assistant,Other prescriber
+Ocularist,Ocularist,Other prescriber
+Ophthalmology,Ophthalmology,Other physician specialty
+Opioid Treatment Program,Opioid Treatment Program,Organization or unknown
+Optician,Optician,Other prescriber
+Optometry,Optometry,Other prescriber
+Oral & Maxillofacial Surgery,Oral and Maxillofacial Surgery,Other prescriber
+Oral Medicine,Oral Medicine,Other prescriber
+Oral Medicinist,Oral Medicine,Other prescriber
+Oral Surgery (Dentist only),Oral and Maxillofacial Surgery,Other prescriber
+Oral and Maxillofacial Pathology,Oral and Maxillofacial Pathology,Other prescriber
+Orofacial Pain,Orofacial Pain,Other prescriber
+Orthopaedic Surgery,Orthopedic Surgery,Other physician specialty
+Orthopedic Surgery,Orthopedic Surgery,Other physician specialty
+Orthotic Fitter,Orthotic Fitter,Other prescriber
+Orthotist,Orthotist,Other prescriber
+Osteopathic Manipulative Medicine,Osteopathic Manipulative Medicine,Primary care physician
+Other Clinic/Center,Other Clinic/Center,Organization or unknown
+Other Medical Supply Company,Other Medical Supply Company,Organization or unknown
+Other Nursing Facility,Other Nursing Facility,Organization or unknown
+Otolaryngology,Otolaryngology,Other physician specialty
+Oxygen supplier,Oxygen supplier,Organization or unknown
+Pain Management,Pain Management,Other physician specialty
+Pain Medicine,Pain Management,Other physician specialty
+Pathology,Pathology,Other physician specialty
+Pediatric Medicine,Pediatric Medicine,Primary care physician
+Pediatrics,Pediatric Medicine,Primary care physician
+Peer Specialist,Peer Specialist,Other prescriber
+Perfusionist,Perfusionist,Other prescriber
+Periodontics,Periodontics,Other prescriber
+Peripheral Vascular Disease,Peripheral Vascular Disease,Cardiology
+Personal Emergency Response Attendant,Personal Emergency Response Attendant,Other prescriber
+Pharmacist,Pharmacist,Pharmacist
+Pharmacy,Pharmacy,Pharmacist
+Pharmacy Technician,Pharmacy Technician,Other prescriber
+Phlebology,Phlebology,Other physician specialty
+Physical Medicine & Rehabilitation,Physical Medicine and Rehabilitation,Other physician specialty
+Physical Medicine and Rehabilitation,Physical Medicine and Rehabilitation,Other physician specialty
+Physical Therapist in Private Practice,Physical Therapist in Private Practice,Other prescriber
+Physical Therapy Assistant,Physical Therapy Assistant,Other prescriber
+Physician Assistant,Physician Assistant,Physician assistant
+Plastic Surgery,Plastic and Reconstructive Surgery,Other physician specialty
+Plastic and Reconstructive Surgery,Plastic and Reconstructive Surgery,Other physician specialty
+Podiatry,Podiatry,Other prescriber
+Point of Service,Point of Service,Organization or unknown
+Preferred Provider Organization,Preferred Provider Organization,Organization or unknown
+Prevention Professional,Prevention Professional,Other prescriber
+Preventive Medicine,Preventive Medicine,Primary care physician
+Program of All-Inclusive Care for the Elderly (PACE) Provider Organization,Program of All-Inclusive Care for the Elderly (PACE) Provider Organization,Organization or unknown
+Prosthetic/Orthotic Supplier,Prosthetic/Orthotic Supplier,Organization or unknown
+Prosthetist,Prosthetist,Other prescriber
+Prosthodontics,Prosthodontics,Other prescriber
+Psychiatric Residential Treatment Facility,Psychiatric Residential Treatment Facility,Organization or unknown
+Psychiatry,Psychiatry,Other physician specialty
+Psychiatry & Neurology,Psychiatry & Neurology,Other physician specialty
+Psychoanalyst,Psychoanalyst,Other prescriber
+Psychologist,Psychologist,Other prescriber
+"Psychologist, Clinical",Psychologist,Other prescriber
+Public Health or Welfare Agency,Public Health or Welfare Agency,Organization or unknown
+Pulmonary Disease,Pulmonary Disease,Other physician specialty
+Radiation Oncology,Radiation Oncology,Other physician specialty
+Radiation Therapy Center,Radiation Therapy Center,Organization or unknown
+Radiologic Technologist,Radiologic Technologist,Other prescriber
+Radiology,Diagnostic Radiology,Other physician specialty
+Radiology Practitioner Assistant,Radiology Practitioner Assistant,Other prescriber
+Registered Dietitian or Nutrition Professional,Registered Dietitian or Nutrition Professional,Other prescriber
+Registered Nurse,Registered Nurse,Other prescriber
+Rehabilitation Counselor,Rehabilitation Counselor,Other prescriber
+Rehabilitation Practitioner,Rehabilitation Practitioner,Other prescriber
+Religious Nonmedical Nursing Personnel,Religious Nonmedical Nursing Personnel,Other prescriber
+Religious Nonmedical Practitioner,Religious Nonmedical Practitioner,Other prescriber
+"Residential Treatment Facility, Emotionally Disturbed Children","Residential Treatment Facility, Emotionally Disturbed Children",Organization or unknown
+"Residential Treatment Facility, Intellectual and/or Developmental Disabilit","Residential Treatment Facility, Intellectual and/or Developmental Disabilit",Organization or unknown
+"Residential Treatment Facility, Physical Disabilities","Residential Treatment Facility, Physical Disabilities",Organization or unknown
+"Respiratory Therapist, Certified",Respiratory Therapist,Other prescriber
+"Respiratory Therapist, Registered",Respiratory Therapist,Other prescriber
+Respite Care,Respite Care,Organization or unknown
+Rheumatology,Rheumatology,Other physician specialty
+Skilled Nursing Facility,Skilled Nursing Facility,Organization or unknown
+Sleep Medicine,Sleep Medicine,Other physician specialty
+"Sleep Specialist, PhD","Sleep Specialist, PhD",Other prescriber
+Slide Preparation Facility,Slide Preparation Facility,Organization or unknown
+Social Worker,Social Worker,Other prescriber
+Specialist,Specialist,Organization or unknown
+Specialist/Technologist,Specialist/Technologist,Organization or unknown
+Specialist/Technologist Cardiovascular,Specialist/Technologist Cardiovascular,Other prescriber
+"Specialist/Technologist, Health Information","Specialist/Technologist, Health Information",Other prescriber
+"Specialist/Technologist, Other",Specialist/Technologist,Organization or unknown
+"Specialist/Technologist, Pathology","Specialist/Technologist, Pathology",Other prescriber
+Speech Language Pathologist,Speech Language Pathologist,Other prescriber
+Sports Medicine,Sports Medicine,Other physician specialty
+Student in an Organized Health Care Education/Training Program,Student in an Organized Health Care Education/Training Program,Physician in training
+Substance Abuse Rehabilitation Facility,Substance Abuse Rehabilitation Facility,Organization or unknown
+Surgery,Surgery,Other physician specialty
+Surgical Oncology,Surgical Oncology,Other physician specialty
+Technician,Technician,Other prescriber
+"Technician, Cardiology","Technician, Cardiology",Other prescriber
+"Technician, Health Information","Technician, Health Information",Other prescriber
+"Technician, Pathology","Technician, Pathology",Other prescriber
+Technician/Technologist,Technician,Other prescriber
+Thoracic Surgery,Thoracic Surgery,Other physician specialty
+Thoracic Surgery (Cardiothoracic Vascular Surgery),Thoracic Surgery,Other physician specialty
+Undefined Physician type,Undefined Physician type,Organization or unknown
+Undersea and Hyperbaric Medicine,Undersea and Hyperbaric Medicine,Other physician specialty
+Unknown Supplier/Provider Specialty,Unknown Supplier/Provider Specialty,Organization or unknown
+Urology,Urology,Other physician specialty
+Vascular Surgery,Vascular Surgery,Other physician specialty
+Veterinarian,Veterinarian,Other prescriber
+Voluntary Health or Charitable Agency,Voluntary Health or Charitable Agency,Organization or unknown

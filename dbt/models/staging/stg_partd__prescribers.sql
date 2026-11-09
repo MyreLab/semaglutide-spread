@@ -6,7 +6,7 @@ select
     Prscrbr_NPI as npi,
     case Prscrbr_Ent_Cd when 'I' then 'individual' when 'O' then 'organization' end as entity_type,
     Prscrbr_Crdntls as credentials,
-    Prscrbr_Type as prescriber_type,
+    nullif(Prscrbr_Type, 'None') as prescriber_type,  -- CMS writes the word "None" for a missing type
     Prscrbr_Type_Src as prescriber_type_source,
     Prscrbr_St1 as street_1,
     Prscrbr_St2 as street_2,

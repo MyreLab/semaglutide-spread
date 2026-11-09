@@ -29,6 +29,9 @@ seeds:
       atc_group: varchar
       drug_class: varchar
       note: varchar
+      prescriber_type: varchar
+      specialty: varchar
+      specialty_group: varchar
 
 flags:
   send_anonymous_usage_stats: false
