@@ -17,3 +17,34 @@ seeds:
         description: WHO ATC level-4 group, e.g. A10BJ (GLP-1 receptor agonists). Blank if excluded.
       - name: drug_class
         description: Pharmacological class used in this project's charts and substitution analysis.
+
+  - name: specialty_groups
+    description: >
+      Every Part D prescriber type (specialty label), with a harmonised specialty name that merges
+      spelling variants (e.g. "Orthopaedic Surgery" into "Orthopedic Surgery", "Family Medicine" into
+      "Family Practice") and one of 13 broad groups used in the charts.
+    columns:
+      - name: prescriber_type
+        description: Exactly as in Part D's Prscrbr_Type.
+        data_tests: [unique, not_null]
+      - name: specialty
+        data_tests: [not_null]
+      - name: specialty_group
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - Primary care physician
+                  - Advanced practice nurse
+                  - Physician assistant
+                  - Endocrinology
+                  - Cardiology
+                  - Nephrology
+                  - Obstetrics and gynecology
+                  - Hospital and emergency medicine
+                  - Physician in training
+                  - Other physician specialty
+                  - Pharmacist
+                  - Other prescriber
+                  - Organization or unknown

@@ -41,3 +41,17 @@ models:
         data_tests: [{at_least: {arguments: {min_value: -15}}}]
       - name: county_fips
         description: 2020 county FIPS code (5 digits).
+
+  - name: int_prescriber_years
+    description: >
+      One row per prescriber x year: specialty (from the specialty_groups seed), location and
+      county (from int_prescriber_locations), and total Part D claims.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [year, npi]
+    columns:
+      - name: specialty_group
+        data_tests: [not_null]
+      - name: location_method
+        data_tests: [not_null]

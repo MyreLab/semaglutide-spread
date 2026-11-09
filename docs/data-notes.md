@@ -42,12 +42,26 @@ The original letters cannot be recovered. Names are not used in the analysis; ci
 ### One line that is not valid text
 The 2020 "by Provider and Drug" file (3.6 GB) has one line whose bytes are not valid UTF-8 (the Mayagüez row above), which makes the file unreadable as published. The downloader replaces only the invalid bytes with "�" and records `repaired_lines: 1` in that year's `_source.json`. No rows are dropped.
 
-### Specialty: 229 labels, three sources, and changes over time
-`Prscrbr_Type` comes from Part B claims for most rows (164.8M), from the national provider registry's specialty for 13.5M, and from its taxonomy codes for 3.5M (`Prscrbr_Type_Src`).
+### Specialty: 264 labels, three sources, and changes over time
+`Prscrbr_Type` comes from Part B claims for most rows (164.8M), from the national provider registry's specialty for 13.5M, and from its taxonomy codes for 3.5M (`Prscrbr_Type_Src`). The "by Provider" file has 264 distinct labels.
 
-- Spelling variants of the same specialty: "Orthopedic Surgery" (25,471 prescribers) and "Orthopaedic Surgery" (4,502); "Family Practice" (137,815) and "Family Medicine" (2,110).
-- 138,734 prescribers have more than one specialty across the years. Example: one semaglutide prescriber is listed as "Student in an Organized Health Care Education/Training Program", "Internal Medicine" and "Endocrinology" in different years.
-- **Decision (to confirm in the adoption model):** use the specialty in the year of adoption, after harmonising spelling variants.
+- Spelling variants of the same specialty: "Orthopedic Surgery" (25,471 prescribers) and "Orthopaedic Surgery" (4,502); "Family Practice" (137,815) and "Family Medicine" (2,110); "Physical Medicine and Rehabilitation" and "Physical Medicine & Rehabilitation".
+- 25 prescribers have the literal word "None" as their specialty. Loaded naively, it turns into a missing value in some tools and stays as text in others; staging converts it to a missing value explicitly.
+- Labels that are not clinical specialties at all: "Driver", "Interpreter", "Lodging", "Home Delivered Meals", "Veterinarian". They come from the national provider registry and cover a handful of prescribers each.
+- Prescribers change label over time: one semaglutide prescriber is listed as "Student in an Organized Health Care Education/Training Program", "Internal Medicine" and "Endocrinology" in different years. After harmonising, 170,542 prescribers still appear in more than one specialty group.
+
+**Decision:** `dbt/seeds/specialty_groups.csv` maps every label to a harmonised specialty (263 labels to 242 names) and one of 13 groups: primary care physician, advanced practice nurse, physician assistant, endocrinology, cardiology, nephrology, obstetrics and gynecology, hospital and emergency medicine, physician in training, other physician specialty, pharmacist, other prescriber, and organization or unknown. A test fails if CMS publishes a label that isn't in the seed. The adoption model will use the specialty in the year of adoption.
+
+Semaglutide prescribers by group, 2018 and 2024:
+
+| Group | All prescribers 2024 | Semaglutide 2024 | Semaglutide 2018 |
+|---|---|---|---|
+| Primary care physician | 270,518 | 101,196 | 480 |
+| Advanced practice nurse | 283,915 | 43,635 | 165 |
+| Physician assistant | 137,246 | 15,133 | 64 |
+| Endocrinology | 6,689 | 5,750 | 330 |
+| Cardiology | 28,045 | 2,634 | 11 |
+| Other groups | 690,470 | 6,537 | 15 |
 
 ### Prescribers move
 122,598 prescribers appear in more than one state across the years. **Decision:** place each adopter on the map at their location in the year of adoption.
