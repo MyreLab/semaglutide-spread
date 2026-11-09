@@ -1,0 +1,15 @@
+# Dependabot opens a pull request when a newer version of a GitHub Action or a Python package
+# is released. CI runs on that pull request, so an update is only merged if everything passes.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      python-packages:
+        patterns: ["*"]

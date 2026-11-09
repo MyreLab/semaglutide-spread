@@ -1,5 +1,7 @@
 # semaglutide-spread
 
+[![CI](https://github.com/MyreLab/semaglutide-spread/actions/workflows/ci.yml/badge.svg)](https://github.com/MyreLab/semaglutide-spread/actions/workflows/ci.yml)
+
 How semaglutide (Ozempic) spread through prescribers in the US and the UK, tracked like an epidemic.
 
 > **Status:** work in progress. See the [milestones](https://github.com/MyreLab/semaglutide-spread/milestones).
@@ -27,7 +29,7 @@ git clone https://github.com/MyreLab/semaglutide-spread.git
 cd semaglutide-spread
 uv sync                      # create the environment from uv.lock
 uv run pre-commit install    # turn on the checks that run on every commit
-uv run pytest                # run the tests
+uv run pytest                # run the tests, including a dbt build on made-up sample data
 ```
 
 Download the data:
@@ -45,6 +47,8 @@ uv run build-warehouse       # dbt build: ~3 minutes, writes data/warehouse.duck
 ```
 
 The Part D download is about 33 GB of CSVs from data.cms.gov, one file at a time, and stores them as about 4.6 GB of Parquet in `data/raw/`. Allow about 10 GB of free disk space while it runs. Re-running only fetches years that are new or that CMS has re-published.
+
+Every pull request runs the same checks and tests on GitHub Actions; the dbt models are tested end to end on a small made-up dataset (`tests/sample_data.py`) with known answers.
 
 Problems found in the source data, and how they are handled, are documented in [docs/data-notes.md](docs/data-notes.md).
 
