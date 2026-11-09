@@ -16,6 +16,7 @@ dependencies = [
 [project.scripts]
 partd-download = "semaglutide_spread.sources.partd:main"
 census-download = "semaglutide_spread.sources.census:main"
+geocode-addresses = "semaglutide_spread.sources.geocoder:main"
 
 [dependency-groups]
 dev = [

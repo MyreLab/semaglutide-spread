@@ -58,7 +58,35 @@ CMS gives a 5-digit ZIP code. The Census Bureau's ZIP Code Tabulation Areas (ZCT
 | 14642 | Rochester, NY | 10,759 |
 | 94143 | San Francisco, CA | 10,124 |
 
-Checked whether this biases the adoption map: in 2024, 1.4% of semaglutide prescribers are unmatched (1.3% of 2018's early adopters), against 3.2% of all prescribers. Endocrinologists are more affected (5.0%). **Plan:** geocode the 14,516 distinct unmatched addresses with the Census Geocoder; prescribers outside the US (e.g. Canada, Germany, Japan; 511 rows have no ZIP) are left off the map.
+Checked whether this biases the adoption map: in 2024, 1.4% of semaglutide prescribers are unmatched (1.3% of 2018's early adopters), against 3.2% of all prescribers. Endocrinologists are more affected (5.0%).
+
+### Geocoding the rest
+The 20,716 distinct addresses behind those prescriber-years (in the 50 states, DC and the territories) were sent to the Census Bureau's batch geocoder. Military mail (APO/FPO/DPO) and foreign addresses were not: they have no US street location.
+
+| Result | Addresses |
+|---|---|
+| Matched on street line 1 | 11,271 |
+| Matched on street line 2, after line 1 failed | 1,532 |
+| Two equally good candidates ("Tie"), so no location | 592 |
+| No match | 7,321 |
+
+Line 2 helps because many records put a department or building in line 1 and the street in line 2 (e.g. "Kent State University Health Services" / "Eastway Drive"). Addresses that fail are mostly not street addresses: "Department Of Psychiatry Child Psychiatry", "988480 Nebraska Medical Ctr", PO boxes.
+
+Placement of all 9.12 million prescriber-years after geocoding:
+
+| Method | Share |
+|---|---|
+| ZCTA centre point | 96.83% |
+| Geocoded street address | 2.14% |
+| Not placed (geocoding failed) | 1.01% |
+| Not attempted (military mail, foreign, no ZIP) | 0.03% |
+
+Among semaglutide prescribers, 0.46% are not placed in 2024 and 0.66% in 2018. The failures concentrate in a few medical-centre ZIP codes (37232 Nashville, 03756 Lebanon NH, 27157 Winston-Salem, 22908 Charlottesville, 68198 Omaha). **Plan:** a fallback in the prescriber location model: first the median of successfully geocoded addresses in the same ZIP code, then the centre of the ZCTAs sharing the ZIP code's first three digits (99.8% of failures have one).
+
+Of the geocoded matches, 58% are "Non_Exact" (the geocoder adjusted the address, for example dropping a suite number or correcting the ZIP code). For a national map, a street-level match of either kind is more precise than a ZIP-area centre point.
+
+### State code and state name disagree
+In 3,155 prescriber-years (0.03%), CMS's state FIPS code and state abbreviation point to different states. Examples: "Houston, TN" with Texas's code and a Houston, Texas ZIP code (77079); "Fort Campbell, KY" with Tennessee's code (Fort Campbell straddles the border). Location is taken from the ZIP code or street address, not from either state field, so this does not move dots on the map; state-level summaries will use the state of the assigned location.
 
 ### Formatting quirks
 - The 2020 ZCTA gazetteer pads every line and its last column name with trailing spaces (`INTPTLONG` followed by over 100 spaces).
