@@ -187,3 +187,32 @@ models:
     columns:
       - name: practice_code
         data_tests: [unique, not_null]
+
+  - name: stg_ni__diabetes_items
+    description: >
+      Northern Ireland: one row per practice x substance x month (and product, for the target
+      drug), BNF 6.1.1 and 6.1.2.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [month, practice_code, substance, target_presentation]
+    columns:
+      - name: target_brand
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [Ozempic, Rybelsus, Wegovy, Generic name]
+
+  - name: stg_ni__practices
+    description: "Northern Ireland: one row per practice x month, with total items."
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [month, practice_code]
+
+  - name: stg_ni__register
+    description: "Northern Ireland's GP practice reference files: one row per practice x release."
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [release_month, practice_code]
