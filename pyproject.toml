@@ -13,6 +13,7 @@ dependencies = [
     "dbt-duckdb>=1.11.1",
     "duckdb>=2.0.0",
     "httpx>=0.28.1",
+    "matplotlib>=3.11.2",
     "numpy>=2.5.4",
     "pillow>=13.0.0",
 ]
@@ -23,6 +24,7 @@ census-download = "semaglutide_spread.sources.census:main"
 geocode-addresses = "semaglutide_spread.sources.geocoder:main"
 build-warehouse = "semaglutide_spread.warehouse:main"
 night-lights = "semaglutide_spread.viz.night_lights:main"
+adoption-curve = "semaglutide_spread.viz.adoption_curve:main"
 
 [dependency-groups]
 dev = [
