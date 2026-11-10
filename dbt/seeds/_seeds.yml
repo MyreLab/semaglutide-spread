@@ -48,3 +48,14 @@ seeds:
                   - Pharmacist
                   - Other prescriber
                   - Organization or unknown
+
+  - name: scottish_health_boards
+    description: >
+      Scotland's NHS health boards, by code. Copied from Public Health Scotland's "Health Board
+      2014 - Health Board 2019" geography codes (opendata.nhs.scot). Four boards got new codes
+      in 2018-2019 when their boundaries were adjusted; both codes are listed, with dates.
+    columns:
+      - name: health_board_code
+        data_tests: [unique, not_null]
+      - name: health_board_name
+        data_tests: [not_null]

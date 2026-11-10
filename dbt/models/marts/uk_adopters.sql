@@ -1,8 +1,8 @@
 -- The UK adopters (the numerator): one row per GP practice that ever prescribed the target
 -- drug, with two adoption dates:
 --
---   adoption_month          the first month with 1+ item (England's own, finest measure;
---                           used for the maps)
+--   adoption_month          the first month with 1+ item (the UK data's own, finest
+--                           measure; used for the maps)
 --   matched_adoption_month  the first month in which the past 12 months add up to 11+
 --                           items: close to the US rule (11+ claims in a calendar year), for
 --                           comparing countries. Null if the practice never reached it.
@@ -47,8 +47,9 @@ select
     p.latitude,
     p.longitude,
     p.region,
-    p.icb_code,
-    p.icb_name,
+    p.nhs_area_code,
+    p.nhs_area_name,
+    p.list_size,
     p.local_authority_code,
     p.rural_urban_2021
 from first_months as f

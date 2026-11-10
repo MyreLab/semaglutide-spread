@@ -50,6 +50,21 @@ sources:
       - name: practices
         description: One row per practice x month, with name, address, postcode and total items.
 
+  - name: phs
+    description: >
+      Public Health Scotland open data, downloaded by `phs-download`: monthly prescribing by
+      GP practice (diabetes drugs by practice and chemical substance, and every practice
+      code's total items), by paid month, and the quarterly GP practice register.
+    meta:
+      external_location: "read_parquet('{{ env_var('SEMAGLUTIDE_DATA_DIR', '../data') }}/raw/phs_{name}/*/data.parquet', hive_partitioning = true)"
+    tables:
+      - name: diabetes
+        description: One row per practice code x BNF chemical substance x paid month (x presentation, for the target drug).
+      - name: practices
+        description: One row per practice code x paid month, with total items of all drugs.
+      - name: register
+        description: One row per GP practice x quarter, with name, address, postcode, list size and health board.
+
   - name: postcodes_io
     description: UK postcode lookups from postcodes.io (ONS Postcode Directory).
     tables:
