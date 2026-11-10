@@ -91,7 +91,7 @@ flowchart LR
 - **dbt + DuckDB** for every transformation, as tested SQL models, from raw files to the analysis tables.
 - **Quality checks:** data tests on the full data (uniqueness, completeness, value ranges, and that counts reconcile between layers), and an end-to-end test that builds the whole warehouse on a small made-up dataset with known answers.
 - **GitHub Actions** runs formatting, lint and all tests on every pull request; `main` only changes through pull requests that pass.
-- Built with Claude (Anthropic's AI) as a coding assistant. I set the questions and methods, made the analytical decisions, and reviewed and merged every pull request; tests and CI check every change.
+- Built with Claude as a coding assistant. I set the questions and methods, made the analytical decisions, and reviewed and merged every pull request; tests and CI check every change.
 
 ## Run it yourself
 
@@ -142,7 +142,7 @@ data/                     downloaded and built data (not committed; see data/REA
 
 ## Author
 
-Myrela Bauman, epidemiologist turned data engineer. [GitHub](https://github.com/MyreLab)
+Myrela Bauman: epidemiologist, data engineer. [GitHub](https://github.com/MyreLab)
 
 ## License
 
