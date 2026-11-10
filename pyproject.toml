@@ -22,6 +22,7 @@ dependencies = [
 partd-download = "semaglutide_spread.sources.partd:main"
 census-download = "semaglutide_spread.sources.census:main"
 geocode-addresses = "semaglutide_spread.sources.geocoder:main"
+epd-download = "semaglutide_spread.sources.epd:main"
 build-warehouse = "semaglutide_spread.warehouse:main"
 night-lights = "semaglutide_spread.viz.night_lights:main"
 adoption-curve = "semaglutide_spread.viz.adoption_curve:main"

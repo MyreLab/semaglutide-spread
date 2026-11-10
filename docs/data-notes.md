@@ -171,3 +171,33 @@ In 3,155 prescriber-years (0.03%), CMS's state FIPS code and state abbreviation 
 - The ZCTA-to-county relationship file is pipe-separated and starts with an invisible byte-order mark.
 - 903 of its 47,863 rows are parts of counties that lie in no ZCTA (blank ZCTA columns).
 - 10,186 ZCTAs overlap more than one county. **Decision (to confirm):** assign each ZCTA to the county containing most of its land area.
+
+## English Prescribing Dataset (NHS Business Services Authority)
+
+### Asking the portal instead of downloading the files
+Each month of the English Prescribing Dataset is ~17 million rows (~7 GB of CSV). The NHSBSA portal can run SQL on its side, so the downloader asks only for diabetes drugs (BNF 6.1.1 insulins and 6.1.2 antidiabetic drugs), already added up by practice and drug, plus each practice's address and total items. January 2018 to August 2026 is 104 months, 17.7 million diabetes rows and 502 million diabetes items, out of 10.2 billion items of all drugs.
+
+### Results come in pages, and must add up
+The portal returns at most 32,000 rows per request, so each month comes in about six pages, in a fixed order. A separate one-row query gives the month's total items, and the pages must match it exactly, or the download stops.
+
+### Two datasets, and the columns changed meaning
+NHSBSA retired the original dataset (January 2014 to June 2025) and replaced it with "EPD with SNOMED code" (November 2020 onwards). The downloader takes each month from the newer dataset when it has it: 34 months come from the retired dataset and 70 from the new one.
+
+From March 2025, the column `BNF_CHEMICAL_SUBSTANCE` holds the drug's *name*; before, it held the drug's *code* (the name was in `CHEMICAL_SUBSTANCE_BNF_DESCR`). Reading the wrong one would silently produce zero diabetes rows. The downloader checks each month's columns and picks the matching layout, and stops on any layout it doesn't know.
+
+In some months the costs are stored as text rather than numbers, so every value is converted before it is added up.
+
+### NHS areas were renamed and redrawn
+Older months give each practice's STP (sustainability and transformation partnership); newer ones its ICB (integrated care board), which replaced STPs in July 2022. Areas are therefore not taken from the prescribing data: every practice gets its area from its postcode, the same way for every month.
+
+### "Unidentified doctors"
+Prescriptions that couldn't be traced to a practice are under the code "-" or codes ending in "998", named "UNIDENTIFIED DOCTORS": 4.8 million items (0.05%). They are left out.
+
+### Nothing is suppressed
+Unlike Part D, England publishes every item, even a single prescription, so adoption can be dated to the month. The first semaglutide items are in December 2018 (2 items).
+
+### All brands share one code; many prescriptions don't name a brand
+Ozempic, Rybelsus and Wegovy are all BNF chemical substance 0601023AW. Many prescriptions are written by generic name ("Semaglutide 9mg tablets"), so the brand isn't known: about 30% of England's semaglutide items. The product name is kept for semaglutide rows so brands can be split where they are known.
+
+### Two adoption dates
+Because single items are published, England (and Scotland and Northern Ireland) get two adoption dates: the first month with any item, used for maps, and the first month whose past 12 months add up to 11 or more items, close to the US rule, used to compare countries. The first is always earlier: by December 2019, 57% of English GP practices had prescribed semaglutide at least once, but only 25% had reached 11 items in 12 months.
