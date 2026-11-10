@@ -108,3 +108,13 @@ def test_night_lights_gif_from_the_built_warehouse(built, tmp_path):
     with Image.open(gif) as image:
         assert image.n_frames == 6  # 3 years x 2 frames
     assert png.name == "us_night_lights_2020.png"
+
+
+def test_adoption_curve_chart_from_the_built_warehouse(built, tmp_path):
+    from semaglutide_spread.viz import adoption_curve
+
+    paths = adoption_curve.render(built, out_dir=tmp_path)
+    assert sorted(p.name for p in paths) == [
+        "us_adoption_curve_dark.png",
+        "us_adoption_curve_light.png",
+    ]
