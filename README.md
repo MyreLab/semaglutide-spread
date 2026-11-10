@@ -46,6 +46,12 @@ Build the warehouse (types, tests, and later the analysis tables):
 uv run build-warehouse       # dbt build: ~3 minutes, writes data/warehouse.duckdb
 ```
 
+Draw the maps:
+
+```bash
+uv run night-lights          # docs/images/us_night_lights.gif and a still of the last year (~20 s)
+```
+
 The Part D download is about 33 GB of CSVs from data.cms.gov, one file at a time, and stores them as about 4.6 GB of Parquet in `data/raw/`. Allow about 10 GB of free disk space while it runs. Re-running only fetches years that are new or that CMS has re-published.
 
 Every pull request runs the same checks and tests on GitHub Actions; the dbt models are tested end to end on a small made-up dataset (`tests/sample_data.py`) with known answers.
@@ -58,7 +64,7 @@ Problems found in the source data, and how they are handled, are documented in [
 src/semaglutide_spread/   Python code: downloads, geocoding, maps, animations
 dbt/                      SQL models that clean and combine the data, with data tests
 tests/                    automated tests
-docs/                     notes on the data
+docs/                     notes on the data, and the images shown in this README
 data/                     downloaded and built data (not committed; see data/README.md)
 ```
 
