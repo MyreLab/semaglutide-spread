@@ -28,6 +28,8 @@ vars:
   # The drug whose spread is tracked, exactly as Part D writes its generic name. Changing it
   # (e.g. to "Tirzepatide") re-runs the whole analysis for another drug.
   target_generic_name: Semaglutide
+  # The same drug in the UK's British National Formulary (BNF chemical substance code).
+  target_bnf_chemical_code: "0601023AW"
 
 seeds:
   semaglutide_spread:

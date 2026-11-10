@@ -8,7 +8,7 @@ chart with two y-axes would invite false comparisons):
 Each is drawn twice, for GitHub's light and dark themes; the README shows the one that matches
 the reader's theme.
 
-Inputs:  data/warehouse.duckdb (table `rpt_adoption_curve`)
+Inputs:  data/warehouse.duckdb (table `rpt_us_adoption_curve`)
 Outputs: docs/images/us_adoption_curve_light.png and docs/images/us_adoption_curve_dark.png
 
 Usage:
@@ -58,7 +58,7 @@ class Curve:
 
 def load(con: duckdb.DuckDBPyConnection) -> Curve:
     rows = con.execute(
-        "select year, new_adopters, prevalence_pct from rpt_adoption_curve order by year"
+        "select year, new_adopters, prevalence_pct from rpt_us_adoption_curve order by year"
     ).fetchall()
     return Curve([r[0] for r in rows], [r[1] for r in rows], [float(r[2]) for r in rows])
 

@@ -6,14 +6,14 @@
 -- least one brand". Specialty and location are taken from the adoption year: prescribers move
 -- and change specialty, and the adoption year is when the "infection" happened.
 --
--- Adopters are drawn from population_at_risk, so the numerator is a subset of the denominator
+-- Adopters are drawn from us_population_at_risk, so the numerator is a subset of the denominator
 -- by construction (a test checks it anyway).
 
 with first_year as (
     select
         npi,
         min(year) as adoption_year
-    from {{ ref('population_at_risk') }}
+    from {{ ref('us_population_at_risk') }}
     where prescribed_target_drug
     group by npi
 )
@@ -34,5 +34,5 @@ select
     p.longitude,
     p.county_fips
 from first_year as f
-inner join {{ ref('population_at_risk') }} as p
+inner join {{ ref('us_population_at_risk') }} as p
     on f.npi = p.npi and f.adoption_year = p.year

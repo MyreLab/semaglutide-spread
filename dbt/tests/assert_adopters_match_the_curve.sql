@@ -2,12 +2,12 @@
 -- new adopters than susceptible prescribers.
 
 select 'total' as check_name, year
-from {{ ref('rpt_adoption_curve') }}
-where year = (select max(year) from {{ ref('rpt_adoption_curve') }})
-    and cumulative_adopters != (select count(*) from {{ ref('adopters') }})
+from {{ ref('rpt_us_adoption_curve') }}
+where year = (select max(year) from {{ ref('rpt_us_adoption_curve') }})
+    and cumulative_adopters != (select count(*) from {{ ref('us_adopters') }})
 
 union all
 
 select 'new_adopters_above_susceptible' as check_name, year
-from {{ ref('rpt_adoption_curve') }}
+from {{ ref('rpt_us_adoption_curve') }}
 where new_adopters > susceptible

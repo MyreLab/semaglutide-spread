@@ -36,7 +36,7 @@ def query(con, sql):
 
 
 def test_adopters_and_their_adoption_year(built):
-    assert query(built, "select npi, adoption_year from adopters order by npi") == [
+    assert query(built, "select npi, adoption_year from us_adopters order by npi") == [
         ("0000000001", 2018),
         ("0000000002", 2019),
         ("0000000003", 2020),
@@ -49,7 +49,7 @@ def test_specialty_and_place_come_from_the_adoption_year(built):
     # B was an internist in Oakland in 2018 and a family doctor in El Cerrito when adopting.
     row = query(
         built,
-        "select specialty, county_fips, adoption_brands from adopters where npi = '0000000002'",
+        "select specialty, county_fips, adoption_brands from us_adopters where npi = '0000000002'",
     )
     assert row == [("Family Practice", "06013", "Ozempic, Rybelsus")]
 
@@ -87,7 +87,7 @@ def test_adoption_curve(built):
     rows = query(
         built,
         "select year, at_risk, susceptible, new_adopters, adopted_at_risk, cumulative_adopters, "
-        "all_prescribers from rpt_adoption_curve order by year",
+        "all_prescribers from rpt_us_adoption_curve order by year",
     )
     assert rows == [
         # 150 background + A, B, C + Z;  +50 non-diabetes prescribers in all_prescribers
@@ -117,4 +117,35 @@ def test_adoption_curve_chart_from_the_built_warehouse(built, tmp_path):
     assert sorted(p.name for p in paths) == [
         "us_adoption_curve_dark.png",
         "us_adoption_curve_light.png",
+    ]
+
+
+def test_england_adopters_and_both_adoption_months(built):
+    rows = query(
+        built,
+        "select practice_code, adoption_month::varchar, matched_adoption_month::varchar, "
+        "adoption_brands, postcode_status from uk_adopters where nation = 'England' order by 1",
+    )
+    assert rows == [
+        ("A81001", "2019-02-01", "2019-05-01", "Ozempic", "current"),
+        ("B82002", "2019-04-01", None, "Rybelsus", "current"),
+        ("Y01008", "2019-06-01", None, "Generic name", "terminated"),
+    ]
+
+
+def test_england_adoption_curve(built):
+    rows = query(
+        built,
+        "select month::varchar, at_risk, susceptible, new_adopters, adopted_at_risk, "
+        "matched_new_adopters, matched_adopted_at_risk from rpt_uk_adoption_curve "
+        "where nation = 'England' order by 1",
+    )
+    assert rows == [
+        # A, B, Y and D at risk; C prescribes no diabetes drugs; unidentified left out
+        ("2019-01-01", 4, 4, 0, 0, 0, 0),
+        ("2019-02-01", 4, 4, 1, 1, 0, 0),  # A adopts
+        ("2019-03-01", 4, 3, 0, 1, 0, 0),
+        ("2019-04-01", 3, 2, 1, 2, 0, 0),  # D has closed; B adopts
+        ("2019-05-01", 3, 1, 0, 2, 1, 1),  # A's past 12 months reach 11 items
+        ("2019-06-01", 3, 1, 1, 3, 0, 1),  # Y adopts
     ]

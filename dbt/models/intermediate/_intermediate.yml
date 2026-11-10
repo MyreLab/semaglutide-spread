@@ -55,3 +55,29 @@ models:
         data_tests: [not_null]
       - name: location_method
         data_tests: [not_null]
+
+  - name: int_epd_practice_months
+    description: >
+      England: one row per prescribing organisation x month (unidentified prescriptions left
+      out), with location from the postcode and items of all drugs, glucose-lowering drugs and
+      the target drug.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [month, practice_code]
+    columns:
+      - name: postcode_status
+        description: current, terminated, not_found, or not_looked_up (run postcode-lookup).
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [current, terminated, not_found, not_looked_up]
+
+  - name: int_uk_practice_months
+    description: >
+      One row per UK GP practice x month, every nation stacked with the same columns. Practice
+      codes are unique only within a nation.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [nation, practice_code, month]
