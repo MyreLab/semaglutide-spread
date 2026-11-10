@@ -55,7 +55,7 @@ LON_RANGE = (-125.0, -66.0)
 PARALLELS = (29.5, 45.5)
 ORIGIN = (23.0, -96.0)
 
-BACKGROUND = np.array([10, 22, 50], dtype=np.float32)  # navy
+BACKGROUND = np.array([6, 13, 32], dtype=np.float32)  # dark navy
 COOL = np.array([32, 50, 92], dtype=np.float32)  # population at risk: faint blue
 WARM = np.array([255, 176, 70], dtype=np.float32)  # adopters: amber
 HOT = np.array([255, 248, 225], dtype=np.float32)  # dense adopters / flashes: near-white
