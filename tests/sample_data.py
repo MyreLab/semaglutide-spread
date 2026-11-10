@@ -34,6 +34,8 @@ England, January to June 2019, by prescribing organisation (code) and month:
     C83003  prescribes no diabetes drugs (not at risk); its postcode is unknown
     D84004  metformin in January to March, then closes
     -       "unidentified doctors": 2 Ozempic items in March, left out of everything
+    Y03127  a community diabetes team (not a GP practice in the NHS register); Ozempic in
+            January, left out of the UK tables
 
 Scotland, same months:
 
@@ -202,6 +204,11 @@ ENGLAND = {
     ),
     "C83003": ("Skin Clinic", "ZZ9 9ZZ", {m: [] for m in ENGLAND_MONTHS}),
     "D84004": ("Closing Practice", "LS1 1AA", {m: [METFORMIN] for m in ENGLAND_MONTHS[:3]}),
+    "Y03127": (
+        "Diabetes Intermediate Care Team",
+        "LS1 1AA",
+        {"2019-01": [("0601023AW", "Semaglutide", "Ozempic 1mg/0.74ml inj", 5)]},
+    ),
     "-": (
         "UNIDENTIFIED DOCTORS",
         "-",
@@ -281,6 +288,12 @@ def _write_england(raw: Path) -> None:
         _write(raw / "epd_diabetes" / folder / "data.parquet",
                ("practice_code", "bnf_chemical_code", "bnf_chemical_name", "target_presentation",
                 "items", "total_quantity", "nic", "actual_cost"), diabetes)  # fmt: skip
+    _write(
+        raw / "ods_gp_practices" / "data.parquet",
+        ("OrgId", "Name", "Status", "PostCode", "LastChangeDate"),
+        [(code, name, "Active", pc, "2024-01-01") for code, (name, pc, _) in ENGLAND.items()
+         if code not in ("-", "Y03127")],
+    )  # fmt: skip
     _write(
         raw / "postcodes" / "data.parquet",
         ("postcode", "status", "latitude", "longitude", "country", "region", "icb_code",

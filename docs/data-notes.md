@@ -230,3 +230,13 @@ The Scottish Medicines Consortium accepted semaglutide (Ozempic) for restricted 
 
 ### Rybelsus is Scotland's most prescribed form
 Of all semaglutide items from 2019 to mid-2026, 385,000 were Rybelsus tablets, 310,000 Ozempic injections, 10,000 Wegovy, and 28,000 prescribed by generic name. In England, Ozempic leads.
+
+## NHS Organisation Data Service (England's GP practices)
+
+### England's data list every prescribing organisation, not only GP practices
+The English Prescribing Dataset has a row for every "prescribing cost centre": GP practices, but also walk-in centres, out-of-hours services, prisons, community diabetes teams and groups of nurse prescribers. Their codes can't be told apart reliably: new GP practices get codes starting with "Y", like many of the other services.
+
+**Decision:** keep only codes that the NHS Organisation Data Service lists as GP practices (role RO76), open or closed: 8,256 codes, 6,655 of them still open. What's left out is 0.13% of England's diabetes items, mostly from community diabetes teams and non-medical prescribers.
+
+### The API rejects "Offset=0"
+The ODS API counts results from 0 but returns an error for `Offset=0`; the first page is requested without an offset. A small thing, but the kind that makes a pipeline fail on its first run.

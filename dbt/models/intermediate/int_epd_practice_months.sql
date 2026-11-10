@@ -1,6 +1,6 @@
 -- One row per English prescribing organisation x month (unidentified prescriptions left out):
--- where it is, and how much it prescribed of all drugs, of glucose-lowering drugs and of the
--- target drug. The starting point for England's population at risk and adopters.
+-- whether it is a GP practice, where it is, and how much it prescribed of all drugs, of
+-- glucose-lowering drugs and of the target drug. Only GP practices go on to the UK tables.
 
 with diabetes as (
     select
@@ -22,6 +22,8 @@ select
     p.practice_code,
     p.practice_name,
     p.postcode,
+    p.practice_code in (select practice_code from {{ ref('stg_ods__gp_practices') }})
+        as is_gp_practice,
     coalesce(l.lookup_status, 'not_looked_up') as postcode_status,
     l.latitude,
     l.longitude,

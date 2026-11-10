@@ -180,3 +180,10 @@ models:
               arguments:
                 to: ref('scottish_health_boards')
                 field: health_board_code
+
+  - name: stg_ods__gp_practices
+    description: >
+      Prescribing cost centres that ODS lists as GP practices (role RO76), open or closed.
+    columns:
+      - name: practice_code
+        data_tests: [unique, not_null]
