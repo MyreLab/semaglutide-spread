@@ -1,7 +1,7 @@
 [project]
 name = "semaglutide-spread"
 version = "0.1.0"
-description = "How semaglutide (Ozempic) spread through prescribers in the US and the UK, tracked like an epidemic."
+description = "How semaglutide (Ozempic, Rybelsus, Wegovy) spread through prescribers in the US and the UK, tracked like an epidemic."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]

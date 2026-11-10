@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/MyreLab/semaglutide-spread/actions/workflows/ci.yml/badge.svg)](https://github.com/MyreLab/semaglutide-spread/actions/workflows/ci.yml)
 
-How semaglutide (Ozempic) spread through prescribers in the US and the UK, tracked like an epidemic.
+How semaglutide (Ozempic, Rybelsus, Wegovy) spread through prescribers in the US and the UK, tracked like an epidemic.
 
 ![Night-lights map: each US Medicare prescriber lights up in the year they first prescribe semaglutide, 2018 to 2024](docs/images/us_night_lights.gif)
 
