@@ -1,9 +1,10 @@
 """Animate semaglutide's spread across the US as a "night-lights" map.
 
-Each prescriber in the population at risk is a faint blue speck, so the map of US diabetes
-prescribing appears on its own, without drawn borders. When a prescriber adopts semaglutide
-their light comes on: a bright flash that settles into a steady warm glow. Places with many
-adopters glow brighter, like cities seen from space at night.
+The map starts dark. When a prescriber adopts semaglutide their light comes on: a bright flash
+that settles into a steady warm glow. Places with many adopters glow brighter, like cities seen
+from space at night. With --show-population-at-risk, every prescriber of any diabetes drug is
+also drawn as a faint blue speck (the denominator), so the country's outline is there from the
+start.
 
 Steps:
 1. Read adopters (adoption year, location) and each year's population at risk from the
@@ -24,6 +25,7 @@ Outputs: docs/images/us_night_lights.gif and docs/images/us_night_lights_<last y
 Usage:
     uv run night-lights
     uv run night-lights --width 1600 --frames-per-year 12   # bigger, smoother, larger file
+    uv run night-lights --show-population-at-risk           # add the blue denominator layer
 """
 
 from __future__ import annotations
@@ -221,19 +223,22 @@ def year_of(t: float, data: MapData) -> int:
     return min(int(t - 1e-9), data.last_year)
 
 
-def render_frame(data: MapData, grid: PixelGrid, t: float) -> np.ndarray:
+def render_frame(
+    data: MapData, grid: PixelGrid, t: float, show_at_risk: bool = False
+) -> np.ndarray:
     """One RGB frame (uint8) at time t (in years)."""
     shape = (grid.height, grid.width)
     year = year_of(t, data)
 
-    rx, ry = data.at_risk[year]
-    at_risk = accumulate(rx, ry, np.ones_like(rx), shape)
-    at_risk = tone(glow(at_risk, 1) * 3, 0.2)
+    at_risk = np.zeros(shape)
+    if show_at_risk:
+        rx, ry = data.at_risk[year]
+        at_risk = tone(glow(accumulate(rx, ry, np.ones_like(rx), shape), 1) * 3, 0.2)
 
     weights = light_curve(t - data.adopter_time)
     lit = weights > 0
     adopters = accumulate(data.adopter_x[lit], data.adopter_y[lit], weights[lit], shape)
-    core = tone(glow(adopters, 1) * 3, 0.16)
+    core = tone(glow(adopters, 1) * 3, 0.3)
     halo = tone(glow(adopters, 4) * 3, 0.06)
 
     warm = np.clip(0.8 * core + 0.35 * halo, 0, 1)[..., None]
@@ -318,6 +323,7 @@ def render(
     frames_per_year: int = 8,
     frame_ms: int = 90,
     hold_ms: int = 4000,
+    show_at_risk: bool = False,
 ) -> tuple[Path, Path]:
     """Draw every frame from the warehouse behind `con`; save the GIF and the final PNG."""
     grid = PixelGrid(width, margin=int(20 * width / 960), top=int(70 * width / 960))
@@ -327,7 +333,7 @@ def render(
     frames = []
     for t in frame_times(data.first_year, data.last_year, frames_per_year):
         adopted = int((data.adopter_time <= t).sum())
-        frames.append(annotate(render_frame(data, grid, t), data, t, adopted))
+        frames.append(annotate(render_frame(data, grid, t, show_at_risk), data, t, adopted))
 
     out_dir.mkdir(parents=True, exist_ok=True)
     png_path = out_dir / f"us_night_lights_{data.last_year}.png"
@@ -350,10 +356,20 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--width", type=int, default=960, help="image width in pixels")
     parser.add_argument("--frames-per-year", type=int, default=8)
+    parser.add_argument(
+        "--show-population-at-risk",
+        action="store_true",
+        help="also draw every diabetes-drug prescriber as a faint blue speck",
+    )
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     with duckdb.connect(str(WAREHOUSE_PATH), read_only=True) as con:
-        render(con, width=args.width, frames_per_year=args.frames_per_year)
+        render(
+            con,
+            width=args.width,
+            frames_per_year=args.frames_per_year,
+            show_at_risk=args.show_population_at_risk,
+        )
     return 0
 
 
