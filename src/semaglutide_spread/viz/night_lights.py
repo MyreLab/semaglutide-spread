@@ -24,7 +24,7 @@ Outputs: docs/images/us_night_lights.gif and docs/images/us_night_lights_<last y
 
 Usage:
     uv run night-lights
-    uv run night-lights --width 1600 --frames-per-year 12   # bigger, smoother, larger file
+    uv run night-lights --width 1600 --frames-per-year 16   # bigger, smoother, larger file
     uv run night-lights --show-population-at-risk           # add the blue denominator layer
 """
 
@@ -55,7 +55,7 @@ LON_RANGE = (-125.0, -66.0)
 PARALLELS = (29.5, 45.5)
 ORIGIN = (23.0, -96.0)
 
-BACKGROUND = np.array([4, 6, 14], dtype=np.float32)  # near-black navy
+BACKGROUND = np.array([10, 22, 50], dtype=np.float32)  # navy
 COOL = np.array([32, 50, 92], dtype=np.float32)  # population at risk: faint blue
 WARM = np.array([255, 176, 70], dtype=np.float32)  # adopters: amber
 HOT = np.array([255, 248, 225], dtype=np.float32)  # dense adopters / flashes: near-white
@@ -320,8 +320,8 @@ def render(
     con: duckdb.DuckDBPyConnection,
     out_dir: Path = IMAGES_DIR,
     width: int = 960,
-    frames_per_year: int = 8,
-    frame_ms: int = 90,
+    frames_per_year: int = 12,
+    frame_ms: int = 160,
     hold_ms: int = 4000,
     show_at_risk: bool = False,
 ) -> tuple[Path, Path]:
@@ -355,7 +355,7 @@ def render(
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--width", type=int, default=960, help="image width in pixels")
-    parser.add_argument("--frames-per-year", type=int, default=8)
+    parser.add_argument("--frames-per-year", type=int, default=12)
     parser.add_argument(
         "--show-population-at-risk",
         action="store_true",
