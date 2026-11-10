@@ -320,8 +320,8 @@ def render(
     con: duckdb.DuckDBPyConnection,
     out_dir: Path = IMAGES_DIR,
     width: int = 960,
-    frames_per_year: int = 12,
-    frame_ms: int = 160,
+    frames_per_year: int = 10,
+    frame_ms: int = 120,
     hold_ms: int = 4000,
     show_at_risk: bool = False,
 ) -> tuple[Path, Path]:
@@ -355,7 +355,7 @@ def render(
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--width", type=int, default=960, help="image width in pixels")
-    parser.add_argument("--frames-per-year", type=int, default=12)
+    parser.add_argument("--frames-per-year", type=int, default=10)
     parser.add_argument(
         "--show-population-at-risk",
         action="store_true",
