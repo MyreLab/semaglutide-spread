@@ -262,7 +262,7 @@ def annotate(frame: np.ndarray, data: MapData, t: float, adopted: int) -> Image.
     pad = int(24 * s)
     draw.text(
         (pad, pad),
-        "Semaglutide (Ozempic) spreading through US prescribers",
+        "Semaglutide (Ozempic, Rybelsus, Wegovy) spreading through US prescribers",
         font=font(int(22 * s)),
         fill=TEXT,
     )
