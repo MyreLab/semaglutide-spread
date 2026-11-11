@@ -260,3 +260,20 @@ As in Scotland, there is no semaglutide in Northern Ireland until July 2019, whe
 
 ### Practice reference files
 Quarterly files give each practice's address, postcode, local commissioning group (LCG) and registered patients. The LCG is written as the text "NULL" for some practices; it's treated as missing.
+
+## GP Data Extracts (NHS Wales Shared Services Partnership)
+
+### Where the months come from
+NWSSP publishes a zip for each month (~17 MB: the month's prescribing for every Welsh GP practice, the practice address file and two BNF lookups). The page describing the extract says data are kept for "the current and two complete financial years", but the list of files at the bottom of that page goes back to April 2018. January to March 2018 were sent by NWSSP in reply to a request; they are read from a local folder (`--local-dir`), and a checksum of each zip is recorded. In all: 104 months, January 2018 to August 2026, 720 million items, of which 32.8 million are diabetes drugs. The data are published under the Open Government Licence.
+
+### Each month has its own page, and one doesn't follow the pattern
+Files are found by building each month's page address ("gp-data-extract-april-2018"). December 2025 uses the short month name instead ("gp-data-extract-dec-2025"), so both are tried. The page site answers a missing month with an ordinary web page rather than an error, so the downloader checks that a zip came back, and that the zip holds that month's file.
+
+### The text encoding changes from month to month
+Some months are UTF-8, others Latin-1, and at least one product name was converted twice ("crÃ¨me" for "crème"). Each file's encoding is checked before it is read. Product names aren't used for anything but labelling semaglutide brands, so the garbled names don't affect results.
+
+### Not every code is a GP practice
+The extract includes health trusts, out-of-hours services and other prescribers alongside GP practices. As for England, only codes that the NHS Organisation Data Service lists as GP practices are kept: 421 of 628 codes, and 99.6% of diabetes items. Some practices that closed are listed by ODS as "other prescribing cost centre" rather than GP practice (for example Parc Surgery, W95047), so a few closed practices are left out of the earliest years.
+
+### Semaglutide in Wales: early and fast
+The first Welsh items are in January 2019, a month after England's. Unlike Scotland and Northern Ireland, which started in one jump months later, Wales spread month by month like England, and faster: 86% of Welsh GP practices had prescribed it by December 2019, against 57% in England.

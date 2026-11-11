@@ -115,6 +115,7 @@ uv run epd-download          # England: diabetes drugs by GP practice and month 
 uv run ods-download          # England: which prescribing codes are GP practices (seconds)
 uv run phs-download          # Scotland: prescribing by GP practice, and the practice register (~15 minutes)
 uv run ni-download           # Northern Ireland: prescribing by GP practice, and practice lists (~30 minutes)
+uv run wales-download        # Wales: prescribing by GP practice, and practice addresses (~10 minutes)
 uv run postcode-lookup       # UK practice postcodes to locations and NHS areas (~1 minute)
 ```
 
