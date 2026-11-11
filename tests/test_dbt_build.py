@@ -169,6 +169,31 @@ def test_england_adopters_and_both_adoption_months(built):
     ]
 
 
+def test_us_prescription_share(built):
+    # 2019: 4,601 glucose-lowering claims, 65 for semaglutide (A 20, B 15 + 12, F 18). B's 12
+    # Rybelsus claims are 90-day fills, so they count 36 30-day fills: 89 of 4,625.
+    # 2020: 84 of 4,644 (A 20, B 40, C 11, D 13; F's lisinopril isn't a diabetes drug).
+    assert query(
+        built,
+        "select year, glucose_lowering_claims, target_drug_claims, glucose_lowering_30day_fills, "
+        "target_drug_30day_fills, target_share_30day_fills_pct from rpt_us_prescription_share "
+        "where year > 2018 order by year",
+    ) == [
+        (2019, 4601, 65, 4625, 89, 1.92),
+        (2020, 4644, 84, 4644, 84, 1.81),
+    ]
+
+
+def test_uk_prescription_share(built):
+    # Scotland, January to June 2019: practice 10002 has 180 metformin and 8 Ozempic items,
+    # practice 10017 150 metformin; 99996 isn't a GP practice.
+    assert query(
+        built,
+        "select months, glucose_lowering_items, target_drug_items, target_share_pct "
+        "from rpt_uk_prescription_share where nation = 'Scotland'",
+    ) == [(6, 338, 8, 2.37)]
+
+
 def test_england_adoption_curve(built):
     rows = query(
         built,
