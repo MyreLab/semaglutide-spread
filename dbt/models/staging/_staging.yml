@@ -216,3 +216,39 @@ models:
       - unique_combination_of_columns:
           arguments:
             combination_of_columns: [release_month, practice_code]
+
+  - name: stg_wales__diabetes_items
+    description: >
+      Wales: one row per practice x BNF chemical substance x month (and product, for the
+      target drug), BNF 6.1.1 and 6.1.2.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [month, practice_code, bnf_chemical_code, target_presentation]
+    columns:
+      - name: target_brand
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [Ozempic, Rybelsus, Wegovy, Generic name]
+
+  - name: stg_wales__practices
+    description: "Wales: one row per prescribing organisation x month, with total items."
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [month, practice_code]
+    columns:
+      - name: health_board_code
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('welsh_health_boards')
+                field: health_board_code
+
+  - name: stg_wales__register
+    description: "Wales: the monthly address file, one row per prescribing organisation x month."
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [month, practice_code]
