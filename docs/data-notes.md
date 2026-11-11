@@ -201,3 +201,12 @@ Ozempic, Rybelsus and Wegovy are all BNF chemical substance 0601023AW. Many pres
 
 ### Two adoption dates
 Because single items are published, England (and Scotland and Northern Ireland) get two adoption dates: the first month with any item, used for maps, and the first month whose past 12 months add up to 11 or more items, close to the US rule, used to compare countries. The first is always earlier: by December 2019, 57% of English GP practices had prescribed semaglutide at least once, but only 25% had reached 11 items in 12 months.
+
+## UK postcodes (postcodes.io)
+
+### Most practice postcodes are current; a few are retired or unknown
+Practices in all three nations are placed by their postcode, looked up on postcodes.io (built on the ONS Postcode Directory). Of 10,364 distinct practice postcodes, 10,157 are current, 194 have been retired (terminated) and 13 are not known at all.
+
+- **Retired postcodes** belong mostly to practices that closed or moved. postcodes.io keeps their location, so they are still placed on the map, but without areas (region, NHS area, rural-urban class).
+- **Unknown postcodes** (13, all in England) look like typos in the source data (e.g. a valid-looking postcode that never existed). Those practices have no location; they still count in every total, but not on maps.
+- Values that aren't postcodes at all, like "-" for unidentified prescribing, are dropped before the lookup.
