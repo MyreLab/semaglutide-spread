@@ -19,7 +19,7 @@ Steps:
    running count of adopters.
 5. Save the frames as a looping GIF, holding the last frame, plus a full-size PNG of the end.
 
-Inputs:  data/warehouse.duckdb (tables `adopters`, `population_at_risk`, `rpt_adoption_curve`)
+Inputs:  data/warehouse.duckdb (`us_adopters`, `us_population_at_risk`, `rpt_us_adoption_curve`)
 Outputs: docs/images/us_night_lights.gif and docs/images/us_night_lights_<last year>.png
 
 Usage:
@@ -141,7 +141,7 @@ def load(con: duckdb.DuckDBPyConnection, grid: PixelGrid) -> MapData:
         f"and longitude between {LON_RANGE[0]} and {LON_RANGE[1]}"
     )
     adopters = con.execute(
-        f"select npi, adoption_year, latitude, longitude from adopters where {box} order by npi"
+        f"select npi, adoption_year, latitude, longitude from us_adopters where {box} order by npi"
     ).fetchall()
     npis = [r[0] for r in adopters]
     years = np.array([r[1] for r in adopters], dtype=np.float64)
@@ -152,17 +152,19 @@ def load(con: duckdb.DuckDBPyConnection, grid: PixelGrid) -> MapData:
 
     at_risk = {}
     for (year,) in con.execute(
-        "select distinct year from population_at_risk order by 1"
+        "select distinct year from us_population_at_risk order by 1"
     ).fetchall():
         rows = con.execute(
-            f"select npi, latitude, longitude from population_at_risk where year = ? and {box}",
+            f"select npi, latitude, longitude from us_population_at_risk where year = ? and {box}",
             [year],
         ).fetchall()
         c, r = grid.to_pixels(np.array([x[1] for x in rows]), np.array([x[2] for x in rows]))
         jx, jy = jitter([x[0] for x in rows], spread=0.8)
         at_risk[year] = (c + jx, r + jy)
 
-    prevalence = dict(con.execute("select year, prevalence_pct from rpt_adoption_curve").fetchall())
+    prevalence = dict(
+        con.execute("select year, prevalence_pct from rpt_us_adoption_curve").fetchall()
+    )
     return MapData(
         adopter_x=col + dx,
         adopter_y=row + dy,

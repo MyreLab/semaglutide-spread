@@ -34,3 +34,28 @@ sources:
           written by `geocode-addresses`. One row per distinct address, matched or not.
         meta:
           external_location: "read_parquet('{{ env_var('SEMAGLUTIDE_DATA_DIR', '../data') }}/raw/census_geocoder/data.parquet')"
+
+  - name: epd
+    description: >
+      English Prescribing Dataset (NHSBSA), one folder per month, downloaded by `epd-download`
+      as query results: diabetes drugs by practice and chemical substance, and every
+      practice's address. Nothing is suppressed: single items are published.
+    meta:
+      external_location: "read_parquet('{{ env_var('SEMAGLUTIDE_DATA_DIR', '../data') }}/raw/epd_{name}/*/data.parquet', hive_partitioning = true)"
+    tables:
+      - name: diabetes
+        description: >
+          One row per practice x BNF chemical substance x month, for BNF 6.1.1 (insulins) and
+          6.1.2 (antidiabetic drugs); semaglutide rows are also split by presentation.
+      - name: practices
+        description: One row per practice x month, with name, address, postcode and total items.
+
+  - name: postcodes_io
+    description: UK postcode lookups from postcodes.io (ONS Postcode Directory).
+    tables:
+      - name: postcodes
+        description: >
+          One row per practice postcode, written by `postcode-lookup`: location and areas for
+          current postcodes, location only for terminated ones.
+        meta:
+          external_location: "read_parquet('{{ env_var('SEMAGLUTIDE_DATA_DIR', '../data') }}/raw/postcodes/data.parquet')"

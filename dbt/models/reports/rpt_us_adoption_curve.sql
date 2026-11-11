@@ -21,8 +21,8 @@ with prescriber_years as (
         p.npi is not null as at_risk,
         a.adoption_year
     from {{ ref('int_prescriber_years') }} as y
-    left join {{ ref('population_at_risk') }} as p using (year, npi)
-    left join {{ ref('adopters') }} as a using (npi)
+    left join {{ ref('us_population_at_risk') }} as p using (year, npi)
+    left join {{ ref('us_adopters') }} as a using (npi)
 ),
 
 by_year as (

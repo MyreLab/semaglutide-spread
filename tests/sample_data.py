@@ -22,6 +22,18 @@ Three years (2018-2020), ZIP areas in the East Bay, and:
     G  0000000007  an organization whose specialty CMS writes as "None"; metformin 2020
     Z  0000000099  a 2018 prescriber with one row for every drug in the glucose_lowering_drugs
                    seed except semaglutide (so the seed tests find every name in the data)
+
+England, January to June 2019, by prescribing organisation (code) and month:
+
+    A81001  Leeds; metformin every month; 3 Ozempic items a month from February
+            -> adopts 2019-02; its past 12 months reach 11 items in May -> matched 2019-05
+    B82002  York; metformin every month; one Rybelsus item in April only
+            -> adopts 2019-04; never reaches 11 items in 12 months
+    Y01008  a practice whose postcode has since been retired; metformin every month; one
+            semaglutide item prescribed by generic name in June -> adopts 2019-06
+    C83003  prescribes no diabetes drugs (not at risk); its postcode is unknown
+    D84004  metformin in January to March, then closes
+    -       "unidentified doctors": 2 Ozempic items in March, left out of everything
 """
 
 from __future__ import annotations
@@ -141,6 +153,92 @@ def _write(path: Path, columns: tuple[str, ...], rows: list[tuple]) -> None:
         )
 
 
+ENGLAND_MONTHS = [f"2019-{m:02d}" for m in range(1, 7)]
+METFORMIN = ("0601022B0", "Metformin hydrochloride", None, 20)
+# code -> (name, postcode, {month: [(chemical code, chemical name, presentation, items)]})
+ENGLAND = {
+    "A81001": (
+        "Leeds Surgery",
+        "LS1 1AA",
+        {
+            m: [METFORMIN]
+            + (
+                [("0601023AW", "Semaglutide", "Ozempic 1mg/0.74ml inj", 3)]
+                if m >= "2019-02"
+                else []
+            )
+            for m in ENGLAND_MONTHS
+        },
+    ),
+    "B82002": (
+        "York Practice",
+        "YO1 7HH",
+        {
+            m: [METFORMIN]
+            + ([("0601023AW", "Semaglutide", "Rybelsus 3mg tablets", 1)] if m == "2019-04" else [])
+            for m in ENGLAND_MONTHS
+        },
+    ),
+    "Y01008": (
+        "Bay Medical Group",
+        "TQ4 5AA",
+        {
+            m: [METFORMIN]
+            + (
+                [("0601023AW", "Semaglutide", "Semaglutide 9mg tablets", 1)]
+                if m == "2019-06"
+                else []
+            )
+            for m in ENGLAND_MONTHS
+        },
+    ),
+    "C83003": ("Skin Clinic", "ZZ9 9ZZ", {m: [] for m in ENGLAND_MONTHS}),
+    "D84004": ("Closing Practice", "LS1 1AA", {m: [METFORMIN] for m in ENGLAND_MONTHS[:3]}),
+    "-": (
+        "UNIDENTIFIED DOCTORS",
+        "-",
+        {"2019-03": [("0601023AW", "Semaglutide", "Ozempic 1mg/0.74ml inj", 2)]},
+    ),
+}
+POSTCODE_RESULTS = [
+    # postcode, status, latitude, longitude, country, region, ICB code, ICB name
+    ("LS1 1AA", "current", "53.79", "-1.54", "England", "Yorkshire", "E54000054", "West Yorks"),
+    ("YO1 7HH", "current", "53.96", "-1.08", "England", "Yorkshire", "E54000051", "Humber"),
+    ("TQ4 5AA", "terminated", "50.43", "-3.56", None, None, None, None),
+    ("ZZ9 9ZZ", "not_found", None, None, None, None, None, None),
+]  # fmt: skip
+
+
+def _write_england(raw: Path) -> None:
+    for month in ENGLAND_MONTHS:
+        practices, diabetes = [], []
+        for code, (name, postcode, months) in ENGLAND.items():
+            if month not in months:
+                continue
+            rx = months[month]
+            practices.append(
+                (code, name, "1 High St", None, None, None, postcode, 100 + sum(r[3] for r in rx))
+            )
+            diabetes += [
+                (code, chem, chem_name, pres, items, items * 28, items * 5, items * 5)
+                for chem, chem_name, pres, items in rx
+            ]
+        folder = f"year_month={month}"
+        _write(raw / "epd_practices" / folder / "data.parquet",
+               ("practice_code", "practice_name", "address_1", "address_2", "address_3",
+                "address_4", "postcode", "items"), practices)  # fmt: skip
+        _write(raw / "epd_diabetes" / folder / "data.parquet",
+               ("practice_code", "bnf_chemical_code", "bnf_chemical_name", "target_presentation",
+                "items", "total_quantity", "nic", "actual_cost"), diabetes)  # fmt: skip
+    _write(
+        raw / "postcodes" / "data.parquet",
+        ("postcode", "status", "latitude", "longitude", "country", "region", "icb_code",
+         "icb_name", "local_authority_code", "local_authority_name", "lsoa21_code",
+         "rural_urban_2021", "terminated", "looked_up_at"),
+        [(*r, None, None, None, None, None, None) for r in POSTCODE_RESULTS],
+    )  # fmt: skip
+
+
 def write_sample_raw_data(data_dir: Path) -> Path:
     """Write the sample raw data under data_dir/raw/ and return data_dir."""
     raw = data_dir / "raw"
@@ -185,4 +283,5 @@ def write_sample_raw_data(data_dir: Path) -> Path:
             for line in ["st1" if status == "Match" else None]
         ],
     )  # fmt: skip
+    _write_england(raw)
     return data_dir

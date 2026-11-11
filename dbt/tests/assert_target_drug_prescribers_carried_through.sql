@@ -11,14 +11,14 @@ with staging as (
 
 at_risk as (
     select year, count(*) as prescribers
-    from {{ ref('population_at_risk') }}
+    from {{ ref('us_population_at_risk') }}
     where prescribed_target_drug
     group by year
 ),
 
 placed as (
     select p.year, count(*) as prescribers
-    from {{ ref('population_at_risk') }} as p
+    from {{ ref('us_population_at_risk') }} as p
     inner join {{ ref('int_prescriber_years') }} as y using (year, npi)
     where p.prescribed_target_drug
     group by p.year

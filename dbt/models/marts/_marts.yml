@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: population_at_risk
+  - name: us_population_at_risk
     description: >
       The population at risk (denominator). One row per prescriber x year with 11+ Part D claims
       for at least one glucose-lowering drug (WHO ATC A10, the `included` rows of the
@@ -26,7 +26,7 @@ models:
       - name: location_method
         data_tests: [not_null]
 
-  - name: adopters
+  - name: us_adopters
     description: >
       The adopters (numerator). One row per prescriber who ever had 11+ Part D claims for the
       target drug, with the first such year (adoption year) and their specialty and location
@@ -42,3 +42,34 @@ models:
         data_tests: [not_null, {at_least: {arguments: {min_value: 11}}}]
       - name: specialty_group
         data_tests: [not_null]
+
+  - name: uk_population_at_risk
+    description: >
+      The UK population at risk (denominator): one row per GP practice x month with 1+ item of
+      a glucose-lowering drug (BNF 6.1.1 or 6.1.2), the target drug included. Keyed by
+      (nation, practice_code, month).
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [nation, practice_code, month]
+    columns:
+      - name: nation
+        data_tests: [not_null]
+      - name: glucose_lowering_items
+        data_tests: [{at_least: {arguments: {min_value: 1}}}]
+
+  - name: uk_adopters
+    description: >
+      The UK adopters (numerator): one row per GP practice that ever prescribed the target
+      drug, with the first month with 1+ item (adoption_month) and the first month whose past
+      12 months add up to 11+ items (matched_adoption_month, for comparing with the US), and
+      location in the adoption month.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [nation, practice_code]
+    columns:
+      - name: adoption_month
+        data_tests: [not_null]
+      - name: adoption_month_items
+        data_tests: [{at_least: {arguments: {min_value: 1}}}]
