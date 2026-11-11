@@ -51,6 +51,7 @@ PRACTICE_SOURCES = (
     ("epd_practices", "postcode"),
     ("phs_register", "postcode"),
     ("ni_register", "postcode"),
+    ("wales_register", "postcode"),
 )
 
 POSTCODE = re.compile(r"^([A-Z]{1,2}[0-9][A-Z0-9]?)\s*([0-9][A-Z]{2})$")
