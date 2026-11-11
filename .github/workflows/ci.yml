@@ -1,7 +1,9 @@
-# Continuous integration: runs on every pull request and every push to main.
+# Continuous integration (CI): runs on every pull request and every push to main.
+# The workflow's name is the label on the README badge
+# ("Continuous integration tests: passing").
 # It repeats what you'd run locally before merging: the pre-commit checks and the tests,
 # including a full dbt build on the sample data in tests/sample_data.py.
-name: CI
+name: Continuous integration tests
 
 on:
   pull_request:
