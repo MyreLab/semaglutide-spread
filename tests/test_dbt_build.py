@@ -149,3 +149,18 @@ def test_england_adoption_curve(built):
         ("2019-05-01", 3, 1, 0, 2, 1, 1),  # A's past 12 months reach 11 items
         ("2019-06-01", 3, 1, 1, 3, 0, 1),  # Y adopts
     ]
+
+
+def test_scotland_keeps_only_registered_gp_practices(built):
+    assert query(
+        built,
+        "select practice_code, adoption_month::varchar, matched_adoption_month, adoption_brands, "
+        "nhs_area_name, list_size from uk_adopters where nation = 'Scotland'",
+    ) == [("10002", "2019-03-01", None, "Ozempic", "NHS Tayside", 8643)]
+    rows = query(
+        built,
+        "select month::varchar, at_risk, new_adopters, adopted_at_risk from rpt_uk_adoption_curve "
+        "where nation = 'Scotland' order by 1",
+    )
+    assert [r[1] for r in rows] == [2] * 6  # 99996 is never counted
+    assert [r[2] for r in rows] == [0, 0, 1, 0, 0, 0]

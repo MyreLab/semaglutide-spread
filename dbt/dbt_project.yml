@@ -33,15 +33,25 @@ vars:
 
 seeds:
   semaglutide_spread:
-    +column_types:
-      generic_name: varchar
-      included: boolean
-      atc_group: varchar
-      drug_class: varchar
-      note: varchar
-      prescriber_type: varchar
-      specialty: varchar
-      specialty_group: varchar
+    # Each seed's column types, so dbt doesn't guess (e.g. a code with leading zeros).
+    glucose_lowering_drugs:
+      +column_types:
+        generic_name: varchar
+        included: boolean
+        atc_group: varchar
+        drug_class: varchar
+        note: varchar
+    specialty_groups:
+      +column_types:
+        prescriber_type: varchar
+        specialty: varchar
+        specialty_group: varchar
+    scottish_health_boards:
+      +column_types:
+        health_board_code: varchar
+        health_board_name: varchar
+        enacted: date
+        archived: date
 
 flags:
   send_anonymous_usage_stats: false

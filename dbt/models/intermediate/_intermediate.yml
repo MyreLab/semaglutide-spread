@@ -73,6 +73,19 @@ models:
               arguments:
                 values: [current, terminated, not_found, not_looked_up]
 
+  - name: int_phs_practice_months
+    description: >
+      Scotland: one row per GP practice (codes in the practice register) x month, with
+      register details as of that month, location from the postcode, and items.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [month, practice_code]
+    columns:
+      - name: nhs_area_name
+        description: Health board name.
+        data_tests: [not_null]
+
   - name: int_uk_practice_months
     description: >
       One row per UK GP practice x month, every nation stacked with the same columns. Practice

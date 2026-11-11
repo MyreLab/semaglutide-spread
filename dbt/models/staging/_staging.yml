@@ -142,3 +142,41 @@ models:
           - accepted_values:
               arguments:
                 values: [current, terminated, not_found]
+
+  - name: stg_phs__diabetes_items
+    description: >
+      Scotland: one row per practice code x BNF chemical substance x paid month (and
+      presentation, for the target drug), BNF 6.1.1 and 6.1.2.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [month, practice_code, bnf_chemical_code, target_presentation]
+    columns:
+      - name: items
+        description: Paid items (at least 1 in every row so far).
+      - name: target_brand
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [Ozempic, Rybelsus, Wegovy, Generic name]
+
+  - name: stg_phs__practices
+    description: "Scotland: one row per practice code x paid month, with total items."
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [month, practice_code]
+
+  - name: stg_phs__register
+    description: "Scotland's GP practice register: one row per practice x quarter."
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [quarter, practice_code]
+    columns:
+      - name: health_board_code
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('scottish_health_boards')
+                field: health_board_code

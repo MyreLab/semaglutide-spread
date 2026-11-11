@@ -34,6 +34,14 @@ England, January to June 2019, by prescribing organisation (code) and month:
     C83003  prescribes no diabetes drugs (not at risk); its postcode is unknown
     D84004  metformin in January to March, then closes
     -       "unidentified doctors": 2 Ozempic items in March, left out of everything
+
+Scotland, same months:
+
+    10002   Dundee GP practice (in the register); metformin every month; 2 Ozempic items a
+            month from March -> adopts 2019-03; only 8 items by June, so no matched date
+    10017   Crieff GP practice; metformin every month; never prescribes semaglutide
+    99996   not in the GP practice register (e.g. hospital prescribing); semaglutide in
+            January, left out because it is not a GP practice
 """
 
 from __future__ import annotations
@@ -206,7 +214,50 @@ POSTCODE_RESULTS = [
     ("YO1 7HH", "current", "53.96", "-1.08", "England", "Yorkshire", "E54000051", "Humber"),
     ("TQ4 5AA", "terminated", "50.43", "-3.56", None, None, None, None),
     ("ZZ9 9ZZ", "not_found", None, None, None, None, None, None),
+    ("DD2 5NH", "current", "56.47", "-3.03", "Scotland", None, None, None),
+    ("PH7 3SA", "current", "56.37", "-3.84", "Scotland", None, None, None),
 ]  # fmt: skip
+
+# Scotland: code -> {month: [(chemical code, presentation, items)]}
+SCOTLAND = {
+    "10002": {
+        m: [("0601022B0", None, 30)]
+        + ([("0601023AW", "OZEMPIC_INJ 0.25MG/0.19ML 1.5ML PF PEN", 2)] if m >= "2019-03" else [])
+        for m in ENGLAND_MONTHS
+    },
+    "10017": {m: [("0601022B0", None, 25)] for m in ENGLAND_MONTHS},
+    "99996": {"2019-01": [("0601023AW", "SEMAGLUTIDE_INJ 0.5MG/0.37ML 1.5ML PFPEN", 4)]},
+}
+SCOTTISH_REGISTER = [
+    ("10002", "MUIRHEAD", "8643", "Liff Road", "", "", "", "DD2 5NH", "17J", "S08000030"),
+    ("10017", "THE BLUE PRACTICE", "6685", "King St", "", "", "", "PH7 3SA", "17J", "S08000030"),
+]  # fmt: skip
+
+
+def _write_scotland(raw: Path) -> None:
+    for month in ENGLAND_MONTHS:
+        practices, diabetes = [], []
+        for code, months in SCOTLAND.items():
+            if month not in months:
+                continue
+            rx = months[month]
+            practices.append((code, 500 + sum(r[2] for r in rx)))
+            diabetes += [
+                (code, chem, pres, items, items * 28, items * 5) for chem, pres, items in rx
+            ]
+        folder = f"year_month={month}"
+        _write(
+            raw / "phs_practices" / folder / "data.parquet", ("practice_code", "items"), practices
+        )
+        _write(raw / "phs_diabetes" / folder / "data.parquet",
+               ("practice_code", "bnf_chemical_code", "target_presentation", "items",
+                "paid_quantity", "gross_ingredient_cost"), diabetes)  # fmt: skip
+    _write(
+        raw / "phs_register" / "quarter=2019-01" / "data.parquet",
+        ("practice_code", "practice_name", "list_size", "address_1", "address_2", "address_3",
+         "address_4", "postcode", "practice_type", "health_board"),
+        SCOTTISH_REGISTER,
+    )  # fmt: skip
 
 
 def _write_england(raw: Path) -> None:
@@ -284,4 +335,5 @@ def write_sample_raw_data(data_dir: Path) -> Path:
         ],
     )  # fmt: skip
     _write_england(raw)
+    _write_scotland(raw)
     return data_dir
