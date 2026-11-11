@@ -164,3 +164,17 @@ def test_scotland_keeps_only_registered_gp_practices(built):
     )
     assert [r[1] for r in rows] == [2] * 6  # 99996 is never counted
     assert [r[2] for r in rows] == [0, 0, 1, 0, 0, 0]
+
+
+def test_northern_ireland_keeps_only_listed_gp_practices(built):
+    assert query(
+        built,
+        "select practice_code, adoption_month::varchar, adoption_brands, nhs_area_name, list_size "
+        "from uk_adopters where nation = 'Northern Ireland'",
+    ) == [("1", "2019-05-01", "Generic name", "Belfast", 6783)]
+    rows = query(
+        built,
+        "select at_risk from rpt_uk_adoption_curve "
+        "where nation = 'Northern Ireland' order by month",
+    )
+    assert rows == [(2,)] * 6  # code 999 is not a GP practice

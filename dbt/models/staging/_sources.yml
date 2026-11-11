@@ -75,6 +75,21 @@ sources:
       - name: register
         description: One row per GP practice x quarter, with name, address, postcode, list size and health board.
 
+  - name: ni
+    description: >
+      Northern Ireland GP prescribing (Business Services Organisation, via OpenDataNI),
+      filtered by `ni-download`: diabetes drugs by practice and substance, every practice's
+      total items, and the GP practice reference files.
+    meta:
+      external_location: "read_parquet('{{ env_var('SEMAGLUTIDE_DATA_DIR', '../data') }}/raw/ni_{name}/*/data.parquet', hive_partitioning = true)"
+    tables:
+      - name: diabetes
+        description: One row per practice x substance x month (x product, for the target drug), BNF 6.1.1 and 6.1.2.
+      - name: practices
+        description: One row per practice x month, with total items of all drugs.
+      - name: register
+        description: One row per GP practice x reference-file release, with address, postcode, LCG and registered patients.
+
   - name: postcodes_io
     description: UK postcode lookups from postcodes.io (ONS Postcode Directory).
     tables:
