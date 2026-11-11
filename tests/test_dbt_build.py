@@ -169,6 +169,23 @@ def test_england_adopters_and_both_adoption_months(built):
     ]
 
 
+def test_comparison_chart_from_the_built_warehouse(built, tmp_path):
+    from semaglutide_spread.viz import comparison
+
+    data = comparison.load(built)
+    # US: 0 at the start, then the share at the end of each year (2018-2020: 1, 2, 3 years)
+    assert data.us_adoption.x == [0.0, 1, 2, 3]
+    # UK: the first matched adopter is A81001 in May 2019; June is one month later
+    assert data.uk_start == "May 2019"
+    assert data.uk_adoption.x == [0.0, 1 / 12, 2 / 12]
+    assert data.uk_share.x == []  # six months of sample data: no complete UK year
+    paths = comparison.render(built, out_dir=tmp_path)
+    assert sorted(p.name for p in paths) == [
+        "us_uk_comparison_dark.png",
+        "us_uk_comparison_light.png",
+    ]
+
+
 def test_us_prescription_share(built):
     # 2019: 4,601 glucose-lowering claims, 65 for semaglutide (A 20, B 15 + 12, F 18). B's 12
     # Rybelsus claims are 90-day fills, so they count 36 30-day fills: 89 of 4,625.
