@@ -132,9 +132,28 @@ def test_adoption_curve_chart_from_the_built_warehouse(built, tmp_path):
 
     paths = adoption_curve.render(built, out_dir=tmp_path)
     assert sorted(p.name for p in paths) == [
+        "uk_adoption_curve_dark.png",
+        "uk_adoption_curve_light.png",
+        "uk_nations_adoption_dark.png",
+        "uk_nations_adoption_light.png",
         "us_adoption_curve_dark.png",
         "us_adoption_curve_light.png",
     ]
+
+
+def test_uk_curve_adds_months_up_to_years(built):
+    from semaglutide_spread.viz import adoption_curve
+
+    curve = adoption_curve.load_uk(built)
+    (total,) = built.execute(
+        "select sum(matched_new_adopters) from rpt_uk_adoption_curve where month <= ?",
+        [adoption_curve.last_common_month(built)],
+    ).fetchone()
+    assert sum(curve.new_adopters) == total
+    assert all(0 <= p <= 100 for p in curve.prevalence_pct)
+    nations, uk = adoption_curve.load_nations(built)
+    assert [n.nation for n in nations] == list(adoption_curve.NATIONS)
+    assert uk.months[-1] == adoption_curve.last_common_month(built)
 
 
 def test_england_adopters_and_both_adoption_months(built):
