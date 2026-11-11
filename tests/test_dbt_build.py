@@ -110,6 +110,23 @@ def test_night_lights_gif_from_the_built_warehouse(built, tmp_path):
     assert png.name == "us_night_lights_2020.png"
 
 
+def test_uk_night_lights_gif_from_the_built_warehouse(built, tmp_path):
+    from PIL import Image
+
+    from semaglutide_spread.viz import night_lights
+
+    gif, png = night_lights.render(built, night_lights.UK, out_dir=tmp_path, width=320)
+    first, last = built.execute(
+        "select min(first), min(last) from (select min(month) as first, max(month) as last "
+        "from uk_population_at_risk group by nation)"
+    ).fetchone()
+    months = (last.year - first.year) * 12 + last.month - first.month + 1
+    with Image.open(gif) as image:
+        # the US pace, 10 frames a year, to the last month all nations have
+        assert image.n_frames == round(months * 10 / 12)
+    assert png.name == f"uk_night_lights_{last:%Y-%m}.png"
+
+
 def test_adoption_curve_chart_from_the_built_warehouse(built, tmp_path):
     from semaglutide_spread.viz import adoption_curve
 

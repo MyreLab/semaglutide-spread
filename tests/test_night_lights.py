@@ -26,10 +26,34 @@ def test_a_light_flashes_then_settles():
     assert steady == later == 1
 
 
-def test_frames_run_to_the_end_of_the_last_year():
-    times = nl.frame_times(2018, 2020, per_year=4)
+def test_uk_map_is_the_right_way_round():
+    grid = nl.PixelGrid(960, margin=20, top=70, country=nl.UK, map_width=600)
+    # Belfast, London, Lerwick (Shetland)
+    col, row = grid.to_pixels(np.array([54.60, 51.51, 60.15]), np.array([-5.93, -0.13, -1.15]))
+    assert col[0] < col[1]  # Belfast is west of London
+    assert row[2] < row[0] < row[1]  # Shetland at the top, London below Belfast
+    assert col.min() >= 20 and col.max() <= 620 and row.max() <= grid.height
+
+
+def test_frames_run_to_the_end_of_the_last_period():
+    times = nl.frame_times(2018, 2021, per_year=4)
     assert len(times) == 12
     assert times[0] == pytest.approx(2018.25) and times[-1] == pytest.approx(2021.0)
+    # UK, January 2018 to July 2026 at the US pace: 86 frames, the last one at the end
+    uk = nl.frame_times(2018, (2026 * 12 + 7) / 12, per_year=10)
+    assert len(uk) == 86 and uk[-1] == pytest.approx(2026 + 7 / 12)
+
+
+def test_periods_are_years_in_the_us_and_months_in_the_uk():
+    assert nl.period_label(2019, nl.US) == "2019"
+    assert nl.period_label(2019 * 12 + 7, nl.UK) == "Aug 2019"
+
+
+def test_nearly_everyone_is_not_everyone():
+    assert nl.format_pct(4.04) == "4.0"
+    assert nl.format_pct(57.7) == "58"
+    assert nl.format_pct(99.77) == "99.8"
+    assert nl.format_pct(100.0) == "100"
 
 
 def test_box_blur_spreads_light_without_adding_any():

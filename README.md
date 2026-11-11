@@ -26,6 +26,12 @@ Epidemiologists track how a disease moves through a population: who catches it f
 - **The spread accelerated, then may have started to slow.** Each year, a growing share of the prescribers who hadn't yet adopted did so: 5% in 2019, 15% in 2022 and 29% in 2023. In 2024 that share held at 28%, and the number of new adopters fell for the first time.
 - **Specialists went first; primary care carried the spread.** Endocrinologists were 31% of the first 1,065 adopters in 2018, and by 2024, 86% of endocrinologists in Part D prescribed semaglutide. But in 2024, 58% of the prescribers using it were primary care physicians, and a quarter were nurse practitioners, up from 165 nurse practitioners in 2018 to 43,635.
 
+## The UK (2018-2026)
+
+![Night-lights map: each UK GP practice lights up once it reaches 11+ semaglutide items in 12 months, January 2018 to July 2026](docs/images/uk_night_lights.gif)
+
+*Each light is an NHS GP practice in England, Scotland, Wales or Northern Ireland, switched on in the first month its past 12 months add up to 11+ semaglutide items, the closest match to the US rule (11+ claims in a year). Both maps run at the same pace, 1.2 seconds a year; the UK's runs longer because its data go to July 2026. The UK data are monthly, so the timing is real to the month. Brighter areas have more adopting practices, partly because they have more practices.*
+
 ## By the numbers
 
 | | |
@@ -125,7 +131,7 @@ Build the warehouse and draw the figures:
 
 ```bash
 uv run build-warehouse       # dbt build with all data tests: ~2 minutes, writes data/warehouse.duckdb
-uv run night-lights          # docs/images/us_night_lights.gif and a still of the last year (~20 s)
+uv run night-lights          # docs/images/{us,uk}_night_lights.gif and a still of each last frame (~45 s)
 uv run adoption-curve        # docs/images/us_adoption_curve_{light,dark}.png
 ```
 
