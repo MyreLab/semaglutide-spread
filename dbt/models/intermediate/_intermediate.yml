@@ -98,6 +98,19 @@ models:
           arguments:
             combination_of_columns: [month, practice_code]
 
+  - name: int_wales_practice_months
+    description: >
+      Wales: one row per GP practice (listed by the NHS Organisation Data Service) x month,
+      with name and postcode from that month's address file, health board, and items.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [month, practice_code]
+    columns:
+      - name: nhs_area_name
+        description: Health board name.
+        data_tests: [not_null]
+
   - name: int_uk_practice_months
     description: >
       One row per UK GP practice x month, every nation stacked with the same columns. Practice

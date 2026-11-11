@@ -59,3 +59,13 @@ seeds:
         data_tests: [unique, not_null]
       - name: health_board_name
         data_tests: [not_null]
+
+  - name: welsh_health_boards
+    description: >
+      Wales's seven local health boards, by code, as named in the NHS Organisation Data
+      Service. Abertawe Bro Morgannwg became Swansea Bay, and Cwm Taf became Cwm Taf
+      Morgannwg, in April 2019 when Bridgend moved between them; the codes didn't change, so
+      the current names are used throughout.
+    columns:
+      - name: health_board_code
+        data_tests: [unique, not_null]

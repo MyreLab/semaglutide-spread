@@ -1,6 +1,6 @@
 -- One row per UK GP practice x month, all nations stacked with the same columns: where the
 -- practice is, its NHS area (an integrated care board in England, a health board in
--- Scotland, a local commissioning group in Northern Ireland), and its items of all drugs, glucose-lowering drugs and the target drug.
+-- Scotland and Wales, a local commissioning group in Northern Ireland), and its items of all drugs, glucose-lowering drugs and the target drug.
 -- Practice codes are only unique within a nation, so (nation, practice_code) is the key.
 
 {% set columns %}
@@ -44,3 +44,8 @@ union all
 
 select 'Northern Ireland' as nation, {{ columns }}
 from {{ ref('int_ni_practice_months') }}
+
+union all
+
+select 'Wales' as nation, {{ columns }}
+from {{ ref('int_wales_practice_months') }}

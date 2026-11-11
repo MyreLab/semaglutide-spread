@@ -178,3 +178,16 @@ def test_northern_ireland_keeps_only_listed_gp_practices(built):
         "where nation = 'Northern Ireland' order by month",
     )
     assert rows == [(2,)] * 6  # code 999 is not a GP practice
+
+
+def test_wales_keeps_only_gp_practices(built):
+    assert query(
+        built,
+        "select practice_code, adoption_month::varchar, adoption_brands, nhs_area_name "
+        "from uk_adopters where nation = 'Wales'",
+    ) == [("W93001", "2019-03-01", "Ozempic", "Aneurin Bevan University Health Board")]
+    rows = query(
+        built,
+        "select at_risk from rpt_uk_adoption_curve where nation = 'Wales' order by month",
+    )
+    assert rows == [(2,)] * 6  # the health trust W00024 is not a GP practice

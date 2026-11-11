@@ -52,6 +52,10 @@ seeds:
         health_board_name: varchar
         enacted: date
         archived: date
+    welsh_health_boards:
+      +column_types:
+        health_board_code: varchar
+        health_board_name: varchar
 
 flags:
   send_anonymous_usage_stats: false

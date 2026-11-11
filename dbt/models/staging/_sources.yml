@@ -90,6 +90,21 @@ sources:
       - name: register
         description: One row per GP practice x reference-file release, with address, postcode, LCG and registered patients.
 
+  - name: wales
+    description: >
+      Wales GP prescribing (NHS Wales Shared Services Partnership), filtered by
+      `wales-download`: diabetes drugs by practice and chemical substance, every practice's
+      total items, and the monthly practice address files.
+    meta:
+      external_location: "read_parquet('{{ env_var('SEMAGLUTIDE_DATA_DIR', '../data') }}/raw/wales_{name}/*/data.parquet', hive_partitioning = true)"
+    tables:
+      - name: diabetes
+        description: One row per practice x BNF chemical substance x month (x product, for the target drug), BNF 6.1.1 and 6.1.2.
+      - name: practices
+        description: One row per practice x month, with its health board and total items.
+      - name: register
+        description: One row per prescribing organisation x month in the address file, with name, address and postcode.
+
   - name: postcodes_io
     description: UK postcode lookups from postcodes.io (ONS Postcode Directory).
     tables:
