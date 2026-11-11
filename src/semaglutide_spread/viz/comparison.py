@@ -175,11 +175,11 @@ def draw(data: Comparison, theme: Theme, path: Path) -> Path:
     fig.text(
         0.01,
         0.01,
-        f"Left: US Medicare Part D prescribers (first adopters {data.us_start}, yearly) and UK "
-        f"GP practices (first adopters {data.uk_start}, monthly); adoption = 11+ claims in a "
-        "year (US), 11+ items in 12 months (UK).\nRight: semaglutide's share of glucose-"
-        "lowering prescriptions: US in 30-day fills, UK in items; complete years only. "
-        "A practice is many prescribers, and Medicare is mostly people 65+.",
+        f"Left: US Medicare prescribers (yearly, from {data.us_start}) and UK GP practices "
+        f"(monthly, from {data.uk_start}); adoption = 11+ claims in a year (US), 11+ items in "
+        "12 months (UK).\nRight: semaglutide's share of glucose-lowering prescriptions: US in "
+        "30-day fills, UK in items; complete years only. A practice is many prescribers, and "
+        "Medicare is mostly people 65+.",
         fontsize=7.5,
         color=theme.muted,
         linespacing=1.5,
