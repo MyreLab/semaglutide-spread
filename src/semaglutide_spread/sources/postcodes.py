@@ -9,8 +9,8 @@ Practices close and postcodes are retired, so a postcode that is no longer curre
 up again as a terminated postcode, which still has a location (but no areas).
 
 Steps:
-1. Collect the distinct postcodes from the saved practice files (England for now; Scotland,
-   Wales and Northern Ireland as they are added), tidied to the standard "AB1 2CD" form.
+1. Collect the distinct postcodes from the saved practice files (England's prescribing data
+   and Scotland's practice register so far), tidied to the standard "AB1 2CD" form.
 2. Load the results of earlier runs and keep only postcodes not yet looked up.
 3. Look up current postcodes 100 at a time (the service's bulk limit).
 4. Look up the ones not found as terminated postcodes, one at a time.
@@ -47,7 +47,7 @@ BATCH_SIZE = 100  # the most postcodes postcodes.io accepts in one bulk request
 OUT_NAME = "postcodes"
 
 # Practice files to read postcodes from: (folder under data/raw, postcode column).
-PRACTICE_SOURCES = (("epd_practices", "postcode"),)
+PRACTICE_SOURCES = (("epd_practices", "postcode"), ("phs_register", "Postcode"))
 
 POSTCODE = re.compile(r"^([A-Z]{1,2}[0-9][A-Z0-9]?)\s*([0-9][A-Z]{2})$")
 

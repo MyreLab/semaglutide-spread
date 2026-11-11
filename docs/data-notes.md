@@ -210,3 +210,23 @@ Practices in all three nations are placed by their postcode, looked up on postco
 - **Retired postcodes** belong mostly to practices that closed or moved. postcodes.io keeps their location, so they are still placed on the map, but without areas (region, NHS area, rural-urban class).
 - **Unknown postcodes** (13, all in England) look like typos in the source data (e.g. a valid-looking postcode that never existed). Those practices have no location; they still count in every total, but not on maps.
 - Values that aren't postcodes at all, like "-" for unidentified prescribing, are dropped before the lookup.
+
+## Prescriptions in the Community (Public Health Scotland)
+
+### Months are when the pharmacy was paid
+Scotland's monthly files are by *paid* month: when the dispensing was paid for, usually the month after the medicine was dispensed. England's and Northern Ireland's are by dispensing month. Comparisons between nations can be off by about a month.
+
+### Not every prescribing code is a GP practice
+The "prescriber location" files include codes for hospitals and "unallocated" prescribing (99996, 99997, 99998, 99999, among others): 297 of 1,320 codes, and 6.7% of all items. Only codes in Public Health Scotland's GP practice register count as GP practices here.
+
+### The practice register changed its column names
+The quarterly register has used `PracticeName` and `GPPracticeName`, `Listsize` and `PracticeListSize`, over the years. The downloader maps each to one name and stops if a needed column disappears. Three practices have a list size of 0 in some quarters (closing or newly opened practices).
+
+### Health boards were re-coded in 2018-2019
+Fife and Tayside (February 2018), and Greater Glasgow and Clyde and Lanarkshire (April 2019) got new codes when their boundaries were adjusted. Both old and new codes are in the health board lookup, with their dates, so practices keep a board name throughout.
+
+### Semaglutide arrives in August 2019, all at once
+The Scottish Medicines Consortium accepted semaglutide (Ozempic) for restricted use on 14 January 2019, but no Scottish GP practice prescribed it until the August 2019 paid month, when 268 practices (28%) started in the same month. It isn't hidden under another code before then: total GLP-1 prescribing doesn't jump in August. The cause (local formulary decisions are the likely candidate) isn't established here.
+
+### Rybelsus is Scotland's most prescribed form
+Of all semaglutide items from 2019 to mid-2026, 385,000 were Rybelsus tablets, 310,000 Ozempic injections, 10,000 Wegovy, and 28,000 prescribed by generic name. In England, Ozempic leads.
