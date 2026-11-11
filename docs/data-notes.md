@@ -240,3 +240,23 @@ The English Prescribing Dataset has a row for every "prescribing cost centre": G
 
 ### The API rejects "Offset=0"
 The ODS API counts results from 0 but returns an error for `Offset=0`; the first page is requested without an offset. A small thing, but the kind that makes a pipeline fail on its first run.
+
+## GP Prescribing Data (Northern Ireland)
+
+### Files are Latin-1, not UTF-8
+The monthly CSVs use the Latin-1 text encoding: the "£" in `Gross Cost (£)` is a single byte that isn't valid UTF-8. They're read with the encoding stated explicitly, so nothing is replaced or lost.
+
+### BNF codes aren't the standard format
+Northern Ireland's `BNF Code` column holds codes like `20030100526`, not the 15-character BNF codes used in England and Scotland. The files also have separate BNF chapter, section and paragraph columns, which are used to select insulins (6.1.1) and antidiabetic drugs (6.1.2), and a substance name (`VTM_NM`, from the NHS dictionary of medicines), which identifies semaglutide.
+
+### "-" means "prescribed by generic name"
+The branded product column (`AMP_NM`) is "-" when a prescription was written by generic name; the generic product name (`VMP_NM`) is used instead, and the brand is recorded as unknown.
+
+### No query service for recent months
+Many months can be queried on the portal, but about 40 since 2021 (most of them since 2023) can only be downloaded as files (~60 MB each). Every month is downloaded, filtered locally and deleted, so all months are handled the same way.
+
+### Semaglutide arrives in July 2019, all at once
+As in Scotland, there is no semaglutide in Northern Ireland until July 2019, when 82 GP practices start in the same month. England's first items were in December 2018.
+
+### Practice reference files
+Quarterly files give each practice's address, postcode, local commissioning group (LCG) and registered patients. The LCG is written as the text "NULL" for some practices; it's treated as missing.

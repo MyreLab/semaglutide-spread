@@ -47,7 +47,11 @@ BATCH_SIZE = 100  # the most postcodes postcodes.io accepts in one bulk request
 OUT_NAME = "postcodes"
 
 # Practice files to read postcodes from: (folder under data/raw, postcode column).
-PRACTICE_SOURCES = (("epd_practices", "postcode"), ("phs_register", "Postcode"))
+PRACTICE_SOURCES = (
+    ("epd_practices", "postcode"),
+    ("phs_register", "postcode"),
+    ("ni_register", "postcode"),
+)
 
 POSTCODE = re.compile(r"^([A-Z]{1,2}[0-9][A-Z0-9]?)\s*([0-9][A-Z]{2})$")
 
