@@ -122,7 +122,8 @@ def test_uk_night_lights_gif_from_the_built_warehouse(built, tmp_path):
     ).fetchone()
     months = (last.year - first.year) * 12 + last.month - first.month + 1
     with Image.open(gif) as image:
-        assert image.n_frames == months  # one frame a month, to the last month all nations have
+        # the US pace, 10 frames a year, to the last month all nations have
+        assert image.n_frames == round(months * 10 / 12)
     assert png.name == f"uk_night_lights_{last:%Y-%m}.png"
 
 

@@ -39,9 +39,9 @@ def test_frames_run_to_the_end_of_the_last_period():
     times = nl.frame_times(2018, 2021, per_year=4)
     assert len(times) == 12
     assert times[0] == pytest.approx(2018.25) and times[-1] == pytest.approx(2021.0)
-    # UK: one frame a month, January 2018 to July 2026
-    months = nl.frame_times(2018 * 12 / 12, (2026 * 12 + 7) / 12, per_year=12)
-    assert len(months) == 103
+    # UK, January 2018 to July 2026 at the US pace: 86 frames, the last one at the end
+    uk = nl.frame_times(2018, (2026 * 12 + 7) / 12, per_year=10)
+    assert len(uk) == 86 and uk[-1] == pytest.approx(2026 + 7 / 12)
 
 
 def test_periods_are_years_in_the_us_and_months_in_the_uk():

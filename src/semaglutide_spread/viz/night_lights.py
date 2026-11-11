@@ -13,8 +13,9 @@ bright one light is.
 Steps:
 1. Read adopters (adoption date, location) and each period's population at risk from the
    warehouse. The US map shows the contiguous US (Alaska, Hawaii and territories need insets:
-   not yet); the UK map shows all four nations, using each practice's first month with 1+
-   item (decision D34), up to the last month every nation has published.
+   not yet); the UK map shows all four nations, using each practice's first month whose
+   past 12 months add up to 11+ items (the measure matched to the US rule of 11+ claims in a
+   year), up to the last month every nation has published.
 2. Project latitude/longitude to pixels with an Albers equal-area projection (areas are not
    distorted, so density reads correctly), with standard parallels suited to each country.
 3. Give each adopter a moment within their adoption period (a year in the US, a month in the
@@ -101,7 +102,7 @@ US = Country(
     periods_per_year=1,
     title="Semaglutide (Ozempic, Rybelsus, Wegovy) spreading through US prescribers",
     subtitle="Each light is a Medicare Part D prescriber; "
-    "it comes on in the year they first prescribe semaglutide",
+    "it comes on in the first year they have 11+ semaglutide claims",
     unit="prescribers",
     prevalence_text="{label}'s diabetes-drug prescribers had adopted by year end",
     source="Data: CMS Medicare Part D Prescribers, {start}-{end}. "
@@ -122,10 +123,10 @@ UK = Country(
     origin=(54.5, -3.0),
     periods_per_year=12,
     title="Semaglutide (Ozempic, Rybelsus, Wegovy) spreading through UK GP practices",
-    subtitle="Each light is a GP practice; it comes on in the month it first prescribes "
-    "semaglutide",
+    subtitle="Each light is a GP practice; "
+    "it comes on once it reaches 11+ semaglutide items in 12 months",
     unit="GP practices",
-    prevalence_text="practices prescribing diabetes drugs\nhad prescribed it by month end",
+    prevalence_text="practices prescribing diabetes drugs\nhad adopted by month end",
     source="Data: NHSBSA (England), Public Health Scotland, BSO (Northern Ireland), "
     "NWSSP (Wales), {start} to {end}.",
     light_gain=9.0,
@@ -270,6 +271,11 @@ def load_us(con: duckdb.DuckDBPyConnection, grid: PixelGrid, spread: float) -> M
     )
 
 
+# The UK's adoption month for the map: matched to the US rule (see uk_adopters), so the two
+# maps can be read side by side. Practices that never reached 11+ items have no light.
+ADOPTION = "matched_adoption_month"
+
+
 def load_uk(con: duckdb.DuckDBPyConnection, grid: PixelGrid, spread: float) -> MapData:
     """All four nations, up to the last month that every nation has published (so the
     count and the percentage don't dip when one nation's latest month is missing)."""
@@ -281,8 +287,8 @@ def load_uk(con: duckdb.DuckDBPyConnection, grid: PixelGrid, spread: float) -> M
     ).fetchone()
     adopters = con.execute(
         f"select nation || ':' || practice_code, latitude, longitude, "
-        f"year(adoption_month) * 12 + month(adoption_month) - 1 from uk_adopters "
-        f"where {box} and year(adoption_month) * 12 + month(adoption_month) - 1 <= ? "
+        f"year({ADOPTION}) * 12 + month({ADOPTION}) - 1 from uk_adopters "
+        f"where {box} and year({ADOPTION}) * 12 + month({ADOPTION}) - 1 <= ? "
         "order by 1",
         [last],
     ).fetchall()
@@ -299,7 +305,7 @@ def load_uk(con: duckdb.DuckDBPyConnection, grid: PixelGrid, spread: float) -> M
     at_risk = {p: place(rows, grid, spread)[1:] for p, rows in rows_by_period.items()}
 
     prevalence = con.execute(
-        f"select {period}, 100.0 * sum(adopted_at_risk) / sum(at_risk) "
+        f"select {period}, 100.0 * sum(matched_adopted_at_risk) / sum(at_risk) "
         "from rpt_uk_adoption_curve group by 1"
     ).fetchall()
     return MapData(
@@ -440,9 +446,11 @@ def annotate(
 
 
 def frame_times(start: float, end: float, per_year: int) -> list[float]:
-    """Frame times (in years) from `start` to `end`: each frame shows the moment it ends."""
-    steps = round((end - start) * per_year)
-    return [start + (i + 1) / per_year for i in range(steps)]
+    """Frame times (in years) from `start` to `end`: each frame shows the moment it ends.
+    Evenly spaced, as close to `per_year` a year as fits (8 years 7 months at 10 a year: 86
+    frames), with the last frame exactly at `end`."""
+    steps = max(1, round((end - start) * per_year))
+    return [start + (i + 1) * (end - start) / steps for i in range(steps)]
 
 
 def to_palette(frames: list[Image.Image]) -> list[Image.Image]:
@@ -464,13 +472,13 @@ def render(
     country: Country = US,
     out_dir: Path = IMAGES_DIR,
     width: int = 960,
-    frames_per_year: int | None = None,
+    frames_per_year: int = 10,
     frame_ms: int = 120,
     hold_ms: int = 4000,
     show_at_risk: bool = False,
 ) -> tuple[Path, Path]:
     """Draw every frame from the warehouse behind `con`; save the GIF and the final PNG.
-    By default the US map has 10 frames a year and the UK map one a month."""
+    Both maps have the same pace by default: 10 frames a year, 120 ms each (1.2 s a year)."""
     s = width / 960
     grid = PixelGrid(
         width,
@@ -483,9 +491,8 @@ def render(
     log.info("%s: %s adopters on the map", country.code, f"{len(data.adopter_time):,}")
 
     ppy = country.periods_per_year
-    per_year = frames_per_year or (10 if ppy == 1 else 12)
     frames = []
-    for t in frame_times(data.first_period / ppy, (data.last_period + 1) / ppy, per_year):
+    for t in frame_times(data.first_period / ppy, (data.last_period + 1) / ppy, frames_per_year):
         adopted = int((data.adopter_time <= t).sum())
         frame = render_frame(data, grid, t, show_at_risk)
         frames.append(annotate(frame, data, country, t, adopted))
@@ -514,7 +521,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--country", choices=[*COUNTRIES, "all"], default="all")
     parser.add_argument("--width", type=int, default=960, help="image width in pixels")
     parser.add_argument(
-        "--frames-per-year", type=int, help="default: 10 for the US, 12 (monthly) for the UK"
+        "--frames-per-year", type=int, default=10, help="the same for both maps, so they keep pace"
     )
     parser.add_argument(
         "--show-population-at-risk",

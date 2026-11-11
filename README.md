@@ -28,9 +28,9 @@ Epidemiologists track how a disease moves through a population: who catches it f
 
 ## The UK (2018-2026)
 
-![Night-lights map: each UK GP practice lights up in the month it first prescribes semaglutide, January 2018 to July 2026](docs/images/uk_night_lights.gif)
+![Night-lights map: each UK GP practice lights up once it reaches 11+ semaglutide items in 12 months, January 2018 to July 2026](docs/images/uk_night_lights.gif)
 
-*Each light is an NHS GP practice in England, Scotland, Wales or Northern Ireland, switched on in the month it first prescribed semaglutide (any amount). The UK data are monthly, so the timing is real to the month. Brighter areas have more adopting practices, partly because they have more practices.*
+*Each light is an NHS GP practice in England, Scotland, Wales or Northern Ireland, switched on in the first month its past 12 months add up to 11+ semaglutide items, the closest match to the US rule (11+ claims in a year). Both maps run at the same pace, 1.2 seconds a year; the UK's runs longer because its data go to July 2026. The UK data are monthly, so the timing is real to the month. Brighter areas have more adopting practices, partly because they have more practices.*
 
 ## By the numbers
 
