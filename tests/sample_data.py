@@ -10,7 +10,7 @@ Three years (2018-2020), ZIP areas in the East Bay, and:
                  50 who prescribe no diabetes drug at all (lisinopril only)
     A  0000000001  endocrinologist, El Cerrito (94530); Ozempic every year       -> adopts 2018
     B  0000000002  internist in Oakland 2018 (metformin); family doctor in El Cerrito from
-                   2019 (Ozempic and Rybelsus)                                   -> adopts 2019
+                   2019 (Ozempic, and Rybelsus as 90-day fills)                  -> adopts 2019
     C  0000000003  nurse practitioner at a campus address (ZIP 94720 has no ZIP area, but the
                    address geocodes); metformin 2018-2019, Ozempic 2020           -> adopts 2020
     D  0000000004  dermatologist in a ZIP code with no ZIP area and no geocoded address
@@ -82,6 +82,9 @@ DRUG_COLUMNS = (
     "Prscrbr_NPI", "Prscrbr_Type", "Prscrbr_Type_Src", "Brnd_Name", "Gnrc_Name",
     "Tot_Clms", "Tot_30day_Fills", "Tot_Day_Suply", "Tot_Drug_Cst", "Tot_Benes",
 )  # fmt: skip
+
+# Brands filled as 90-day supplies in the sample: each claim is three 30-day fills.
+NINETY_DAY = {"Rybelsus": 3}
 
 # Addresses: (street 1, street 2, city, state, ZIP, country)
 OAKLAND = ("1 Broadway", None, "Oakland", "CA", "94612", "US")
@@ -423,8 +426,9 @@ def write_sample_raw_data(data_dir: Path) -> Path:
                  "1", "Metropolitan area core", claims, claims * 10, None)
             )  # fmt: skip
             drugs += [
-                (npi, specialty, "S", brand, generic, c, c, c * 30, c * 10, None)
+                (npi, specialty, "S", brand, generic, c, c * months, c * 30 * months, c * 10, None)
                 for brand, generic, c in rx
+                for months in [NINETY_DAY.get(brand, 1)]
             ]
         _write(
             raw / "partd_by_provider" / f"year={year}" / "data.parquet", PROVIDER_COLUMNS, providers

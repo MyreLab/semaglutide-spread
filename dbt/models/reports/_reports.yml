@@ -25,3 +25,29 @@ models:
       - unique_combination_of_columns:
           arguments:
             combination_of_columns: [nation, month]
+
+  - name: rpt_us_prescription_share
+    description: >
+      Semaglutide's share of glucose-lowering prescriptions in Medicare Part D, one row per
+      year, by claims and by 30-day fills. Volume, not adoption: every prescriber counts.
+    columns:
+      - name: year
+        data_tests: [unique, not_null]
+      - name: glucose_lowering_claims
+        data_tests: [not_null]
+      - name: target_drug_claims
+        data_tests: [not_null]
+
+  - name: rpt_uk_prescription_share
+    description: >
+      Semaglutide's share of glucose-lowering prescription items from UK GP practices, one
+      row per nation x calendar year, with the number of months each year has.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [nation, year]
+    columns:
+      - name: glucose_lowering_items
+        data_tests: [not_null]
+      - name: target_drug_items
+        data_tests: [not_null]
