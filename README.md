@@ -112,6 +112,7 @@ uv run partd-download        # Medicare Part D, 2018 to the latest year CMS has 
 uv run census-download       # Census ZIP-area (ZCTA) reference files, ~2 MB
 uv run geocode-addresses     # place prescribers whose ZIP code has no ZIP area (~4 minutes)
 uv run epd-download          # England: diabetes drugs by GP practice and month (~1 hour)
+uv run ods-download          # England: which prescribing codes are GP practices (seconds)
 uv run phs-download          # Scotland: prescribing by GP practice, and the practice register (~15 minutes)
 uv run postcode-lookup       # UK practice postcodes to locations and NHS areas (~1 minute)
 ```

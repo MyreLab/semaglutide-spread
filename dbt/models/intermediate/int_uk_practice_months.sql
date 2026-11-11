@@ -32,6 +32,7 @@ from (
         icb_name as nhs_area_name,
         cast(null as integer) as list_size  -- not in the English data
     from {{ ref('int_epd_practice_months') }}
+    where is_gp_practice  -- leave out walk-in centres, community teams, prisons, etc.
 )
 
 union all

@@ -50,6 +50,16 @@ sources:
       - name: practices
         description: One row per practice x month, with name, address, postcode and total items.
 
+  - name: ods
+    description: NHS Organisation Data Service (the official register of NHS organisations).
+    tables:
+      - name: gp_practices
+        description: >
+          Every prescribing cost centre that is a GP practice, open or closed, written by
+          `ods-download`.
+        meta:
+          external_location: "read_parquet('{{ env_var('SEMAGLUTIDE_DATA_DIR', '../data') }}/raw/ods_gp_practices/data.parquet')"
+
   - name: phs
     description: >
       Public Health Scotland open data, downloaded by `phs-download`: monthly prescribing by

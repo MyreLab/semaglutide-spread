@@ -66,6 +66,9 @@ models:
           arguments:
             combination_of_columns: [month, practice_code]
     columns:
+      - name: is_gp_practice
+        description: Listed as a GP practice by the NHS Organisation Data Service.
+        data_tests: [not_null]
       - name: postcode_status
         description: current, terminated, not_found, or not_looked_up (run postcode-lookup).
         data_tests:
