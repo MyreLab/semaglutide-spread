@@ -2,8 +2,9 @@
 
 Most adopters are where you'd expect (primary care, nurse practitioners, endocrinology), so
 a chart of every specialty would be one long bar and a lot of slivers. Instead, the subtitle
-gives the split between expected, plausible and unexpected specialties (seed
-`specialty_expectations`, decision D47), and the chart lists the unexpected ones: one
+gives the split between specialties expected to prescribe diabetes drugs and specialties
+that rarely manage diabetes (seed `specialty_expectations`, decision D47), and the chart
+lists the second: one
 horizontal bar per specialty, longest first, the smallest folded into one "Other" bar.
 
 Inputs:  data/warehouse.duckdb (table `rpt_us_adopters_by_specialty`)
@@ -39,6 +40,7 @@ class Specialties:
     adopters: list[int]
     share_pct: dict[str, float]  # expectation -> % of all adopters
     unexpected: int
+    unknown: int  # adopters with no specialty (mostly organisations)
     total: int
 
 
@@ -59,7 +61,13 @@ def load(con: duckdb.DuckDBPyConnection, shown: int = SHOWN) -> Specialties:
         ).fetchall()
     )
     (total,) = con.execute("select sum(adopters) from rpt_us_adopters_by_specialty").fetchone()
-    return Specialties(names, counts, shares, sum(r[1] for r in rows), int(total or 0))
+    (unknown,) = con.execute(
+        "select coalesce(sum(adopters), 0) from rpt_us_adopters_by_specialty "
+        "where expectation = 'unknown'"
+    ).fetchone()
+    return Specialties(
+        names, counts, shares, sum(r[1] for r in rows), int(unknown), int(total or 0)
+    )
 
 
 def draw(data: Specialties, theme: Theme, path: Path) -> Path:
@@ -95,10 +103,10 @@ def draw(data: Specialties, theme: Theme, path: Path) -> Path:
     fig.text(
         0.01,
         1 - 0.45 / height,
-        f"Of {data.total:,} US adopters: {pct.get('expected', 0):.1f}% from expected specialties "
-        "(primary care, endocrinology,\nnurse practitioners, physician assistants), "
-        f"{pct.get('plausible', 0):.1f}% plausible (e.g. cardiology, nephrology), "
-        f"{pct.get('unexpected', 0):.1f}% unexpected",
+        f"Of {data.total:,} US adopters, {pct.get('expected', 0):.1f}% came from specialties "
+        "expected to prescribe diabetes drugs (such as primary care,\nendocrinology, nurse "
+        f"practitioners and cardiology) and {pct.get('unexpected', 0):.1f}% from specialties "
+        "that rarely manage diabetes",
         fontsize=8.5,
         color=theme.secondary,
         va="top",
@@ -109,7 +117,8 @@ def draw(data: Specialties, theme: Theme, path: Path) -> Path:
         0.01,
         "Medicare Part D prescribers with 11+ semaglutide claims in a year, 2018-2024, by "
         "specialty in their adoption year.\nThe data can't say why semaglutide was "
-        "prescribed. Specialty names as CMS writes them.",
+        f"prescribed. Specialty names as CMS writes them. {data.unknown:,} adopters with no "
+        "specialty aren't shown.",
         fontsize=7.5,
         color=theme.muted,
         linespacing=1.5,
