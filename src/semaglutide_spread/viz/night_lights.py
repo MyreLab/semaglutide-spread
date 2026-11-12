@@ -34,6 +34,7 @@ Usage:
     uv run night-lights                       # both maps
     uv run night-lights --country uk
     uv run night-lights --show-population-at-risk   # add the blue denominator layer
+    uv run night-lights --detailed            # add the small print, for sharing on its own
 """
 
 from __future__ import annotations
@@ -415,25 +416,48 @@ def format_pct(pct: float) -> str:
     return f"{pct:.1f}" if pct < 10 or 99.5 <= pct < 100 else f"{pct:.0f}"
 
 
+def fitted_font(text: str, size: int, max_width: float):
+    """The largest font, up to `size`, that fits `text` in `max_width` pixels."""
+    while size > 8 and font(size).getlength(text) > max_width:
+        size -= 1
+    return font(size)
+
+
 def annotate(
-    frame: np.ndarray, data: MapData, country: Country, t: float, adopted: int
+    frame: np.ndarray,
+    data: MapData,
+    country: Country,
+    t: float,
+    adopted: int,
+    detailed: bool = False,
 ) -> Image.Image:
-    """Add the title, the date, the running count and the source line."""
+    """Add the title, the date and the running count. With `detailed`, also the subtitle,
+    the percentage adopted and the source line: small print that suits an image shared on
+    its own, not the README, where the caption says the same at a readable size."""
     image = Image.fromarray(frame)
     draw = ImageDraw.Draw(image)
     w, h = image.size
     s = w / 960  # text scales with image width
     pad = int(24 * s)
-    draw.text((pad, pad), country.title, font=font(int(22 * s)), fill=TEXT)
-    draw.text((pad, pad + int(30 * s)), country.subtitle, font=font(int(13 * s)), fill=SUBTLE)
+    title_size = int((22 if detailed else 28) * s)
+    draw.text((pad, pad), country.title, font=fitted_font(country.title, title_size, w - 2 * pad),
+              fill=TEXT)  # fmt: skip
+    if detailed:
+        draw.text((pad, pad + int(30 * s)), country.subtitle, font=font(int(13 * s)), fill=SUBTLE)
 
     period = period_of(t, country, data)
     label = period_label(period, country)
     x, y = int(country.stats_at[0] * w), int(country.stats_at[1] * h)
     draw.text((x, y), label, font=font(int(64 * s)), fill=TEXT)
     draw.text(
-        (x, y + int(72 * s)), f"{adopted:,} {country.unit}", font=font(int(20 * s)), fill=WARM_TEXT
+        (x, y + int(72 * s)),
+        f"{adopted:,} {country.unit}",
+        font=font(int((20 if detailed else 26) * s)),
+        fill=WARM_TEXT,
     )
+    if not detailed:
+        return image
+
     pct = data.prevalence_pct.get(period)
     if pct is not None:
         shown = format_pct(pct)
@@ -482,6 +506,7 @@ def render(
     frame_ms: int = 120,
     hold_ms: int = 4000,
     show_at_risk: bool = False,
+    detailed: bool = False,
 ) -> tuple[Path, Path]:
     """Draw every frame from the warehouse behind `con`; save the GIF and the final PNG.
     Both maps have the same pace by default: 10 frames a year, 120 ms each (1.2 s a year)."""
@@ -501,7 +526,7 @@ def render(
     for t in frame_times(data.first_period / ppy, (data.last_period + 1) / ppy, frames_per_year):
         adopted = int((data.adopter_time <= t).sum())
         frame = render_frame(data, grid, t, show_at_risk)
-        frames.append(annotate(frame, data, country, t, adopted))
+        frames.append(annotate(frame, data, country, t, adopted, detailed))
 
     out_dir.mkdir(parents=True, exist_ok=True)
     year, month = divmod(data.last_period, country.periods_per_year)
@@ -534,6 +559,11 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="also draw everyone prescribing diabetes drugs as a faint blue speck",
     )
+    parser.add_argument(
+        "--detailed",
+        action="store_true",
+        help="add the small print (what a light is, % adopted, sources), for sharing on its own",
+    )
     args = parser.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     countries = COUNTRIES.values() if args.country == "all" else [COUNTRIES[args.country]]
@@ -545,6 +575,7 @@ def main(argv: list[str] | None = None) -> int:
                 width=args.width,
                 frames_per_year=args.frames_per_year,
                 show_at_risk=args.show_population_at_risk,
+                detailed=args.detailed,
             )
     return 0
 
