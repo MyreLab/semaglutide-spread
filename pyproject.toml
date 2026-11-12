@@ -33,6 +33,7 @@ night-lights = "semaglutide_spread.viz.night_lights:main"
 adoption-curve = "semaglutide_spread.viz.adoption_curve:main"
 comparison-chart = "semaglutide_spread.viz.comparison:main"
 specialty-chart = "semaglutide_spread.viz.specialties:main"
+social-preview = "semaglutide_spread.viz.social_preview:main"
 
 [dependency-groups]
 dev = [
