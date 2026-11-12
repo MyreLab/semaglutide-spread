@@ -55,7 +55,7 @@ models:
   - name: rpt_us_adopters_by_specialty
     description: >
       US adopters by specialty group x specialty, with whether the specialty would be expected
-      to prescribe a diabetes drug (expected / plausible / unexpected / unknown) and why.
+      to prescribe a diabetes drug (expected / unexpected / unknown) and why.
     data_tests:
       - unique_combination_of_columns:
           arguments:

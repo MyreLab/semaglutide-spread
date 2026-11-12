@@ -53,11 +53,11 @@ seeds:
     description: >
       Whether each specialty would be expected to prescribe a diabetes drug, with a reason. A
       row with no specialty applies to the whole specialty group; a row with a specialty
-      overrides its group. "Expected": diabetes is their everyday work. "Plausible": a clinical
-      reason, such as a condition linked to diabetes, or continuing patients' usual medicines.
-      "Unexpected": their patients' diabetes is usually managed by another doctor. Decided by
-      hand (decision D47), for diabetes prescribing: the data can't say why semaglutide was
-      prescribed.
+      overrides its group. "Expected": diabetes is part of their everyday work, or there is a
+      clear clinical reason (a condition linked to diabetes, or continuing patients' usual
+      medicines). "Unexpected": specialties that rarely manage diabetes; their patients'
+      diabetes is usually managed by another doctor. Decided by hand (decision D47), for
+      diabetes prescribing: the data can't say why semaglutide was prescribed.
     data_tests:
       - unique_combination_of_columns:
           arguments:
@@ -70,7 +70,7 @@ seeds:
           - not_null
           - accepted_values:
               arguments:
-                values: [expected, plausible, unexpected, unknown]
+                values: [expected, unexpected, unknown]
       - name: reason
         data_tests: [not_null]
 
