@@ -65,6 +65,12 @@ TEXT = (235, 230, 215)
 WARM_TEXT = tuple(int(v) for v in WARM)
 SUBTLE = (130, 135, 150)
 
+# Image size and colours. The GIFs are drawn 720 pixels wide with 64 colours: half the file
+# size of 960 pixels and 255 colours (the US GIF: 2.3 MB instead of 4.6 MB), so the README
+# loads faster, with no visible loss (the map is mostly dark navy and shades of amber).
+WIDTH = 720
+COLORS = 64
+
 FLASH_LENGTH = 0.35  # years for a new light to settle from flash to steady glow
 FLASH_PEAK = 4.0  # brightness of a flash, relative to a steady light
 
@@ -129,7 +135,7 @@ UK = Country(
     prevalence_text="practices prescribing diabetes drugs\nhad adopted by month end",
     source="Data: NHSBSA (England), Public Health Scotland, BSO (Northern Ireland), "
     "NWSSP (Wales), {start} to {end}.",
-    light_gain=9.0,
+    light_gain=13.0,
     jitter_px=0.6,
     map_width=600,
     stats_at=(0.64, 0.42),
@@ -453,9 +459,9 @@ def frame_times(start: float, end: float, per_year: int) -> list[float]:
     return [start + (i + 1) * (end - start) / steps for i in range(steps)]
 
 
-def to_palette(frames: list[Image.Image]) -> list[Image.Image]:
-    """Convert every frame to one shared 256-colour palette (GIFs allow 256 colours), so
-    colours don't flicker between frames."""
+def to_palette(frames: list[Image.Image], colors: int = COLORS) -> list[Image.Image]:
+    """Convert every frame to one shared palette (GIFs allow up to 256 colours), so colours
+    don't flicker between frames."""
     # Build the palette from a strip of frames across the animation, so the early blues are
     # in it as well as the late ambers.
     picks = [*frames[:: max(1, len(frames) // 6)], frames[-1]]
@@ -463,7 +469,7 @@ def to_palette(frames: list[Image.Image]) -> list[Image.Image]:
     strip = Image.new("RGB", (w, h * len(picks)))
     for i, frame in enumerate(picks):
         strip.paste(frame, (0, i * h))
-    reference = strip.quantize(colors=255, method=Image.Quantize.MEDIANCUT)
+    reference = strip.quantize(colors=colors, method=Image.Quantize.MEDIANCUT)
     return [f.quantize(palette=reference, dither=Image.Dither.NONE) for f in frames]
 
 
@@ -471,7 +477,7 @@ def render(
     con: duckdb.DuckDBPyConnection,
     country: Country = US,
     out_dir: Path = IMAGES_DIR,
-    width: int = 960,
+    width: int = WIDTH,
     frames_per_year: int = 10,
     frame_ms: int = 120,
     hold_ms: int = 4000,
@@ -479,7 +485,7 @@ def render(
 ) -> tuple[Path, Path]:
     """Draw every frame from the warehouse behind `con`; save the GIF and the final PNG.
     Both maps have the same pace by default: 10 frames a year, 120 ms each (1.2 s a year)."""
-    s = width / 960
+    s = width / 960  # layouts are designed at 960 pixels wide and scaled
     grid = PixelGrid(
         width,
         margin=int(20 * s),
@@ -519,7 +525,7 @@ def render(
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--country", choices=[*COUNTRIES, "all"], default="all")
-    parser.add_argument("--width", type=int, default=960, help="image width in pixels")
+    parser.add_argument("--width", type=int, default=WIDTH, help="image width in pixels")
     parser.add_argument(
         "--frames-per-year", type=int, default=10, help="the same for both maps, so they keep pace"
     )

@@ -4,12 +4,11 @@
 
 How semaglutide (Ozempic, Rybelsus, Wegovy) spread through prescribers in the US and the UK, tracked like an epidemic.
 
-![Night-lights map: each US Medicare prescriber lights up in the year they first prescribe semaglutide, 2018 to 2024](docs/images/us_night_lights.gif)
+<img src="docs/images/us_night_lights.gif" width="720" alt="Night-lights map: each US Medicare prescriber lights up in the year they first prescribe semaglutide, 2018 to 2024">
 
 *Each light is a Medicare Part D prescriber, switched on in the year they first prescribed semaglutide (11+ claims). Brighter areas have more adopters, partly because they have more prescribers. Timing within each year is illustrative: the data are yearly.*
 
 > **Status:** Milestones 1 (US) and 2 (UK) are complete. Comparing the two is next; see the [roadmap](#roadmap).
-> A personal project using public data. Not affiliated with, or endorsed by, any employer.
 
 ## The question
 
@@ -28,7 +27,7 @@ Epidemiologists track how a disease moves through a population: who catches it f
 
 ## What the UK data show (2018-2026)
 
-![Night-lights map: each UK GP practice lights up once it reaches 11+ semaglutide items in 12 months, January 2018 to July 2026](docs/images/uk_night_lights.gif)
+<img src="docs/images/uk_night_lights.gif" width="720" alt="Night-lights map: each UK GP practice lights up once it reaches 11+ semaglutide items in 12 months, January 2018 to July 2026">
 
 *Each light is an NHS GP practice in England, Scotland, Wales or Northern Ireland, switched on in the first month its past 12 months add up to 11+ semaglutide items, the closest match to the US rule (11+ claims in a year). Both maps run at the same pace, 1.2 seconds a year; the UK's runs longer because its data go to July 2026. The UK data are monthly, so the timing is real to the month. Brighter areas have more adopting practices, partly because they have more practices.*
 
