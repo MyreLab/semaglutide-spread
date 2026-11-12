@@ -1,0 +1,22 @@
+specialty_group,specialty,expectation,reason
+Primary care physician,,expected,Primary care manages most type 2 diabetes
+Advanced practice nurse,,expected,Nurse practitioners work mostly in primary care and manage diabetes
+Physician assistant,,expected,Physician assistants work mostly in primary care and manage diabetes
+Endocrinology,,expected,Diabetes specialists
+Physician in training,,expected,Residents prescribe under supervision across specialties
+Cardiology,,plausible,Heart disease is common in diabetes; Wegovy has a cardiovascular indication since 2024
+Nephrology,,plausible,Kidney disease is common in diabetes; Ozempic has a kidney indication since 2025
+Obstetrics and gynecology,,plausible,Some act as women's main doctor
+Hospital and emergency medicine,,plausible,Continue patients' usual medicines in hospital and at discharge
+Pharmacist,,plausible,Adjust diabetes drugs under agreements with doctors
+Other physician specialty,,unexpected,Their patients' diabetes is usually managed by another doctor
+Other prescriber,,unexpected,Not usually prescribers of diabetes drugs
+Organization or unknown,,unknown,Specialty not known
+Other physician specialty,General Surgery,plausible,Includes bariatric (weight-loss) surgeons
+Other physician specialty,Gastroenterology,plausible,Fatty liver disease is common in diabetes
+Other physician specialty,Infectious Disease,plausible,HIV specialists are often their patients' main doctor
+Other physician specialty,Sports Medicine,plausible,Mostly family doctors with extra training
+Other physician specialty,Physical Medicine and Rehabilitation,plausible,Continue patients' usual medicines in rehabilitation hospitals
+Other physician specialty,Sleep Medicine,plausible,Obesity and diabetes are common in sleep apnoea
+Advanced practice nurse,Certified Nurse Midwife,plausible,Women's health; some act as women's main clinician
+Advanced practice nurse,Certified Registered Nurse Anesthetist (CRNA),unexpected,Anaesthesia; not diabetes care

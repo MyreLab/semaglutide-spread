@@ -46,6 +46,12 @@ seeds:
         prescriber_type: varchar
         specialty: varchar
         specialty_group: varchar
+    specialty_expectations:
+      +column_types:
+        specialty_group: varchar
+        specialty: varchar
+        expectation: varchar
+        reason: varchar
     scottish_health_boards:
       +column_types:
         health_board_code: varchar
