@@ -9,7 +9,7 @@ doubles as the portfolio thumbnail.
 2. Crop each map to its lights (the projection box has empty sea and land around the
    country), then scale both to the same height.
 3. Lay them out on GitHub's recommended 1280 x 640 canvas, under the title, with each map's
-   count of adopters beneath it.
+   count of adopters beneath it, aligned to the map's outer edge.
 
 Inputs:  data/warehouse.duckdb (the night-lights tables)
 Output:  docs/images/social_preview.png (set it in GitHub: Settings > General > Social preview)
@@ -37,7 +37,7 @@ log = logging.getLogger(__name__)
 
 SIZE = (1280, 640)  # GitHub's recommended social preview size
 MAP_HEIGHT = 420
-TITLE = "Tracking semaglutide\N{RIGHT SINGLE QUOTATION MARK}s spread: US & UK"
+TITLE = "Tracking semaglutide's spread: US & UK"
 SUBTITLE = "Ozempic, Rybelsus and Wegovy across US prescribers and UK GP practices"
 
 
@@ -67,6 +67,14 @@ def fit_height(image: Image.Image, height: int) -> Image.Image:
     return image.resize((width, height), Image.Resampling.LANCZOS)
 
 
+def label(country: nl.Country, data: nl.MapData) -> str:
+    """E.g. "US: 199,719 prescribers, 2018-2024"."""
+    first = data.first_period // country.periods_per_year
+    last = data.last_period // country.periods_per_year
+    adopters = len(data.adopter_time)
+    return f"{country.code.upper()}: {adopters:,} {country.unit}, {first}-{last}"
+
+
 def render(con: duckdb.DuckDBPyConnection, out_dir: Path = nl.IMAGES_DIR) -> Path:
     us, us_data = final_frame(con, nl.US, 880, nl.US.light_gain * (nl.US.map_width / 880) ** 2)
     uk, uk_data = final_frame(
@@ -75,26 +83,25 @@ def render(con: duckdb.DuckDBPyConnection, out_dir: Path = nl.IMAGES_DIR) -> Pat
     us, uk = (fit_height(crop_to_lights(m), MAP_HEIGHT) for m in (us, uk))
 
     width, height = SIZE
-    canvas = Image.new("RGB", SIZE, tuple(int(v) for v in nl.BACKGROUND))
+    label_font = nl.font(19)
+    labels = [label(country, data) for country, data in ((nl.US, us_data), (nl.UK, uk_data))]
+
+    # Centre the two maps, 70 pixels apart, on the canvas. Each label sits under the outer edge
+    # of its map (the US label from the US map's left edge, the UK label to the UK map's right
+    # edge), so the left and right margins match for the labels as well as the maps.
     between = 70
     us_left = (width - us.size[0] - uk.size[0] - between) // 2
     uk_left = us_left + us.size[0] + between
-    top = 135
-    canvas.paste(us, (us_left, top))
-    canvas.paste(uk, (uk_left, top))
 
+    canvas = Image.new("RGB", SIZE, tuple(int(v) for v in nl.BACKGROUND))
     draw = ImageDraw.Draw(canvas)
     draw.text((width // 2, 52), TITLE, font=nl.font(46), fill=nl.TEXT, anchor="mm")
     draw.text((width // 2, 98), SUBTITLE, font=nl.font(20), fill=nl.SUBTLE, anchor="mm")
-    labels = [
-        (us_left + us.size[0] // 2, nl.US, us_data, len(us_data.adopter_time)),
-        (uk_left + uk.size[0] // 2, nl.UK, uk_data, len(uk_data.adopter_time)),
-    ]
-    for centre, country, data, adopters in labels:
-        first = data.first_period // country.periods_per_year
-        last = data.last_period // country.periods_per_year
-        text = f"{country.code.upper()}: {adopters:,} {country.unit}, {first}-{last}"
-        draw.text((centre, height - 36), text, font=nl.font(19), fill=nl.WARM_TEXT, anchor="mm")
+    canvas.paste(us, (us_left, 135))
+    canvas.paste(uk, (uk_left, 135))
+    y = height - 36
+    draw.text((us_left, y), labels[0], font=label_font, fill=nl.WARM_TEXT, anchor="lm")
+    draw.text((uk_left + uk.size[0], y), labels[1], font=label_font, fill=nl.WARM_TEXT, anchor="rm")
 
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / "social_preview.png"
