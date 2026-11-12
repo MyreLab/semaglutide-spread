@@ -217,6 +217,16 @@ def test_specialty_chart_from_the_built_warehouse(built, tmp_path):
     assert len(specialties.render(built, out_dir=tmp_path)) == 2
 
 
+def test_social_preview_from_the_built_warehouse(built, tmp_path):
+    from PIL import Image
+
+    from semaglutide_spread.viz import social_preview
+
+    path = social_preview.render(built, out_dir=tmp_path)
+    with Image.open(path) as image:
+        assert image.size == (1280, 640)  # GitHub's recommended size
+
+
 def test_us_prescription_share(built):
     # 2019: 4,601 glucose-lowering claims, 65 for semaglutide (A 20, B 15 + 12, F 18). B's 12
     # Rybelsus claims are 90-day fills, so they count 36 30-day fills: 89 of 4,625.
