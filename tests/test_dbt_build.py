@@ -186,6 +186,31 @@ def test_comparison_chart_from_the_built_warehouse(built, tmp_path):
     ]
 
 
+def test_adopters_by_specialty_and_expectation(built):
+    rows = query(
+        built,
+        "select specialty, expectation, adopters from rpt_us_adopters_by_specialty order by 1",
+    )
+    assert rows == [
+        ("Dermatology", "unexpected", 1),  # D: its group's default, "Other physician specialty"
+        ("Endocrinology", "expected", 1),  # A
+        ("Family Practice", "expected", 1),  # B, in its adoption year (2019)
+        ("Nurse Practitioner", "expected", 1),  # C
+        ("Physician Assistant", "expected", 1),  # F
+    ]
+    (total,) = built.execute("select count(*) from us_adopters").fetchone()
+    assert sum(n for *_, n in rows) == total  # every adopter is in exactly one row
+
+
+def test_specialty_chart_from_the_built_warehouse(built, tmp_path):
+    from semaglutide_spread.viz import specialties
+
+    data = specialties.load(built, shown=20)
+    assert data.names == ["Dermatology"] and data.unexpected == 1  # D, the only one
+    assert specialties.load(built, shown=0).names == ["Other (1 specialty)"]
+    assert len(specialties.render(built, out_dir=tmp_path)) == 2
+
+
 def test_us_prescription_share(built):
     # 2019: 4,601 glucose-lowering claims, 65 for semaglutide (A 20, B 15 + 12, F 18). B's 12
     # Rybelsus claims are 90-day fills, so they count 36 30-day fills: 89 of 4,625.

@@ -49,6 +49,31 @@ seeds:
                   - Other prescriber
                   - Organization or unknown
 
+  - name: specialty_expectations
+    description: >
+      Whether each specialty would be expected to prescribe a diabetes drug, with a reason. A
+      row with no specialty applies to the whole specialty group; a row with a specialty
+      overrides its group. "Expected": diabetes is their everyday work. "Plausible": a clinical
+      reason, such as a condition linked to diabetes, or continuing patients' usual medicines.
+      "Unexpected": their patients' diabetes is usually managed by another doctor. Decided by
+      hand (decision D47), for diabetes prescribing: the data can't say why semaglutide was
+      prescribed.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [specialty_group, specialty]
+    columns:
+      - name: specialty_group
+        data_tests: [not_null]
+      - name: expectation
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [expected, plausible, unexpected, unknown]
+      - name: reason
+        data_tests: [not_null]
+
   - name: scottish_health_boards
     description: >
       Scotland's NHS health boards, by code. Copied from Public Health Scotland's "Health Board

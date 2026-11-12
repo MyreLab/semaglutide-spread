@@ -32,6 +32,7 @@ build-warehouse = "semaglutide_spread.warehouse:main"
 night-lights = "semaglutide_spread.viz.night_lights:main"
 adoption-curve = "semaglutide_spread.viz.adoption_curve:main"
 comparison-chart = "semaglutide_spread.viz.comparison:main"
+specialty-chart = "semaglutide_spread.viz.specialties:main"
 
 [dependency-groups]
 dev = [
