@@ -8,7 +8,7 @@ How semaglutide (Ozempic, Rybelsus, Wegovy) spread through prescribers in the US
 
 *Each light is a Medicare Part D prescriber, switched on in the year they first prescribed semaglutide (11+ claims). Brighter areas have more adopters, partly because they have more prescribers. Timing within each year is illustrative: the data are yearly. Data: CMS Medicare Part D Prescribers, 2018-2024, contiguous US.*
 
-> **Status:** Milestones 1 (US) and 2 (UK) are complete. Comparing the two is next; see the [roadmap](#roadmap).
+> **Status:** Milestones 1 to 3 are complete: the US, the UK, and the comparison. See the [roadmap](#roadmap).
 
 ## The question
 
@@ -24,6 +24,17 @@ Epidemiologists track how a disease moves through a population: who catches it f
 - **201,629 Medicare prescribers adopted semaglutide in seven years.** By 2024, 60% of everyone prescribing a diabetes drug in Medicare Part D had prescribed it.
 - **The spread accelerated, then may have started to slow.** Each year, a growing share of the prescribers who hadn't yet adopted did so: 5% in 2019, 15% in 2022 and 29% in 2023. In 2024 that share held at 28%, and the number of new adopters fell for the first time.
 - **Specialists went first; primary care carried the spread.** Endocrinologists were 31% of the first 1,065 adopters in 2018, and by 2024, 86% of endocrinologists in Part D prescribed semaglutide. But in 2024, 58% of the prescribers using it were primary care physicians, and a quarter were nurse practitioners, up from 165 nurse practitioners in 2018 to 43,635.
+
+### Who prescribes it
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/us_unexpected_specialties_dark.png">
+  <img alt="Horizontal bar chart of the 1,294 US adopters from specialties that rarely manage diabetes, led by pulmonary disease (228), psychiatry (135), rheumatology (83), anesthesiology (71) and registered nurses (71), with 35 smaller specialties grouped as other (170)." src="docs/images/us_unexpected_specialties_light.png">
+</picture>
+
+- **99.3% of adopters came from specialties expected to prescribe diabetes drugs.** That includes primary care, endocrinology, nurse practitioners and physician assistants, and specialties with a clear clinical reason, such as cardiology, nephrology and hospital medicine.
+- **0.6% (1,294 prescribers) came from specialties that rarely manage diabetes,** led by pulmonology (228), psychiatry (135) and rheumatology (83), and including 42 naturopaths, 26 dermatologists and 7 dentists. Each reached 11+ semaglutide claims in a year. The data can't say why they prescribed it.
+- Each specialty's classification, and the reason for it, is in [dbt/seeds/specialty_expectations.csv](dbt/seeds/specialty_expectations.csv).
 
 ## What the UK data show (2018-2026)
 
@@ -46,7 +57,18 @@ Epidemiologists track how a disease moves through a population: who catches it f
   <img alt="Four small charts, one per nation, of the monthly share of GP practices that have adopted semaglutide, with the UK in grey behind each. Wales reached half of its practices in December 2019, England in July 2020, Northern Ireland in September 2020 and Scotland in December 2020." src="docs/images/uk_nations_adoption_light.png">
 </picture>
 
-## US and UK: what's being compared
+## US vs UK
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/us_uk_comparison_dark.png">
+  <img alt="Two charts. Left: the share that have adopted against years since the first adopters; UK GP practices rise steeply to 99%, US prescribers rise steadily to 60% after seven years. Right: semaglutide's share of diabetes prescriptions by year; the US and UK track each other until 2021, then the US rises to 7.4% in 2024 while the UK levels off near 2.4%." src="docs/images/us_uk_comparison_light.png">
+</picture>
+
+- **Uptake was faster in the UK.** Half of UK practices had adopted within 18 months of the first adopters; US prescribers reached 48% after six years and 60% after seven. Part of that gap is built into the data: a practice adopts when any one of its GPs does, and the US data can miss prescribers who use semaglutide mainly for patients under 65.
+- **Use is heavier in the US.** The two countries' shares of diabetes prescriptions tracked each other until 2021 (1.8% of Medicare's 30-day fills, 1.2% of UK items). Then the US pulled away: 7.4% in 2024, against 2.5% in the UK, which has stayed at about that level since.
+- **Broad but thin in the UK.** Nearly every UK practice prescribes semaglutide, but it is a small share of what they prescribe for diabetes.
+
+### What's being compared
 
 The two countries' data differ in what they count, so the comparison is about the shape and timing of the spread, not its level.
 
@@ -59,10 +81,7 @@ The two countries' data differ in what they count, so the comparison is about th
 | Population at risk | 11+ claims for a glucose-lowering drug that year | 1+ glucose-lowering item that month |
 | Not in the data | Private insurance, Medicaid, hospitals | Private prescriptions, hospitals, specialist weight-management services |
 
-A first look, ahead of Milestone 3:
-
-- **UK practices adopted faster than US prescribers.** Half of UK practices adopted within 18 months of the first, while US prescribers reached 48% after six years. Much of that gap is built in: a practice adopts when any one of its GPs does, and the US data can miss prescribers who use semaglutide mainly for patients under 65.
-- **US use is heavier.** In 2024, semaglutide was 7.4% of Medicare's glucose-lowering prescriptions (counted in 30-day fills) and 2.5% of the UK's items. Both are shares of diabetes prescriptions, but Medicare's patients are older and the two countries count prescriptions differently, so this is a first look, not a verdict.
+Shares of prescriptions use US 30-day fills (a 90-day fill counts as 3) and UK items, which have no fixed length. Medicare's patients are older than UK GP patients as a whole, so the levels are indicative, not exact.
 
 ## By the numbers
 
@@ -75,7 +94,7 @@ A first look, ahead of Milestone 3:
 | Placed on the map | 99.97% of prescriber-years | 99.6% of practice-months |
 | Raw data | 33 GB of CSV, stored as 4.6 GB of Parquet | 0.3 GB of Parquet, filtered to diabetes drugs on download |
 
-21.6 billion prescriptions in all. Every build runs 120 data tests and 103 code tests.
+21.6 billion prescriptions in all. Every build runs 138 data tests and 109 code tests.
 
 ## Methods
 
@@ -132,7 +151,7 @@ flowchart LR
     B -->|dbt + DuckDB| C[Staging<br>typed, cleaned]
     C --> D[Intermediate<br>locations, specialties]
     D --> E[Marts<br>population at risk, adopters]
-    E --> F[Reports<br>adoption curve]
+    E --> F[Reports<br>adoption curves, shares,<br>specialties]
     E -->|numpy, Pillow| G[Night-lights GIF]
     F -->|matplotlib| H[Charts]
 ```
@@ -178,6 +197,9 @@ uv run build-warehouse       # dbt build with all data tests: ~2 minutes, writes
 uv run night-lights          # docs/images/{us,uk}_night_lights.gif and a still of each last frame (~45 s);
                              # --detailed adds the small print, for sharing a map on its own
 uv run adoption-curve        # docs/images/{us,uk}_adoption_curve_*.png and uk_nations_adoption_*.png
+uv run comparison-chart      # docs/images/us_uk_comparison_*.png
+uv run specialty-chart       # docs/images/us_unexpected_specialties_*.png
+uv run social-preview        # docs/images/social_preview.png, the image shown when the repo is shared
 ```
 
 ## Project layout
@@ -194,7 +216,7 @@ data/                     downloaded and built data (not committed; see data/REA
 
 - [x] **M1: US adoption.** Part D 2018-2024, population at risk, first adoption, US night-lights GIF
 - [x] **M2: UK.** Monthly GP practice data for England, Scotland, Northern Ireland and Wales, same measures, UK night-lights GIF
-- [ ] **M3: Compare.** Epidemic curves, specialty breakdown, US vs UK, adoption rates by county
+- [x] **M3: Compare.** US vs UK adoption and share of prescriptions, who prescribes it
 - [ ] **M4: Agents.** Claude-powered helpers for drug-name matching, data quality triage and questions
 
 ## Author
