@@ -12,7 +12,7 @@ How semaglutide (Ozempic, Rybelsus, Wegovy) spread through prescribers in the US
 
 ## The question
 
-Epidemiologists track how a disease moves through a population: who catches it first, how fast it spreads, and where. This project asks the same questions about a new drug. Each prescriber (US) or GP practice (UK) "catches" semaglutide the first time they prescribe it in meaningful volume, and the project follows that spread over time and across the map.
+Epidemiologists track how a disease moves through a population: who catches it first, how fast it spreads, and where. This project asks the same questions about a new drug, as Coleman, Katz and Menzel did for a new antibiotic among doctors in 1950s Illinois (*Medical Innovation: A Diffusion Study*, 1966). Each prescriber (US) or GP practice (UK) "catches" semaglutide the first time they prescribe it in meaningful volume, and the project follows that spread over time and across the map.
 
 ## What the US data show (2018-2024)
 
