@@ -109,6 +109,12 @@ def test_night_lights_gif_from_the_built_warehouse(built, tmp_path):
         assert image.n_frames == 6  # 3 years x 2 frames
     assert png.name == "us_night_lights_2020.png"
 
+    # The detailed version (small print for sharing on its own) draws too
+    detailed, _ = night_lights.render(
+        built, out_dir=tmp_path / "detailed", width=320, frames_per_year=1, detailed=True
+    )
+    assert detailed.exists()
+
 
 def test_uk_night_lights_gif_from_the_built_warehouse(built, tmp_path):
     from PIL import Image
