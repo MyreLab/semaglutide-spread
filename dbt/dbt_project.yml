@@ -62,6 +62,11 @@ seeds:
       +column_types:
         health_board_code: varchar
         health_board_name: varchar
+    us_states:
+      +column_types:
+        state_fips: varchar
+        state_code: varchar
+        state_name: varchar
 
 flags:
   send_anonymous_usage_stats: false

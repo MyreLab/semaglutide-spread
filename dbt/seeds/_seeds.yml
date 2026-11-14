@@ -94,3 +94,13 @@ seeds:
     columns:
       - name: health_board_code
         data_tests: [unique, not_null]
+
+  - name: us_states
+    description: >
+      US states, the District of Columbia and the territories, by their two-digit FIPS code
+      (the first two digits of a county code), with their postal code and name.
+    columns:
+      - name: state_fips
+        data_tests: [unique, not_null]
+      - name: state_code
+        data_tests: [unique, not_null]

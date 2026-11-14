@@ -67,3 +67,42 @@ models:
         data_tests: [not_null]
       - name: adopters
         data_tests: [not_null]
+
+  - name: rpt_us_adoption_by_place
+    description: >
+      Where semaglutide spread in the US: each year's share of the population at risk that
+      has ever adopted, by state and by rurality (RUCA code groups).
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [year, place_type, place]
+    columns:
+      - name: place_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [state, rurality]
+      - name: at_risk
+        data_tests: [not_null]
+      - name: adopted
+        data_tests: [not_null]
+
+  - name: rpt_uk_adoption_by_place
+    description: >
+      Where semaglutide spread in the UK: each month's share of GP practices that have adopted
+      (matched measure), by area (England's regions and the other three nations) and, for
+      England and Wales, by urban or rural postcode.
+    data_tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [month, place_type, place]
+    columns:
+      - name: place_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [area, rurality]
+      - name: at_risk
+        data_tests: [not_null]
+      - name: adopted
+        data_tests: [not_null]
