@@ -227,6 +227,27 @@ def test_social_preview_from_the_built_warehouse(built, tmp_path):
         assert image.size == (1280, 640)  # GitHub's recommended size
 
 
+def test_adoption_by_place(built):
+    # US 2019: all sample prescribers are in California and in metropolitan areas, except one
+    # with no county (so no state) that still has a RUCA code.
+    assert query(
+        built,
+        "select place_type, place, at_risk, adopted from rpt_us_adoption_by_place "
+        "where year = 2019 order by all",
+    ) == [
+        ("rurality", "Metropolitan", 155, 3),
+        ("state", "California", 154, 3),
+        ("state", "Unknown", 1, 0),
+    ]
+    # UK June 2019: of Yorkshire's two GP practices at risk, A81001 has adopted (May 2019, on
+    # the matched measure); the other nations have none yet.
+    assert query(
+        built,
+        "select place, at_risk, adopted from rpt_uk_adoption_by_place "
+        "where month = '2019-06-01' and place_type = 'area' and adopted > 0",
+    ) == [("Yorkshire", 2, 1)]
+
+
 def test_us_prescription_share(built):
     # 2019: 4,601 glucose-lowering claims, 65 for semaglutide (A 20, B 15 + 12, F 18). B's 12
     # Rybelsus claims are 90-day fills, so they count 36 30-day fills: 89 of 4,625.
