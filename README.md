@@ -6,7 +6,7 @@
 
 Epidemiologists track how a disease moves through a population: who catches it first, how fast it spreads, and where. This project asks the same questions about semaglutide, as Coleman, Katz and Menzel did for a new antibiotic in 1950s Illinois (*Medical Innovation: A Diffusion Study*, 1966). Each prescriber (US) or GP practice (UK) "catches" semaglutide the first time they prescribe it in meaningful volume: 11+ prescriptions in a year.
 
-## How I built this
+## How it's built
 
 Python pipelines download and validate data covering 9.4 billion Medicare claims and 12.2 billion UK prescriptions into Parquet, and dbt models in DuckDB turn it into adoption curves and maps. Each build runs 152 data tests and 110 code tests, and GitHub Actions checks every pull request.
 
@@ -77,7 +77,7 @@ UK:
 - **No patient ages or diagnoses.** The data can't be limited to older patients, or say why semaglutide was prescribed.
 - **Scotland's months are when the pharmacy was paid,** usually a month after dispensing; the other nations' are when it was dispensed.
 
-## How it's built
+## Architecture
 
 ```mermaid
 flowchart LR
