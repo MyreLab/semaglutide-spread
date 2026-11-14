@@ -2,13 +2,17 @@
 
 [![Continuous integration tests](https://github.com/MyreLab/semaglutide-spread/actions/workflows/ci.yml/badge.svg)](https://github.com/MyreLab/semaglutide-spread/actions/workflows/ci.yml)
 
-This data engineering project tracks semaglutide (Ozempic, Rybelsus, Wegovy) like an epidemic: who prescribed it first, how fast it spread, and where, in the US and the UK. Python pipelines download and validate data covering 9.4 billion Medicare claims and 12.2 billion UK prescriptions into Parquet, and dbt models in DuckDB turn it into adoption curves and maps. Each build runs 152 data tests and 110 code tests, and GitHub Actions checks every pull request.
-
-<img src="docs/images/social_preview.png" width="720" alt="Two night-lights maps side by side: US prescribers and UK GP practices that adopted semaglutide, lit up on a dark navy background">
-
 ## The question
 
-Epidemiologists track how a disease moves through a population: who catches it first, how fast it spreads, and where. This project asks the same questions about a new drug, as Coleman, Katz and Menzel did for a new antibiotic among doctors in 1950s Illinois (*Medical Innovation: A Diffusion Study*, 1966). Each prescriber (US) or GP practice (UK) "catches" semaglutide the first time they prescribe it in meaningful volume: 11+ prescriptions in a year.
+Epidemiologists track how a disease moves through a population: who catches it first, how fast it spreads, and where. This project asks the same questions about semaglutide, as Coleman, Katz and Menzel did for a new antibiotic in 1950s Illinois (*Medical Innovation: A Diffusion Study*, 1966). Each prescriber (US) or GP practice (UK) "catches" semaglutide the first time they prescribe it in meaningful volume: 11+ prescriptions in a year.
+
+## How I built this
+
+Python pipelines download and validate data covering 9.4 billion Medicare claims and 12.2 billion UK prescriptions into Parquet, and dbt models in DuckDB turn it into adoption curves and maps. Each build runs 152 data tests and 110 code tests, and GitHub Actions checks every pull request.
+
+<img src="docs/images/us_night_lights.gif" width="64%" alt="Night-lights map: each US Medicare prescriber lights up in the year they first prescribe semaglutide, 2018 to 2024"> <img src="docs/images/uk_night_lights.gif" width="34%" alt="Night-lights map: each UK GP practice lights up once it reaches 11+ semaglutide items in 12 months, January 2018 to July 2026">
+
+*Each light is a US Medicare Part D prescriber (left) or a UK GP practice (right), switched on when it first reaches 11+ semaglutide prescriptions in a year. Both maps run at the same pace, 1.2 seconds a year; the UK's runs longer because its data go to July 2026. Brighter areas have more adopters, partly because they have more prescribers. US timing within each year is illustrative: the data are yearly. Contiguous US.*
 
 ## Who prescribed it first
 
@@ -37,19 +41,41 @@ Year-by-year charts for each country, and for each UK nation, are in [docs/resul
 
 ## Where it spread
 
-<img src="docs/images/us_night_lights.gif" width="720" alt="Night-lights map: each US Medicare prescriber lights up in the year they first prescribe semaglutide, 2018 to 2024">
-
-*Each light is a Medicare Part D prescriber, switched on in the first year they have 11+ semaglutide claims. Brighter areas have more adopters, partly because they have more prescribers. Timing within each year is illustrative: the data are yearly. Contiguous US.*
-
 - **US: the South-east first, and rural areas furthest.** At the end of 2019, 12% of Alabama's diabetes-drug prescribers had adopted, followed by Mississippi, North Carolina, West Virginia and South Carolina, against under 2% in Colorado, Maine and Utah. By 2024, 75% of prescribers in small towns and rural areas had adopted, against 57% in metropolitan areas.
-
-<img src="docs/images/uk_night_lights.gif" width="720" alt="Night-lights map: each UK GP practice lights up once it reaches 11+ semaglutide items in 12 months, January 2018 to July 2026">
-
-*Each light is an NHS GP practice in England, Scotland, Wales or Northern Ireland, switched on in the first month its past 12 months add up to 11+ semaglutide prescriptions. Both maps run at the same pace, 1.2 seconds a year; the UK's runs longer because its data go to July 2026.*
 
 - **UK: Wales first, London last.** At the end of 2019, 56% of Welsh practices had adopted, against 7% in London. Two years later London was still the slowest (66%, against 96% in Wales). Unlike the US, rural and urban practices in England and Wales adopted at the same pace.
 
-**Comparing the two countries:** US data cover Medicare Part D, mostly people 65 and over, and count individual prescribers; UK data cover all NHS GP patients and count practices. So the comparison is about the shape and timing of the spread, not its level. Sources, definitions and limitations are in [docs/methods.md](docs/methods.md).
+**Comparing the two countries:** US data cover Medicare Part D, mostly people 65 and over, and count individual prescribers; UK data cover all NHS GP patients and count practices. So the comparison is about the shape and timing of the spread, not its level. Definitions and the full comparison are in [docs/methods.md](docs/methods.md).
+
+## Data
+
+| Country | Source | Unit | Time step |
+|---|---|---|---|
+| US | [Medicare Part D Prescribers by Provider and Drug](https://data.cms.gov/provider-summary-by-type-of-service/medicare-part-d-prescribers/medicare-part-d-prescribers-by-provider-and-drug) (CMS) | Individual prescriber | Year |
+| England | [English Prescribing Dataset](https://opendata.nhsbsa.net/dataset/english-prescribing-dataset-epd-with-snomed-code) (NHS Business Services Authority) | GP practice | Month |
+| Scotland | [Prescriptions in the Community](https://www.opendata.nhs.scot/dataset/prescriptions-in-the-community) (Public Health Scotland) | GP practice | Month |
+| Northern Ireland | [GP Prescribing Data](https://www.opendatani.gov.uk/dataset/gp-prescribing-data) (Business Services Organisation, via OpenDataNI) | GP practice | Month |
+| Wales | [GP practice prescribing](https://nwssp.nhs.wales/ourservices/primary-care-services/general-information/data-and-publications/prescribing-data-extracts/general-practice-prescribing-data-extract/) (NHS Wales Shared Services Partnership) | GP practice | Month |
+
+US prescribers are placed on the map from their practice ZIP code, using Census ZIP Code Tabulation Areas and, where a ZIP code has none, the Census geocoder. UK practices are placed from their postcode, using [postcodes.io](https://postcodes.io) (built on the ONS Postcode Directory). Only GP practices are kept: in England and Wales, codes the NHS Organisation Data Service lists as GP practices; in Scotland and Northern Ireland, practices in each nation's practice register.
+
+## Limitations
+
+US:
+
+- **Medicare only.** Part D covers people 65 and over and some younger people with disabilities. Most plans don't cover drugs for weight loss alone, so most weight-loss prescribing isn't in this data.
+- **Yearly data.** Adoption is known to the year, not the month.
+- **The 11-claim rule.** CMS hides any prescriber x drug x year with fewer than 11 claims. Adoption is therefore the first year a prescriber becomes *visible*, which can be later than their first prescription.
+- **Claims, not patients.** A claim is one fill, refills included, so one patient on a monthly prescription is enough to reach 11 claims. Most adopters had fewer than 11 patients on semaglutide in their adoption year.
+- **No Medicaid.** Medicaid publishes prescriptions by state and drug, but not by prescriber, so it can't be added.
+- **No diagnoses.** The data can't say why semaglutide was prescribed.
+
+UK:
+
+- **Practices, not prescribers.** One adopting GP turns on the whole practice.
+- **NHS GP prescribing only.** Private prescriptions, including online weight-loss services, and specialist NHS weight-management services aren't in the data.
+- **No patient ages or diagnoses.** The data can't be limited to older patients, or say why semaglutide was prescribed.
+- **Scotland's months are when the pharmacy was paid,** usually a month after dispensing; the other nations' are when it was dispensed.
 
 ## How it's built
 
