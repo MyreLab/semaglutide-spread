@@ -2,128 +2,64 @@
 
 [![Continuous integration tests](https://github.com/MyreLab/semaglutide-spread/actions/workflows/ci.yml/badge.svg)](https://github.com/MyreLab/semaglutide-spread/actions/workflows/ci.yml)
 
-How semaglutide (Ozempic, Rybelsus, Wegovy) spread through prescribers in the US and the UK, tracked like an epidemic.
-
-<img src="docs/images/us_night_lights.gif" width="720" alt="Night-lights map: each US Medicare prescriber lights up in the year they first prescribe semaglutide, 2018 to 2024">
-
-*Each light is a Medicare Part D prescriber, switched on in the year they first prescribed semaglutide (11+ claims). Brighter areas have more adopters, partly because they have more prescribers. Timing within each year is illustrative: the data are yearly. Data: CMS Medicare Part D Prescribers, 2018-2024, contiguous US.*
-
-> **Status:** Milestones 1 to 3 are complete: the US, the UK, and the comparison. See the [roadmap](#roadmap).
-
 ## The question
 
-Epidemiologists track how a disease moves through a population: who catches it first, how fast it spreads, and where. This project asks the same questions about a new drug, as Coleman, Katz and Menzel did for a new antibiotic among doctors in 1950s Illinois (*Medical Innovation: A Diffusion Study*, 1966). Each prescriber (US) or GP practice (UK) "catches" semaglutide the first time they prescribe it in meaningful volume, and the project follows that spread over time and across the map.
+Epidemiologists track how a disease moves through a population: who catches it first, how fast it spreads, and where. This project asks the same questions about semaglutide, as Coleman, Katz and Menzel did for a new antibiotic in 1950s Illinois (*Medical Innovation: A Diffusion Study*, 1966). Each prescriber (US) or GP practice (UK) "catches" semaglutide the first time they prescribe it in meaningful volume: 11+ prescriptions in a year.
 
-## What the US data show (2018-2024)
+## How it's built
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/us_adoption_curve_dark.png">
-  <img alt="Two charts. Left: new adopters each year, rising from 1,065 in 2018 to a peak of 63,477 in 2023, then 51,114 in 2024. Right: the share of diabetes-drug prescribers who have adopted, rising from 0.4% in 2018 to 60% in 2024." src="docs/images/us_adoption_curve_light.png">
-</picture>
+Python pipelines download and validate data covering 9.4 billion Medicare claims and 12.2 billion UK prescriptions into Parquet, and dbt models in DuckDB turn it into adoption curves and maps. Each build runs 152 data tests and 110 code tests, and GitHub Actions checks every pull request.
 
-- **201,629 Medicare prescribers adopted semaglutide in seven years.** By 2024, 60% of everyone prescribing a diabetes drug in Medicare Part D had prescribed it.
-- **The spread accelerated, then may have started to slow.** Each year, a growing share of the prescribers who hadn't yet adopted did so: 5% in 2019, 15% in 2022 and 29% in 2023. In 2024 that share held at 28%, and the number of new adopters fell for the first time.
-- **Specialists went first; primary care carried the spread.** Endocrinologists were 31% of the first 1,065 adopters in 2018, and by 2024, 86% of endocrinologists in Part D prescribed semaglutide. But in 2024, 58% of the prescribers using it were primary care physicians, and a quarter were nurse practitioners, up from 165 nurse practitioners in 2018 to 43,635.
+<img src="docs/images/us_night_lights.gif" width="64%" alt="Night-lights map: each US Medicare prescriber lights up in the year they first prescribe semaglutide, 2018 to 2024"> <img src="docs/images/uk_night_lights.gif" width="34%" alt="Night-lights map: each UK GP practice lights up once it reaches 11+ semaglutide items in 12 months, January 2018 to July 2026">
 
-### Who prescribes it
+*Each light is a US Medicare Part D prescriber (left) or a UK GP practice (right), switched on when it first reaches 11+ semaglutide prescriptions in a year. Both maps run at the same pace, 1.2 seconds a year; the UK's runs longer because its data go to July 2026. Brighter areas have more adopters, partly because they have more prescribers. US timing within each year is illustrative: the data are yearly. Contiguous US.*
+
+## Who prescribed it first
+
+- **US: endocrinologists.** They were 2% of US diabetes-drug prescribers in 2018 but 31% of that year's 1,065 adopters, and 43% of them had adopted by the end of 2019, when 5% of all prescribers had. Primary care then carried the spread: in 2024, 58% of the prescribers using semaglutide were primary care physicians and a quarter were nurse practitioners.
+- **UK: the practices that prescribe most for diabetes.** The UK data are by GP practice, not prescriber, so they have no specialty. At the end of 2019, practices that had adopted wrote a median of 651 diabetes prescriptions a month, against 450 for those that hadn't. Part of that is built in: a practice with more diabetes patients reaches 11 prescriptions sooner. England's practices were first (January 2019), then Wales (February), Scotland and Northern Ireland (August).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/us_unexpected_specialties_dark.png">
   <img alt="Horizontal bar chart of the 1,294 US adopters from specialties that rarely manage diabetes, led by pulmonary disease (228), psychiatry (135), rheumatology (83), anesthesiology (71) and registered nurses (71), with 35 smaller specialties grouped as other (170)." src="docs/images/us_unexpected_specialties_light.png">
 </picture>
 
-- **99.3% of adopters came from specialties expected to prescribe diabetes drugs.** That includes primary care, endocrinology, nurse practitioners and physician assistants, and specialties with a clear clinical reason, such as cardiology, nephrology and hospital medicine.
-- **0.6% (1,294 prescribers) came from specialties that rarely manage diabetes,** led by pulmonology (228), psychiatry (135) and rheumatology (83), and including 42 naturopaths, 26 dermatologists and 7 dentists. Each reached 11+ semaglutide claims in a year. The data can't say why they prescribed it.
-- Each specialty's classification, and the reason for it, is in [dbt/seeds/specialty_expectations.csv](dbt/seeds/specialty_expectations.csv).
+- **Who else: 0.6% of US adopters (1,294 prescribers) came from specialties that rarely manage diabetes,** led by pulmonology (228), psychiatry (135) and rheumatology (83), and including 42 naturopaths, 26 dermatologists and 7 dentists. The other 99.3% came from specialties expected to prescribe diabetes drugs. Each specialty's classification, and the reason for it, is in [dbt/seeds/specialty_expectations.csv](dbt/seeds/specialty_expectations.csv).
 
-## What the UK data show (2018-2026)
-
-<img src="docs/images/uk_night_lights.gif" width="720" alt="Night-lights map: each UK GP practice lights up once it reaches 11+ semaglutide items in 12 months, January 2018 to July 2026">
-
-*Each light is an NHS GP practice in England, Scotland, Wales or Northern Ireland, switched on in the first month its past 12 months add up to 11+ semaglutide items, the closest match to the US rule (11+ claims in a year). Both maps run at the same pace, 1.2 seconds a year; the UK's runs longer because its data go to July 2026. The UK data are monthly, so the timing is real to the month. Brighter areas have more adopting practices, partly because they have more practices. Data: NHSBSA (England), Public Health Scotland, BSO (Northern Ireland) and NWSSP (Wales).*
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/uk_adoption_curve_dark.png">
-  <img alt="Two charts. Left: new adopting GP practices each year, none in 2018, 2,144 in 2019, a peak of 3,062 in 2020, then falling to 39 in 2025. Right: the share of practices prescribing diabetes drugs that have adopted, 25% at the end of 2019, 62% in 2020, 81% in 2021 and 99% by July 2026." src="docs/images/uk_adoption_curve_light.png">
-</picture>
-
-- **8,210 GP practices adopted semaglutide.** By July 2026, 99% of UK practices prescribing a diabetes drug had reached 11+ semaglutide items in 12 months.
-- **Fast once it started.** The first practices reached the threshold in January 2019. A tenth of practices had adopted by September 2019, half by July 2020 and 90% by October 2022. New adopters peaked at 3,062 in 2020, fell to a few hundred a year in 2023 and 2024, and to dozens since, because almost no practice is left to adopt.
-- **Each nation took its own path.** Wales reached half of its practices first (December 2019), then England (July 2020), Northern Ireland (September 2020) and Scotland (December 2020). Scotland and Northern Ireland started later (August 2019) than England (January 2019) and Wales (February 2019), and Scotland was the last to reach 90% (April 2024).
-- **Nearly every practice, but a small share of prescriptions.** In 2025, semaglutide was 2.4% of the UK's glucose-lowering prescription items: 2.2% in England, 2.8% in Wales, 4.8% in Northern Ireland and 5.0% in Scotland.
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/uk_nations_adoption_dark.png">
-  <img alt="Four small charts, one per nation, of the monthly share of GP practices that have adopted semaglutide, with the UK in grey behind each. Wales reached half of its practices in December 2019, England in July 2020, Northern Ireland in September 2020 and Scotland in December 2020." src="docs/images/uk_nations_adoption_light.png">
-</picture>
-
-## US vs UK
+## How fast it spread
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/us_uk_comparison_dark.png">
   <img alt="Two charts. Left: the share that have adopted against years since the first adopters; UK GP practices rise steeply to 99%, US prescribers rise steadily to 60% after seven years. Right: semaglutide's share of diabetes prescriptions by year; the US and UK track each other until 2021, then the US rises to 7.4% in 2024 while the UK levels off near 2.4%." src="docs/images/us_uk_comparison_light.png">
 </picture>
 
-- **Uptake was faster in the UK.** Half of UK practices had adopted within 18 months of the first adopters; US prescribers reached 48% after six years and 60% after seven. Part of that gap is built into the data: a practice adopts when any one of its GPs does, and the US data can miss prescribers who use semaglutide mainly for patients under 65.
-- **Use is heavier in the US.** The two countries' shares of diabetes prescriptions tracked each other until 2021 (1.8% of Medicare's 30-day fills, 1.2% of UK items). Then the US pulled away: 7.4% in 2024, against 2.5% in the UK, which has stayed at about that level since.
-- **Broad but thin in the UK.** Nearly every UK practice prescribes semaglutide, but it is a small share of what they prescribe for diabetes.
+- **US: slowly, then faster.** 5% of diabetes-drug prescribers had adopted by the end of 2019, 19% by 2021, 48% by 2023 and 60% by 2024. Each year a larger share of those who hadn't adopted did so, from 5% in 2019 to 29% in 2023. In 2024 that share held at 28%, and new adopters fell for the first time (63,477 to 51,114).
+- **UK: fast and almost complete.** Half of GP practices adopted within 18 months of the first (by July 2020), 90% by October 2022 and 99% by July 2026. Part of the gap with the US is built in: a practice adopts when any one of its GPs does.
+- **But it runs deeper in the US.** Semaglutide's share of diabetes prescriptions was similar in the two countries until 2021. By 2024 it was 7.4% in the US and 2.5% in the UK, where it has stayed since: nearly every UK practice prescribes it, but in small amounts.
 
-### What's being compared
+Year-by-year charts for each country, and for each UK nation, are in [docs/results.md](docs/results.md).
 
-The two countries' data differ in what they count, so the comparison is about the shape and timing of the spread, not its level.
+## Where it spread
 
-| | US | UK |
-|---|---|---|
-| Who adopts | An individual prescriber | A GP practice (all of its prescribers) |
-| Patients covered | Medicare Part D: mostly people 65 and over | NHS GP patients of all ages |
-| Prescriptions | Filled at pharmacies | Dispensed in the community (pharmacies, dispensing practices) |
-| Adoption | First year with 11+ claims | First month with 11+ items in the past 12 months |
-| Population at risk | 11+ claims for a glucose-lowering drug that year | 1+ glucose-lowering item that month |
-| Not in the data | Private insurance, Medicaid, hospitals | Private prescriptions, hospitals, specialist weight-management services |
+- **US: the South-east first, and rural areas furthest.** At the end of 2019, 12% of Alabama's diabetes-drug prescribers had adopted, followed by Mississippi, North Carolina, West Virginia and South Carolina, against under 2% in Colorado, Maine and Utah. By 2024, 75% of prescribers in small towns and rural areas had adopted, against 57% in metropolitan areas.
 
-Shares of prescriptions use US 30-day fills (a 90-day fill counts as 3) and UK items, which have no fixed length. Medicare's patients are older than UK GP patients as a whole, so the levels are indicative, not exact.
+- **UK: Wales first, London last.** At the end of 2019, 56% of Welsh practices had adopted, against 7% in London. Two years later London was still the slowest (66%, against 96% in Wales). Unlike the US, rural and urban practices in England and Wales adopted at the same pace.
 
-## By the numbers
+**Comparing the two countries:** US data cover Medicare Part D, mostly people 65 and over, and count individual prescribers; UK data cover all NHS GP patients and count practices. So the comparison is about the shape and timing of the spread, not its level. Definitions and the full comparison are in [docs/methods.md](docs/methods.md).
 
-| | US | UK |
-|---|---|---|
-| Rows processed | 181.8 million (prescriber x drug x year) | 21.6 million (practice x drug x month) |
-| Prescriptions they cover | 9.4 billion claims | 12.2 billion items |
-| Drug spending they cover | $1.2 trillion | |
-| Prescribers | 1.54 million prescribers | 9,134 GP practices |
-| Placed on the map | 99.97% of prescriber-years | 99.6% of practice-months |
-| Raw data | 33 GB of CSV, stored as 4.6 GB of Parquet | 0.3 GB of Parquet, filtered to diabetes drugs on download |
-
-21.6 billion prescriptions in all. Every build runs 138 data tests and 109 code tests.
-
-## Methods
-
-### Data
+## Data
 
 | Country | Source | Unit | Time step |
 |---|---|---|---|
-| US | Medicare Part D Prescribers by Provider and Drug (CMS) | Individual prescriber | Year |
-| England | English Prescribing Dataset (NHS Business Services Authority) | GP practice | Month |
-| Scotland | Prescriptions in the Community (Public Health Scotland) | GP practice | Month |
-| Northern Ireland | GP Prescribing Data (Business Services Organisation, via OpenDataNI) | GP practice | Month |
-| Wales | GP practice prescribing (NHS Wales Shared Services Partnership) | GP practice | Month |
+| US | [Medicare Part D Prescribers by Provider and Drug](https://data.cms.gov/provider-summary-by-type-of-service/medicare-part-d-prescribers/medicare-part-d-prescribers-by-provider-and-drug) (CMS) | Individual prescriber | Year |
+| England | [English Prescribing Dataset](https://opendata.nhsbsa.net/dataset/english-prescribing-dataset-epd-with-snomed-code) (NHS Business Services Authority) | GP practice | Month |
+| Scotland | [Prescriptions in the Community](https://www.opendata.nhs.scot/dataset/prescriptions-in-the-community) (Public Health Scotland) | GP practice | Month |
+| Northern Ireland | [GP Prescribing Data](https://www.opendatani.gov.uk/dataset/gp-prescribing-data) (Business Services Organisation, via OpenDataNI) | GP practice | Month |
+| Wales | [GP practice prescribing](https://nwssp.nhs.wales/ourservices/primary-care-services/general-information/data-and-publications/prescribing-data-extracts/general-practice-prescribing-data-extract/) (NHS Wales Shared Services Partnership) | GP practice | Month |
 
 US prescribers are placed on the map from their practice ZIP code, using Census ZIP Code Tabulation Areas and, where a ZIP code has none, the Census geocoder. UK practices are placed from their postcode, using [postcodes.io](https://postcodes.io) (built on the ONS Postcode Directory). Only GP practices are kept: in England and Wales, codes the NHS Organisation Data Service lists as GP practices; in Scotland and Northern Ireland, practices in each nation's practice register.
 
-### Definitions
-
-| Term | US | UK |
-|---|---|---|
-| Glucose-lowering drugs | WHO ATC class A10 | BNF 6.1.1 and 6.1.2 (insulins and antidiabetic drugs) |
-| Population at risk | Prescribers with 11+ Part D claims for at least one glucose-lowering drug (semaglutide included) in that year | GP practices with 1+ glucose-lowering item in that month |
-| Adoption | First year with 11+ claims for semaglutide, any brand (Ozempic, Rybelsus, Wegovy) | First month whose past 12 months add up to 11+ semaglutide items, any brand (the first month with 1+ item is also kept) |
-| Susceptible | In the population at risk and not yet adopted | Same |
-| Incidence | New adopters / susceptible, each year | Same, each month |
-| Prevalence | Ever adopted / that year's population at risk | Same, each month |
-
-Specialty and location are taken from the year (US) or month (UK) of adoption. In the US, 263 specialty labels are grouped into 13 groups.
-
-### Limitations
+## Limitations
 
 US:
 
@@ -141,9 +77,7 @@ UK:
 - **No patient ages or diagnoses.** The data can't be limited to older patients, or say why semaglutide was prescribed.
 - **Scotland's months are when the pharmacy was paid,** usually a month after dispensing; the other nations' are when it was dispensed.
 
-Every problem found in the source data, and how it was handled, is in [docs/data-notes.md](docs/data-notes.md).
-
-## How it's built
+## Architecture
 
 ```mermaid
 flowchart LR
@@ -151,16 +85,26 @@ flowchart LR
     B -->|dbt + DuckDB| C[Staging<br>typed, cleaned]
     C --> D[Intermediate<br>locations, specialties]
     D --> E[Marts<br>population at risk, adopters]
-    E --> F[Reports<br>adoption curves, shares,<br>specialties]
-    E -->|numpy, Pillow| G[Night-lights GIF]
+    E --> F[Reports<br>adoption curves, places,<br>shares, specialties]
+    E -->|numpy, Pillow| G[Night-lights GIFs]
     F -->|matplotlib| H[Charts]
 ```
 
-- **Python 3.12** with [uv](https://docs.astral.sh/uv/) for downloads (resumable, retried, checked against expected columns and row counts) and charts.
+- **Python 3.12** with [uv](https://docs.astral.sh/uv/) for downloads from eight public sources (resumable, retried, checked against expected columns and row counts) and for the maps and charts.
 - **dbt + DuckDB** for every transformation, as tested SQL models, from raw files to the analysis tables.
 - **Quality checks:** data tests on the full data (uniqueness, completeness, value ranges, and that counts reconcile between layers), and an end-to-end test that builds the whole warehouse on a small made-up dataset with known answers.
 - **GitHub Actions** runs formatting, lint and all tests on every pull request; `main` only changes through pull requests that pass.
 - Built with Claude as a coding assistant. I set the questions and methods, made the analytical decisions, and reviewed and merged every pull request; tests and CI check every change.
+
+| | US | UK |
+|---|---|---|
+| Rows processed | 181.8 million (prescriber x drug x year) | 21.6 million (practice x drug x month) |
+| Prescriptions they cover | 9.4 billion claims | 12.2 billion items |
+| Prescribers | 1.54 million prescribers | 9,134 GP practices |
+| Placed on the map | 99.97% of prescriber-years | 99.6% of practice-months |
+| Raw data | 33 GB of CSV, stored as 4.6 GB of Parquet | 0.3 GB of Parquet, filtered to diabetes drugs on download |
+
+Every problem found in the source data, and how it was handled, is in [docs/data-notes.md](docs/data-notes.md).
 
 ## Run it yourself
 
@@ -173,6 +117,9 @@ uv sync                      # create the environment from uv.lock
 uv run pre-commit install    # turn on the checks that run on every commit
 uv run pytest                # run the tests, including a dbt build on made-up sample data
 ```
+
+<details>
+<summary><b>Full pipeline:</b> download the data, build the warehouse and draw the figures</summary>
 
 Download the data:
 
@@ -193,7 +140,7 @@ The Part D download is about 33 GB of CSVs from data.cms.gov, one file at a time
 Build the warehouse and draw the figures:
 
 ```bash
-uv run build-warehouse       # dbt build with all data tests: ~2 minutes, writes data/warehouse.duckdb
+uv run build-warehouse       # dbt build with all data tests: ~3 minutes, writes data/warehouse.duckdb
 uv run night-lights          # docs/images/{us,uk}_night_lights.gif and a still of each last frame (~45 s);
                              # --detailed adds the small print, for sharing a map on its own
 uv run adoption-curve        # docs/images/{us,uk}_adoption_curve_*.png and uk_nations_adoption_*.png
@@ -202,21 +149,13 @@ uv run specialty-chart       # docs/images/us_unexpected_specialties_*.png
 uv run social-preview        # docs/images/social_preview.png, the image shown when the repo is shared
 ```
 
-## Project layout
-
-```
-src/semaglutide_spread/   Python code: downloads, geocoding, maps and charts
-dbt/                      SQL models that clean and combine the data, with data tests
-tests/                    automated tests, including the made-up sample data
-docs/                     notes on the data, and the images shown in this README
-data/                     downloaded and built data (not committed; see data/README.md)
-```
+</details>
 
 ## Roadmap
 
 - [x] **M1: US adoption.** Part D 2018-2024, population at risk, first adoption, US night-lights GIF
 - [x] **M2: UK.** Monthly GP practice data for England, Scotland, Northern Ireland and Wales, same measures, UK night-lights GIF
-- [x] **M3: Compare.** US vs UK adoption and share of prescriptions, who prescribes it
+- [x] **M3: Compare.** Who prescribed it first, how fast it spread and where, US vs UK
 - [ ] **M4: Agents.** Claude-powered helpers for drug-name matching, data quality triage and questions
 
 ## Author
