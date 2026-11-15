@@ -8,11 +8,11 @@ Epidemiologists track how a disease moves through a population: who catches it f
 
 ## How it's built
 
-Python pipelines download and validate data covering 9.4 billion Medicare claims and 12.2 billion UK prescriptions into Parquet, and dbt models in DuckDB turn it into adoption curves and maps. Each build runs 152 data tests and 110 code tests, and GitHub Actions checks every pull request.
+Python pipelines download and validate data covering 9.4 billion Medicare claims and 12.2 billion UK prescriptions into Parquet, and dbt models in DuckDB turn it into adoption curves and maps. Each build runs 152 data tests and 111 code tests, and GitHub Actions checks every pull request.
 
-<img src="docs/images/us_night_lights.gif" width="64%" alt="Night-lights map: each US Medicare prescriber lights up in the year they first prescribe semaglutide, 2018 to 2024"> <img src="docs/images/uk_night_lights.gif" width="34%" alt="Night-lights map: each UK GP practice lights up once it reaches 11+ semaglutide items in 12 months, January 2018 to July 2026">
+<img src="docs/images/us_uk_night_lights.gif" alt="Night-lights maps of the US and the UK side by side on one clock, 2018 to 2026: each US Medicare prescriber and each UK GP practice lights up when it first reaches 11+ semaglutide prescriptions in a year">
 
-*Each light is a US Medicare Part D prescriber (left) or a UK GP practice (right), switched on when it first reaches 11+ semaglutide prescriptions in a year. Both maps run at the same pace, 1.2 seconds a year; the UK's runs longer because its data go to July 2026. Brighter areas have more adopters, partly because they have more prescribers. US timing within each year is illustrative: the data are yearly. Contiguous US.*
+*Each light is a US Medicare Part D prescriber (left) or a UK GP practice (right), switched on when it first reaches 11+ semaglutide prescriptions in a year. Both maps run on one clock; the US map stops changing after 2024, its last year of data, while the UK's runs to July 2026. Brighter areas have more adopters, partly because they have more prescribers. US timing within each year is illustrative: the data are yearly. Contiguous US.*
 
 ## Who prescribed it first
 
@@ -143,6 +143,7 @@ Build the warehouse and draw the figures:
 uv run build-warehouse       # dbt build with all data tests: ~3 minutes, writes data/warehouse.duckdb
 uv run night-lights          # docs/images/{us,uk}_night_lights.gif and a still of each last frame (~45 s);
                              # --detailed adds the small print, for sharing a map on its own
+uv run night-lights-combined # docs/images/us_uk_night_lights.gif: both countries on one clock (~30 s)
 uv run adoption-curve        # docs/images/{us,uk}_adoption_curve_*.png and uk_nations_adoption_*.png
 uv run comparison-chart      # docs/images/us_uk_comparison_*.png
 uv run specialty-chart       # docs/images/us_unexpected_specialties_*.png
