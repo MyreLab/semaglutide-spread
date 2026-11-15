@@ -217,6 +217,25 @@ def test_specialty_chart_from_the_built_warehouse(built, tmp_path):
     assert len(specialties.render(built, out_dir=tmp_path)) == 2
 
 
+def test_combined_night_lights_from_the_built_warehouse(built, tmp_path):
+    from PIL import Image
+
+    from semaglutide_spread.viz import combined_night_lights as combined
+
+    path = combined.render(built, out_dir=tmp_path, width=480, frames_per_year=2)
+    us = combined.load(built, combined.nl.US, 200, 1.0)
+    uk = combined.load(built, combined.nl.UK, 100, 1.0)
+    end = max(us.end, uk.end)  # the later of the two countries' last periods
+    with Image.open(path) as image:
+        assert image.n_frames == round((end - 2018) * 2)  # one clock, to the later end
+        assert image.size[0] == 480
+    # after its data end, a country's count says so; before, it doesn't
+    first = min(us, uk, key=lambda m: m.end)
+    assert first.end < end
+    assert "(data to" not in combined.count_label(first, first.end)
+    assert combined.count_label(first, end).endswith(")")
+
+
 def test_social_preview_from_the_built_warehouse(built, tmp_path):
     from PIL import Image
 
