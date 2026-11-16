@@ -57,21 +57,15 @@ flowchart LR
   <img alt="Horizontal bar chart of the 1,294 US adopters from specialties that rarely manage diabetes, led by pulmonary disease (228), psychiatry (135), rheumatology (83), anesthesiology (71) and registered nurses (71), with 35 smaller specialties grouped as other (170)." src="docs/images/us_unexpected_specialties_light.png">
 </picture>
 
-Each specialty's classification, and the reason for it, is in [dbt/seeds/specialty_expectations.csv](dbt/seeds/specialty_expectations.csv).
-
-Everyone prescribing diabetes drugs is the population at risk. Year-by-year results for each country are in [docs/results.md](docs/results.md), and definitions in [docs/methods.md](docs/methods.md).
-
 ## Problems I ran into
 
 Most of the work was in the data, not the code. A few problems that changed the design:
 
-- **A Census file from the wrong decade.** The file labelled "2020 Gazetteer" lists the 2010 ZIP areas. A dbt test comparing it with another Census file caught the mismatch (851 ZIP areas in one but not the other), and the downloader now checks the row count the Census Bureau publishes.
+- **ZIP codes that aren't places.** About 2% of Medicare's ZIP codes have no Census ZIP area to map to; they mostly belong to large medical centres with their own ZIP code. I geocoded those 12,391 addresses and filled the failures from nearby matches, which puts 99.97% of prescriber-years on the map. The build fails if any year drops below 99%.
 - **A column that changed meaning.** In March 2025, England's prescribing data started putting drug names in the column that used to hold drug codes. Read the old way, it returns zero diabetes prescriptions and no error. The downloader now checks each month's columns against the layouts it knows and stops on anything new.
+- **A Census file from the wrong decade.** The file labelled "2020 Gazetteer" lists the 2010 ZIP areas. A dbt test comparing it with another Census file caught the mismatch (851 ZIP areas in one but not the other), and the downloader now checks the row count the Census Bureau publishes.
+- **Searching for diabetes drugs finds the wrong things.** A text search of Medicare's drug names also returns insulin syringes and metolazone, a diuretic. The drug list is now a dbt seed based on the WHO's diabetes drug group, and a test fails if Medicare publishes a new name nobody has classified.
 - **Paging an API without losing rows.** England's and Scotland's portals return 32,000 rows per request, and without a fixed sort order pages can overlap or skip rows. Every download uses a fixed order and is checked against a separate total before it's saved.
-- **Text encodings.** Wales switches between UTF-8 and Latin-1 from one month to the next, and one line of the 2020 Medicare file isn't valid UTF-8 at all. Encodings are detected per file, and no rows are dropped.
-- **What counts as a GP practice.** Each nation's data mixes GP practices with hospitals and other prescribers, so each nation's official practice list decides what's in.
-
-Every data issue and how I handled it is in [docs/data-notes.md](docs/data-notes.md).
 
 ## Data
 
@@ -90,7 +84,7 @@ The limitations that matter most:
 - The UK data count GP practices, not individual prescribers, and leave out private prescriptions, including online weight-loss services.
 - Neither country's data says why semaglutide was prescribed.
 
-The full list is in [docs/methods.md](docs/methods.md).
+The full list, with definitions, is in [docs/methods.md](docs/methods.md), and year-by-year results for each country are in [docs/results.md](docs/results.md).
 
 ## Working with Claude Code
 
