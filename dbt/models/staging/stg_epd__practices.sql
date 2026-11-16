@@ -13,7 +13,9 @@ select
     -- Tidy to the standard "AB1 2CD" form, the same as the postcode lookup.
     nullif(
         regexp_replace(
-            upper(replace(postcode, ' ', '')), '^([A-Z]{1,2}[0-9][A-Z0-9]?)([0-9][A-Z]{2})$', '\1 \2'
+            upper(replace(postcode, ' ', '')),
+            '^([A-Z]{1,2}[0-9][A-Z0-9]?)([0-9][A-Z]{2})$',
+            '\1 \2'
         ),
         '-'
     ) as postcode,

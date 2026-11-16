@@ -43,7 +43,8 @@ select
     round(100.0 * adopted_at_risk / at_risk, 2) as prevalence_pct,
     matched_susceptible,
     matched_new_adopters,
-    round(100.0 * matched_new_adopters / nullif(matched_susceptible, 0), 2) as matched_incidence_pct,
+    round(100.0 * matched_new_adopters / nullif(matched_susceptible, 0), 2)
+        as matched_incidence_pct,
     matched_adopted_at_risk,
     round(100.0 * matched_adopted_at_risk / at_risk, 2) as matched_prevalence_pct
 from by_month

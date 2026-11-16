@@ -22,7 +22,7 @@ select
     p.practice_code,
     p.practice_name,
     p.postcode,
-    p.practice_code in (select practice_code from {{ ref('stg_ods__gp_practices') }})
+    p.practice_code in (select o.practice_code from {{ ref('stg_ods__gp_practices') }} as o)
         as is_gp_practice,
     coalesce(l.lookup_status, 'not_looked_up') as postcode_status,
     l.latitude,

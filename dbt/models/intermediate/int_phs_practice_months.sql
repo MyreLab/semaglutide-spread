@@ -4,15 +4,20 @@
 -- months before it).
 
 with register as (
-    select r.*, b.health_board_name
+    select
+        r.*,
+        b.health_board_name
     from {{ ref('stg_phs__register') }} as r
     left join {{ ref('scottish_health_boards') }} as b using (health_board_code)
 ),
 
 gp_months as (
-    select p.month, p.practice_code, p.items
+    select
+        p.month,
+        p.practice_code,
+        p.items
     from {{ ref('stg_phs__practices') }} as p
-    where p.practice_code in (select practice_code from register)
+    where p.practice_code in (select r.practice_code from register as r)
 ),
 
 with_details as (

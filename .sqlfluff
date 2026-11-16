@@ -1,0 +1,13 @@
+[sqlfluff]
+dialect = duckdb
+templater = jinja
+max_line_length = 100
+# CP02: source columns keep the publishers' names (e.g. CMS's Prscrbr_NPI) until staging
+#       renames them.
+# RF04: year and month are the natural column names here, even though they're keywords.
+# ST06: would reorder output columns, which are part of the contracts.
+# ST07: USING is clearer than ON for joins on identically named keys like (year, npi).
+exclude_rules = CP02, RF04, ST06, ST07
+
+[sqlfluff:templater:jinja]
+apply_dbt_builtins = True

@@ -54,6 +54,7 @@ select
     p.rural_urban_2021
 from first_months as f
 inner join {{ ref('uk_population_at_risk') }} as p
-    on f.nation = p.nation
-    and f.practice_code = p.practice_code
-    and f.adoption_month = p.month
+    on
+        f.nation = p.nation
+        and f.practice_code = p.practice_code
+        and f.adoption_month = p.month

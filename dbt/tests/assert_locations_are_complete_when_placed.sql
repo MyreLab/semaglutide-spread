@@ -1,7 +1,10 @@
 -- A placed prescriber-year has a latitude, longitude and 5-digit county; an unplaced one has
 -- none of them and says why.
 
-select year, npi, location_method
+select
+    year,
+    npi,
+    location_method
 from {{ ref('int_prescriber_locations') }}
 where
     (

@@ -8,4 +8,4 @@ select
     round(100.0 * count(*) / sum(count(*)) over (partition by year), 3) as pct_of_year
 from {{ ref('int_prescriber_locations') }}
 group by year, location_method, unplaced_reason
-order by year, prescriber_years desc
+order by year asc, prescriber_years desc

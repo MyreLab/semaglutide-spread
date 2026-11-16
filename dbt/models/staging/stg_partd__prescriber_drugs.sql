@@ -5,7 +5,8 @@
 select
     cast(year as smallint) as year,
     Prscrbr_NPI as npi,
-    nullif(Prscrbr_Type, 'None') as prescriber_type,  -- CMS writes the word "None" for a missing type
+    -- CMS writes the word "None" for a missing type
+    nullif(Prscrbr_Type, 'None') as prescriber_type,
     Prscrbr_Type_Src as prescriber_type_source,
     Brnd_Name as brand_name,
     Gnrc_Name as generic_name,

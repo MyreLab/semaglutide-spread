@@ -7,9 +7,12 @@ with register as (
 ),
 
 gp_months as (
-    select p.month, p.practice_code, p.items
+    select
+        p.month,
+        p.practice_code,
+        p.items
     from {{ ref('stg_ni__practices') }} as p
-    where p.practice_code in (select practice_code from register)
+    where p.practice_code in (select r.practice_code from register as r)
 ),
 
 with_details as (

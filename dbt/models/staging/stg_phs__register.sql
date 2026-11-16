@@ -7,7 +7,9 @@ select
     cast(nullif(list_size, '') as integer) as list_size,
     nullif(
         regexp_replace(
-            upper(replace(postcode, ' ', '')), '^([A-Z]{1,2}[0-9][A-Z0-9]?)([0-9][A-Z]{2})$', '\1 \2'
+            upper(replace(postcode, ' ', '')),
+            '^([A-Z]{1,2}[0-9][A-Z0-9]?)([0-9][A-Z]{2})$',
+            '\1 \2'
         ),
         ''
     ) as postcode,

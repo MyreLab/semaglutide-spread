@@ -30,7 +30,7 @@ per_prescriber_year as (
             0
         ) as bigint) as target_drug_claims,
         string_agg(distinct brand_name, ', ' order by brand_name)
-            filter (where generic_name = '{{ var("target_generic_name") }}') as target_drug_brands
+        filter (where generic_name = '{{ var("target_generic_name") }}') as target_drug_brands
     from glucose_lowering_rows
     group by year, npi
 )
