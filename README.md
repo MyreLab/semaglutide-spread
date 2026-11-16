@@ -26,8 +26,8 @@ flowchart LR
 ```
 
 - **Ingestion (Python).** One downloader per source. Downloads are resumable and retried, columns are checked against what the publisher documents, and row counts or totals are checked before anything is saved. Everything lands as text-only Parquet, partitioned by year or month, so column types are decided in one place (dbt) instead of guessed on load.
-- **Transformation (dbt on DuckDB).** Staging models type and clean each source, intermediate models handle locations and specialties, and marts hold the population at risk and the adopters. Hand-maintained lookups, like the list of diabetes drugs and the specialty groups, are dbt seeds with a reason on each row.
-- **Testing.** dbt tests run on the full data at every build, including checks that counts reconcile between layers. A pytest suite also builds the whole warehouse on a small made-up dataset with answers worked out in advance.
+- **Transformation (dbt on DuckDB).** Staging models type and clean each source, intermediate models handle locations and specialties, and marts hold the population at risk and the adopters. Hand-maintained lookups, like the list of diabetes drugs and the specialty groups, are dbt seeds with a reason on each row. Browse the models, tests and lineage in the [dbt docs](https://myrelab.github.io/semaglutide-spread/).
+- **Testing.** dbt tests run on the full data at every build, including checks that counts reconcile between layers. A pytest suite also builds the whole warehouse on a small made-up dataset with answers worked out in advance. The marts and reports have enforced contracts, so a renamed column or changed type fails the build.
 - **CI.** GitHub Actions runs formatting, lint and all tests on every pull request; `main` only changes through pull requests that pass.
 - **Outputs.** Charts in matplotlib; the maps are drawn with numpy and Pillow.
 
@@ -95,7 +95,6 @@ I built this with Claude Code as a pair programmer. I chose the questions and th
 - Run dbt on Snowflake instead of DuckDB, with raw files in S3. Most models would carry over as they are; a few DuckDB-specific pieces, like the as-of joins and reading Parquet straight from disk, would need rewriting.
 - Schedule the downloaders and the dbt build with Dagster or Airflow, monthly, as the sources publish.
 - Make the largest models incremental instead of rebuilding everything each time.
-- Publish the dbt docs and lineage graph.
 
 ## Run it yourself
 
