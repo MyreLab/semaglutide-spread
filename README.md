@@ -115,10 +115,7 @@ uv run pre-commit install    # turn on the checks that run on every commit
 uv run pytest                # run the tests, including a dbt build on made-up sample data
 ```
 
-<details>
-<summary><b>Full pipeline:</b> download the data, build the warehouse and draw the figures</summary>
-
-Download the data:
+To run the full pipeline, download the data:
 
 ```bash
 uv run partd-download        # Medicare Part D, 2018 to the latest year CMS has published
@@ -147,7 +144,6 @@ uv run specialty-chart       # docs/images/us_unexpected_specialties_*.png
 uv run social-preview        # docs/images/social_preview.png, the image shown when the repo is shared
 ```
 
-</details>
 
 ## Roadmap
 
