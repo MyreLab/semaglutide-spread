@@ -20,8 +20,14 @@ models:
     marts:
       # The analysis tables: population at risk and adopters.
       +materialized: table
+      # Contracts: every column's name and type is declared in the YAML, and the build fails
+      # if a model's output doesn't match. These are the tables the charts read from.
+      +contract:
+        enforced: true
     reports:
       +materialized: table
+      +contract:
+        enforced: true
 
 vars:
   # The drug whose spread is tracked, exactly as Part D writes its generic name. Changing it

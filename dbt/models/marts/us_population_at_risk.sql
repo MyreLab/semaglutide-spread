@@ -23,12 +23,12 @@ per_prescriber_year as (
     select
         year,
         npi,
-        sum(total_claims) as glucose_lowering_claims,
+        cast(sum(total_claims) as bigint) as glucose_lowering_claims,
         count(distinct generic_name) as glucose_lowering_drugs,
-        coalesce(
+        cast(coalesce(
             sum(total_claims) filter (where generic_name = '{{ var("target_generic_name") }}'),
             0
-        ) as target_drug_claims,
+        ) as bigint) as target_drug_claims,
         string_agg(distinct brand_name, ', ' order by brand_name)
             filter (where generic_name = '{{ var("target_generic_name") }}') as target_drug_brands
     from glucose_lowering_rows

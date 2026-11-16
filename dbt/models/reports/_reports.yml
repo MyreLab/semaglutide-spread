@@ -5,26 +5,113 @@ models:
     description: >
       Match-rate report: prescriber-years by year and location method, with each method's
       share of the year.
+    columns:
+      - name: year
+        data_type: smallint
+        description: Data year.
+      - name: location_method
+        data_type: varchar
+        description: How the prescriber-years were placed (see int_prescriber_locations).
+      - name: unplaced_reason
+        data_type: varchar
+        description: Why they weren't placed. Empty when placed.
+      - name: prescriber_years
+        data_type: bigint
+        description: Number of prescriber-years.
+      - name: pct_of_year
+        data_type: double
+        description: Share of that year's prescriber-years, in percent.
 
   - name: rpt_us_adoption_curve
     description: >
       The epidemic curve, one row per year: population at risk, susceptible prescribers, new
       adopters, incidence and prevalence of adoption, cumulative adopters, and the same
-      prevalence among all Part D prescribers (sensitivity analysis). Column definitions are
-      at the top of the model's SQL.
+      prevalence among all Part D prescribers (sensitivity analysis).
     columns:
       - name: year
+        data_type: smallint
+        description: Data year.
         data_tests: [unique, not_null]
+      - name: at_risk
+        data_type: bigint
+        description: Prescribers in the population at risk this year.
+      - name: susceptible
+        data_type: bigint
+        description: Of those, not yet adopted at the start of the year.
+      - name: new_adopters
+        data_type: bigint
+        description: Prescribers who adopted this year.
+      - name: incidence_pct
+        data_type: double
+        description: new_adopters / susceptible, in percent.
+      - name: adopted_at_risk
+        data_type: bigint
+        description: Prescribers at risk this year who have adopted, this year or earlier.
+      - name: prevalence_pct
+        data_type: double
+        description: adopted_at_risk / at_risk, in percent.
+      - name: cumulative_adopters
+        data_type: bigint
+        description: Everyone who has adopted so far, whether or not they are at risk this year.
+      - name: all_prescribers
+        data_type: bigint
+        description: Every Part D prescriber this year, whatever they prescribe.
+      - name: adopted_all_prescribers
+        data_type: bigint
+        description: Of those, how many have adopted.
+      - name: prevalence_all_prescribers_pct
+        data_type: double
+        description: adopted_all_prescribers / all_prescribers, in percent (sensitivity analysis).
 
   - name: rpt_uk_adoption_curve
     description: >
       The UK epidemic curves, one row per nation x month, for both adoption measures:
-      population at risk, susceptible, new adopters, incidence and prevalence. Definitions at
-      the top of the model's SQL.
+      population at risk, susceptible, new adopters, incidence and prevalence. Columns starting
+      with matched_ use the 11+ items in 12 months measure, for comparing with the US.
     data_tests:
       - unique_combination_of_columns:
           arguments:
             combination_of_columns: [nation, month]
+    columns:
+      - name: nation
+        data_type: varchar
+        description: England, Scotland, Wales or Northern Ireland.
+      - name: month
+        data_type: date
+        description: First day of the prescribing month.
+      - name: at_risk
+        data_type: bigint
+        description: GP practices in the population at risk this month.
+      - name: susceptible
+        data_type: bigint
+        description: Of those, not yet adopted at the start of the month.
+      - name: new_adopters
+        data_type: bigint
+        description: Practices that adopted this month (first item).
+      - name: incidence_pct
+        data_type: double
+        description: new_adopters / susceptible, in percent. Null once every practice has adopted.
+      - name: adopted_at_risk
+        data_type: bigint
+        description: Practices at risk this month that have adopted, this month or earlier.
+      - name: prevalence_pct
+        data_type: double
+        description: adopted_at_risk / at_risk, in percent.
+      - name: matched_susceptible
+        data_type: bigint
+        description: Susceptible, on the matched measure.
+      - name: matched_new_adopters
+        data_type: bigint
+        description: New adopters, on the matched measure.
+      - name: matched_incidence_pct
+        data_type: double
+        description: Incidence, on the matched measure.
+      - name: matched_adopted_at_risk
+        data_type: bigint
+        description: Adopted and at risk, on the matched measure.
+      - name: matched_prevalence_pct
+        data_type: double
+        description: Prevalence, on the matched measure.
 
   - name: rpt_us_prescription_share
     description: >
@@ -32,11 +119,29 @@ models:
       year, by claims and by 30-day fills. Volume, not adoption: every prescriber counts.
     columns:
       - name: year
+        data_type: smallint
+        description: Data year.
         data_tests: [unique, not_null]
       - name: glucose_lowering_claims
+        data_type: bigint
+        description: Claims for all glucose-lowering drugs. A 90-day fill is one claim.
         data_tests: [not_null]
       - name: target_drug_claims
+        data_type: bigint
+        description: Claims for the target drug.
         data_tests: [not_null]
+      - name: target_share_claims_pct
+        data_type: double
+        description: target_drug_claims / glucose_lowering_claims, in percent.
+      - name: glucose_lowering_30day_fills
+        data_type: double
+        description: Fills standardised to 30 days (a 90-day fill counts as 3).
+      - name: target_drug_30day_fills
+        data_type: double
+        description: 30-day fills of the target drug.
+      - name: target_share_30day_fills_pct
+        data_type: double
+        description: target_drug_30day_fills / glucose_lowering_30day_fills, in percent.
 
   - name: rpt_uk_prescription_share
     description: >
@@ -47,10 +152,26 @@ models:
           arguments:
             combination_of_columns: [nation, year]
     columns:
+      - name: nation
+        data_type: varchar
+        description: England, Scotland, Wales or Northern Ireland.
+      - name: year
+        data_type: smallint
+        description: Calendar year.
+      - name: months
+        data_type: bigint
+        description: Months of data in the year. Less than 12 for a partial first or latest year.
       - name: glucose_lowering_items
+        data_type: bigint
+        description: Items for glucose-lowering drugs (BNF 6.1.1 and 6.1.2).
         data_tests: [not_null]
       - name: target_drug_items
+        data_type: bigint
+        description: Items for the target drug.
         data_tests: [not_null]
+      - name: target_share_pct
+        data_type: double
+        description: target_drug_items / glucose_lowering_items, in percent.
 
   - name: rpt_us_adopters_by_specialty
     description: >
@@ -61,12 +182,27 @@ models:
           arguments:
             combination_of_columns: [specialty_group, specialty]
     columns:
+      - name: specialty_group
+        data_type: varchar
+        description: Specialty group in the adoption year.
+      - name: specialty
+        data_type: varchar
+        description: Harmonised specialty in the adoption year, or Unknown.
       - name: expectation
+        data_type: varchar
+        description: expected, unexpected or unknown, from the specialty_expectations seed.
         data_tests: [not_null]
       - name: reason
+        data_type: varchar
+        description: Why, from the same seed.
         data_tests: [not_null]
       - name: adopters
+        data_type: bigint
+        description: Number of adopters.
         data_tests: [not_null]
+      - name: first_adoption_year
+        data_type: smallint
+        description: Earliest adoption year in the specialty.
 
   - name: rpt_us_adoption_by_place
     description: >
@@ -77,15 +213,32 @@ models:
           arguments:
             combination_of_columns: [year, place_type, place]
     columns:
+      - name: year
+        data_type: smallint
+        description: Data year.
       - name: place_type
+        data_type: varchar
+        description: state or rurality.
         data_tests:
           - accepted_values:
               arguments:
                 values: [state, rurality]
+      - name: place
+        data_type: varchar
+        description: >
+          State name, or Metropolitan, Micropolitan, Small town and rural, or Unknown
+          (RUCA codes 1-3, 4-6 and 7-10).
       - name: at_risk
+        data_type: bigint
+        description: Prescribers in the population at risk.
         data_tests: [not_null]
       - name: adopted
+        data_type: bigint
+        description: Of those, how many have adopted.
         data_tests: [not_null]
+      - name: prevalence_pct
+        data_type: double
+        description: adopted / at_risk, in percent.
 
   - name: rpt_uk_adoption_by_place
     description: >
@@ -97,12 +250,27 @@ models:
           arguments:
             combination_of_columns: [month, place_type, place]
     columns:
+      - name: month
+        data_type: date
+        description: First day of the prescribing month.
       - name: place_type
+        data_type: varchar
+        description: area or rurality.
         data_tests:
           - accepted_values:
               arguments:
                 values: [area, rurality]
+      - name: place
+        data_type: varchar
+        description: England's region or another nation, or Urban, Rural or Unknown.
       - name: at_risk
+        data_type: bigint
+        description: GP practices in the population at risk.
         data_tests: [not_null]
       - name: adopted
+        data_type: bigint
+        description: Of those, how many have adopted (matched measure).
         data_tests: [not_null]
+      - name: prevalence_pct
+        data_type: double
+        description: adopted / at_risk, in percent.
