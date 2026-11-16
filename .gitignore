@@ -18,6 +18,9 @@ __pycache__/
 build/
 dist/
 
+# Dagster's run history when `dagster dev` runs without DAGSTER_HOME
+.tmp_dagster_home_*/
+
 # Tool caches
 .pytest_cache/
 .ruff_cache/

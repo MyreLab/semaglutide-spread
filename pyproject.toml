@@ -9,6 +9,8 @@ authors = [{ name = "Myrela Bauman" }]
 requires-python = ">=3.12"
 # Runtime libraries are added by the pull request that first needs them.
 dependencies = [
+    "dagster>=1.13.30",
+    "dagster-dbt>=0.29.30",
     "dbt-core>=1.12.6",
     "dbt-duckdb>=1.11.1",
     "duckdb>=2.0.0",
@@ -38,6 +40,7 @@ social-preview = "semaglutide_spread.viz.social_preview:main"
 
 [dependency-groups]
 dev = [
+    "dagster-webserver>=1.13.30",
     "pre-commit>=4.0",
     "pytest>=8.3",
     "ruff>=0.17",
@@ -63,3 +66,12 @@ select = ["E", "W", "F", "I", "B", "UP", "SIM", "RUF"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra --strict-markers"
+filterwarnings = [
+    # Deprecations inside dagster-dbt and sqlglot, not in this project's code.
+    "ignore::DeprecationWarning:dagster_dbt",
+    "ignore::DeprecationWarning:sqlglotrs",
+]
+
+[tool.dagster]
+# What `uv run dagster dev` loads.
+module_name = "semaglutide_spread.definitions"
