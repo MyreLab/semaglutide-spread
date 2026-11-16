@@ -19,12 +19,12 @@ with at_risk as (
 
 by_place as (
     select
-        year,
+        a.year,
         'state' as place_type,
         coalesce(s.state_name, 'Unknown') as place,
-        has_adopted
-    from at_risk
-    left join {{ ref('us_states') }} as s on left(at_risk.county_fips, 2) = s.state_fips
+        a.has_adopted
+    from at_risk as a
+    left join {{ ref('us_states') }} as s on left(a.county_fips, 2) = s.state_fips
 
     union all
 

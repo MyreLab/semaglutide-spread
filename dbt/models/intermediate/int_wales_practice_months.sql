@@ -3,9 +3,13 @@
 -- address file; the health board from the prescribing file.
 
 with gp_months as (
-    select p.month, p.practice_code, p.health_board_code, p.items
+    select
+        p.month,
+        p.practice_code,
+        p.health_board_code,
+        p.items
     from {{ ref('stg_wales__practices') }} as p
-    where p.practice_code in (select practice_code from {{ ref('stg_ods__gp_practices') }})
+    where p.practice_code in (select o.practice_code from {{ ref('stg_ods__gp_practices') }} as o)
 ),
 
 diabetes as (

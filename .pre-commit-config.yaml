@@ -18,3 +18,11 @@ repos:
       - id: ruff-check
         args: ["--fix"]
       - id: ruff-format
+  # sqlfluff runs from the project's environment, so it uses the version locked in uv.lock.
+  - repo: local
+    hooks:
+      - id: sqlfluff-lint
+        name: sqlfluff lint
+        entry: uv run sqlfluff lint
+        language: system
+        files: ^dbt/(models|tests)/.*\.sql$

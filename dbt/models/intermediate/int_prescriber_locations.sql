@@ -10,17 +10,37 @@
 --   5. unplaced             outside the US, military mail, no ZIP code, or no nearby ZCTA
 
 with prescribers as (
-    select year, npi, street_1, street_2, city, state, zip5, country
+    select
+        year,
+        npi,
+        street_1,
+        street_2,
+        city,
+        state,
+        zip5,
+        country
     from {{ ref('stg_partd__prescribers') }}
 ),
 
 zctas as (
-    select zcta, latitude, longitude, county_fips
+    select
+        zcta,
+        latitude,
+        longitude,
+        county_fips
     from {{ ref('int_zcta_primary_county') }}
 ),
 
 geocoded as (
-    select street_1, street_2, city, state, zip5, latitude, longitude, county_fips
+    select
+        street_1,
+        street_2,
+        city,
+        state,
+        zip5,
+        latitude,
+        longitude,
+        county_fips
     from {{ ref('stg_census__geocoded_addresses') }}
     where geocode_status = 'Match'
 ),
@@ -42,7 +62,7 @@ zip3_median as (
         median(z.longitude) as longitude,
         mode(z.county_fips) as county_fips
     from prescribers as p
-    inner join zctas as z on z.zcta = p.zip5
+    inner join zctas as z on p.zip5 = z.zcta
     group by left(p.zip5, 3)
 ),
 
@@ -58,20 +78,29 @@ joined as (
             when p.zip5 is null then 'no_zip_code'
         end as excluded_reason,
         z.zcta is not null as has_zcta,
-        g.latitude as g_lat, g.longitude as g_lon, g.county_fips as g_county,
-        z.latitude as z_lat, z.longitude as z_lon, z.county_fips as z_county,
-        m5.latitude as m5_lat, m5.longitude as m5_lon, m5.county_fips as m5_county,
-        m3.latitude as m3_lat, m3.longitude as m3_lon, m3.county_fips as m3_county
+        g.latitude as g_lat,
+        g.longitude as g_lon,
+        g.county_fips as g_county,
+        z.latitude as z_lat,
+        z.longitude as z_lon,
+        z.county_fips as z_county,
+        m5.latitude as m5_lat,
+        m5.longitude as m5_lon,
+        m5.county_fips as m5_county,
+        m3.latitude as m3_lat,
+        m3.longitude as m3_lon,
+        m3.county_fips as m3_county
     from prescribers as p
-    left join zctas as z on z.zcta = p.zip5
+    left join zctas as z on p.zip5 = z.zcta
     left join geocoded as g
-        on z.zcta is null
-        and g.street_1 is not distinct from p.street_1
-        and g.street_2 is not distinct from p.street_2
-        and g.city is not distinct from p.city
-        and g.state is not distinct from p.state
-        and g.zip5 is not distinct from p.zip5
-    left join zip_geocoded_median as m5 on m5.zip5 = p.zip5
+        on
+            z.zcta is null
+            and g.street_1 is not distinct from p.street_1
+            and g.street_2 is not distinct from p.street_2
+            and g.city is not distinct from p.city
+            and g.state is not distinct from p.state
+            and g.zip5 is not distinct from p.zip5
+    left join zip_geocoded_median as m5 on p.zip5 = m5.zip5
     left join zip3_median as m3 on m3.zip3 = left(p.zip5, 3)
 ),
 

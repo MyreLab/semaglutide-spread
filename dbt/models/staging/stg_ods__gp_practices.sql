@@ -4,7 +4,7 @@
 select
     OrgId as practice_code,
     Name as practice_name,
-    Status as status,
-    PostCode as postcode,
+    Status as status,  -- noqa: AL09
+    PostCode as postcode,  -- noqa: AL09
     cast(LastChangeDate as date) as last_change_date
 from {{ source('ods', 'gp_practices') }}

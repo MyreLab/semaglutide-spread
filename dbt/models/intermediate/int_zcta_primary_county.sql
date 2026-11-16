@@ -8,7 +8,7 @@ with ranked as (
         county_name,
         land_area_m2,
         row_number() over (
-            partition by zcta order by land_area_m2 desc, county_fips
+            partition by zcta order by land_area_m2 desc, county_fips asc
         ) as rank_by_land
     from {{ ref('stg_census__zcta_counties') }}
 )
@@ -20,4 +20,4 @@ select
     r.county_fips,
     r.county_name
 from {{ ref('stg_census__zcta_centroids') }} as c
-inner join ranked as r on r.zcta = c.zcta and r.rank_by_land = 1
+inner join ranked as r on c.zcta = r.zcta and r.rank_by_land = 1
