@@ -22,8 +22,9 @@ with glucose_lowering_rows as (
 by_year as (
     select
         year,
-        sum(total_claims) as glucose_lowering_claims,
-        coalesce(sum(total_claims) filter (where is_target), 0) as target_drug_claims,
+        cast(sum(total_claims) as bigint) as glucose_lowering_claims,
+        cast(coalesce(sum(total_claims) filter (where is_target), 0) as bigint)
+            as target_drug_claims,
         -- CMS publishes 30-day fills with decimals (a 45-day fill is 1.5)
         round(sum(total_30day_fills), 1) as glucose_lowering_30day_fills,
         round(coalesce(sum(total_30day_fills) filter (where is_target), 0), 1)

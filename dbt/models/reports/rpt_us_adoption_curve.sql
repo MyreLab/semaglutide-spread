@@ -48,7 +48,7 @@ select
     round(100.0 * new_adopters / susceptible, 2) as incidence_pct,
     adopted_at_risk,
     round(100.0 * adopted_at_risk / at_risk, 2) as prevalence_pct,
-    sum(new_adopters) over (order by year) as cumulative_adopters,
+    cast(sum(new_adopters) over (order by year) as bigint) as cumulative_adopters,
     all_prescribers,
     adopted_all_prescribers,
     round(100.0 * adopted_all_prescribers / all_prescribers, 2) as prevalence_all_prescribers_pct

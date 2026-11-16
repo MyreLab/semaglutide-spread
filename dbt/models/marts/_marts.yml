@@ -12,19 +12,61 @@ models:
           arguments:
             combination_of_columns: [year, npi]
     columns:
+      - name: year
+        data_type: smallint
+        description: Data year.
+      - name: npi
+        data_type: varchar
+        description: National Provider Identifier, the prescriber's ID.
       - name: glucose_lowering_claims
+        data_type: bigint
         description: Claims for all glucose-lowering drugs, summed over the rows CMS publishes.
         data_tests: [not_null, {at_least: {arguments: {min_value: 11}}}]
+      - name: glucose_lowering_drugs
+        data_type: bigint
+        description: Number of different glucose-lowering drugs (generic names) prescribed.
       - name: target_drug_claims
+        data_type: bigint
         description: Claims for the target drug (0 if none).
         data_tests: [not_null]
       - name: target_drug_brands
+        data_type: varchar
         description: Brands of the target drug prescribed that year, comma-separated.
+      - name: prescribed_target_drug
+        data_type: boolean
+        description: True if the prescriber had 11+ claims for the target drug that year.
+      - name: entity_type
+        data_type: varchar
+        description: individual or organization.
+      - name: prescriber_type
+        data_type: varchar
+        description: Specialty as CMS writes it.
+      - name: specialty
+        data_type: varchar
+        description: Specialty after harmonising spelling variants (specialty_groups seed).
       - name: specialty_group
-        description: Null only if the prescriber-year is missing from int_prescriber_years.
+        data_type: varchar
+        description: One of 13 specialty groups. Null only if the prescriber-year is missing from int_prescriber_years.
         data_tests: [not_null]
+      - name: ruca_code
+        data_type: varchar
+        description: Rural-Urban Commuting Area code of the prescriber's address, as CMS publishes it.
       - name: location_method
+        data_type: varchar
+        description: How the prescriber was placed on the map (see int_prescriber_locations).
         data_tests: [not_null]
+      - name: latitude
+        data_type: double
+        description: Map location. Null if the prescriber couldn't be placed.
+      - name: longitude
+        data_type: double
+        description: Map location. Null if the prescriber couldn't be placed.
+      - name: county_fips
+        data_type: varchar
+        description: 2020 county FIPS code (5 digits).
+      - name: all_drug_claims
+        data_type: integer
+        description: Part D claims for all drugs that year, from the "by Provider" file.
 
   - name: us_adopters
     description: >
@@ -33,15 +75,52 @@ models:
       in that year.
     columns:
       - name: npi
+        data_type: varchar
+        description: National Provider Identifier, the prescriber's ID.
         data_tests: [unique, not_null]
       - name: adoption_year
+        data_type: smallint
+        description: First year with 11+ claims for the target drug.
         data_tests: [not_null, {at_least: {arguments: {min_value: 2018}}}]
       - name: adoption_brands
+        data_type: varchar
+        description: Brands of the target drug prescribed in the adoption year, comma-separated.
         data_tests: [not_null]
       - name: adoption_year_claims
+        data_type: bigint
+        description: Claims for the target drug in the adoption year.
         data_tests: [not_null, {at_least: {arguments: {min_value: 11}}}]
+      - name: adoption_year_glucose_lowering_claims
+        data_type: bigint
+        description: Claims for all glucose-lowering drugs in the adoption year.
+      - name: entity_type
+        data_type: varchar
+        description: individual or organization.
+      - name: prescriber_type
+        data_type: varchar
+        description: Specialty as CMS writes it, in the adoption year.
+      - name: specialty
+        data_type: varchar
+        description: Harmonised specialty in the adoption year.
       - name: specialty_group
+        data_type: varchar
+        description: Specialty group in the adoption year.
         data_tests: [not_null]
+      - name: ruca_code
+        data_type: varchar
+        description: Rural-Urban Commuting Area code in the adoption year.
+      - name: location_method
+        data_type: varchar
+        description: How the prescriber was placed on the map in the adoption year.
+      - name: latitude
+        data_type: double
+        description: Map location in the adoption year.
+      - name: longitude
+        data_type: double
+        description: Map location in the adoption year.
+      - name: county_fips
+        data_type: varchar
+        description: 2020 county FIPS code in the adoption year.
 
   - name: uk_population_at_risk
     description: >
@@ -54,9 +133,66 @@ models:
             combination_of_columns: [nation, practice_code, month]
     columns:
       - name: nation
+        data_type: varchar
+        description: England, Scotland, Wales or Northern Ireland.
         data_tests: [not_null]
+      - name: month
+        data_type: date
+        description: First day of the prescribing month.
+      - name: practice_code
+        data_type: varchar
+        description: GP practice code. Unique only within a nation.
+      - name: practice_name
+        data_type: varchar
+        description: Practice name as the nation's data give it that month.
+      - name: postcode
+        data_type: varchar
+        description: Practice postcode that month.
+      - name: postcode_status
+        data_type: varchar
+        description: current, terminated, not_found or not_looked_up, from postcodes.io.
+      - name: latitude
+        data_type: double
+        description: Location of the practice postcode.
+      - name: longitude
+        data_type: double
+        description: Location of the practice postcode.
+      - name: region
+        data_type: varchar
+        description: England's region (one of nine), from the postcode.
+      - name: nhs_area_code
+        data_type: varchar
+        description: >
+          NHS area: an integrated care board in England, a health board in Scotland and
+          Wales, a local commissioning group in Northern Ireland.
+      - name: nhs_area_name
+        data_type: varchar
+        description: Name of the NHS area.
+      - name: local_authority_code
+        data_type: varchar
+        description: Local authority (council) of the postcode.
+      - name: rural_urban_2021
+        data_type: varchar
+        description: ONS 2021 rural-urban classification of the postcode (England and Wales).
+      - name: list_size
+        data_type: integer
+        description: Registered patients. Scotland and Northern Ireland only.
+      - name: all_items
+        data_type: integer
+        description: Prescription items for all drugs.
       - name: glucose_lowering_items
+        data_type: bigint
+        description: Items for glucose-lowering drugs (BNF 6.1.1 and 6.1.2).
         data_tests: [{at_least: {arguments: {min_value: 1}}}]
+      - name: glucose_lowering_drugs
+        data_type: bigint
+        description: Number of different glucose-lowering drugs (BNF chemical substances).
+      - name: target_drug_items
+        data_type: bigint
+        description: Items for the target drug (0 if none).
+      - name: target_drug_brands
+        data_type: varchar
+        description: Brands of the target drug named on prescriptions, comma-separated.
 
   - name: uk_adopters
     description: >
@@ -69,7 +205,58 @@ models:
           arguments:
             combination_of_columns: [nation, practice_code]
     columns:
+      - name: nation
+        data_type: varchar
+        description: England, Scotland, Wales or Northern Ireland.
+      - name: practice_code
+        data_type: varchar
+        description: GP practice code. Unique only within a nation.
       - name: adoption_month
+        data_type: date
+        description: First month with 1+ item of the target drug. Used for the maps.
         data_tests: [not_null]
+      - name: matched_adoption_month
+        data_type: date
+        description: >
+          First month whose past 12 months add up to 11+ items, close to the US rule. Used to
+          compare countries. Null if the practice never reached it.
       - name: adoption_month_items
+        data_type: bigint
+        description: Items of the target drug in the adoption month.
         data_tests: [{at_least: {arguments: {min_value: 1}}}]
+      - name: adoption_brands
+        data_type: varchar
+        description: Brands named in the adoption month, comma-separated.
+      - name: practice_name
+        data_type: varchar
+        description: Practice name in the adoption month.
+      - name: postcode
+        data_type: varchar
+        description: Practice postcode in the adoption month.
+      - name: postcode_status
+        data_type: varchar
+        description: current, terminated, not_found or not_looked_up, from postcodes.io.
+      - name: latitude
+        data_type: double
+        description: Location in the adoption month.
+      - name: longitude
+        data_type: double
+        description: Location in the adoption month.
+      - name: region
+        data_type: varchar
+        description: England's region (one of nine), from the postcode.
+      - name: nhs_area_code
+        data_type: varchar
+        description: NHS area in the adoption month.
+      - name: nhs_area_name
+        data_type: varchar
+        description: Name of the NHS area.
+      - name: list_size
+        data_type: integer
+        description: Registered patients. Scotland and Northern Ireland only.
+      - name: local_authority_code
+        data_type: varchar
+        description: Local authority (council) of the postcode.
+      - name: rural_urban_2021
+        data_type: varchar
+        description: ONS 2021 rural-urban classification of the postcode (England and Wales).

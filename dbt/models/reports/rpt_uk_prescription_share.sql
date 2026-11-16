@@ -7,10 +7,10 @@
 
 select
     nation,
-    year(month) as year,
+    cast(year(month) as smallint) as year,
     count(distinct month) as months,
-    sum(glucose_lowering_items) as glucose_lowering_items,
-    sum(target_drug_items) as target_drug_items,
+    cast(sum(glucose_lowering_items) as bigint) as glucose_lowering_items,
+    cast(sum(target_drug_items) as bigint) as target_drug_items,
     round(100.0 * sum(target_drug_items) / sum(glucose_lowering_items), 2) as target_share_pct
 from {{ ref('uk_population_at_risk') }}
 group by nation, year(month)
