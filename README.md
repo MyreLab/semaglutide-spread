@@ -99,8 +99,6 @@ uv run dagster dev           # UI at http://localhost:3000; click "Materialize a
 uv run dagster job execute -m semaglutide_spread.definitions -j refresh
 ```
 
-The first run downloads about 33 GB of Part D CSVs (stored as 4.6 GB of Parquet; allow 10 GB of free disk) and takes over an hour. Later runs only fetch what's new.
-
 ## Data sources
 
 | Country | Source | Unit | Time step |
