@@ -2,7 +2,7 @@
 
 [![Continuous integration tests](https://github.com/MyreLab/semaglutide-spread/actions/workflows/ci.yml/badge.svg)](https://github.com/MyreLab/semaglutide-spread/actions/workflows/ci.yml)
 
-A data pipeline that tracks how semaglutide (Ozempic, Rybelsus, Wegovy) spread through prescribers in the US and the UK, built on public prescribing data with Python, dbt and DuckDB.
+A data pipeline that tracks how semaglutide (Ozempic, Rybelsus, Wegovy) spread through prescribers in the US and the UK, built on public prescribing data with Python, dbt, DuckDB and Dagster.
 
 <img src="docs/images/us_uk_night_lights.gif" alt="Night-lights maps of the US and the UK side by side on one clock, 2018 to 2026: each US Medicare prescriber and each UK GP practice lights up when it first reaches 11+ semaglutide prescriptions in a year">
 
@@ -27,9 +27,14 @@ flowchart LR
 
 - **Ingestion (Python).** One downloader per source. Downloads are resumable and retried, columns are checked against what the publisher documents, and row counts or totals are checked before anything is saved. Everything lands as text-only Parquet, partitioned by year or month, so column types are decided in one place (dbt) instead of guessed on load.
 - **Transformation (dbt on DuckDB).** Staging models type and clean each source, intermediate models handle locations and specialties, and marts hold the population at risk and the adopters. Hand-maintained lookups, like the list of diabetes drugs and the specialty groups, are dbt seeds with a reason on each row. Browse the models, tests and lineage in the [dbt docs](https://myrelab.github.io/semaglutide-spread/).
-- **Testing.** dbt tests run on the full data at every build, including checks that counts reconcile between layers. A pytest suite also builds the whole warehouse on a small made-up dataset with answers worked out in advance. The marts and reports have enforced contracts, so a renamed column or changed type fails the build.
+- **Orchestration (Dagster).** The downloads, dbt models and charts are one asset graph, with each dbt test as a check on its table. I picked Dagster over Airflow because its assets map one-to-one onto dbt models, so the lineage runs from the source APIs to the charts. A monthly schedule reruns it; the downloaders skip anything unchanged.
+- **Testing.** dbt tests run on the full data at every build, including checks that counts reconcile between layers. A pytest suite also builds the whole warehouse on a small made-up dataset with answers worked out in advance, and runs the Dagster graph on it with the downloads stubbed out. The marts and reports have enforced contracts, so a renamed column or changed type fails the build.
 - **CI.** GitHub Actions runs formatting, lint and all tests on every pull request; `main` only changes through pull requests that pass.
 - **Outputs.** Charts in matplotlib; the maps are drawn with numpy and Pillow.
+
+![One chart's lineage in Dagster, from the raw downloads to the chart](docs/images/dagster_lineage.png)
+
+*One chart's lineage in Dagster, from raw downloads to chart.*
 
 | | US | UK |
 |---|---|---|
@@ -93,7 +98,7 @@ I built this with Claude Code as a pair programmer. I chose the questions and th
 ## If this were production
 
 - Run dbt on Snowflake instead of DuckDB, with raw files in S3. Most models would carry over as they are; a few DuckDB-specific pieces, like the as-of joins and reading Parquet straight from disk, would need rewriting.
-- Schedule the downloaders and the dbt build with Dagster or Airflow, monthly, as the sources publish.
+- Deploy Dagster properly: always-on schedule, Postgres for run history, alerts on failures.
 - Make the largest models incremental instead of rebuilding everything each time.
 
 ## Run it yourself
@@ -108,35 +113,15 @@ uv run pre-commit install    # turn on the checks that run on every commit
 uv run pytest                # run the tests, including a dbt build on made-up sample data
 ```
 
-To run the full pipeline, download the data:
+Then run the whole pipeline with Dagster:
 
 ```bash
-uv run partd-download        # Medicare Part D, 2018 to the latest year CMS has published
-uv run census-download       # Census ZIP-area (ZCTA) reference files, ~2 MB
-uv run geocode-addresses     # place prescribers whose ZIP code has no ZIP area (~4 minutes)
-uv run epd-download          # England: diabetes drugs by GP practice and month (~1 hour)
-uv run ods-download          # England: which prescribing codes are GP practices (seconds)
-uv run phs-download          # Scotland: prescribing by GP practice, and the practice register (~15 minutes)
-uv run ni-download           # Northern Ireland: prescribing by GP practice, and practice lists (~30 minutes)
-uv run wales-download        # Wales: prescribing by GP practice, and practice addresses (~10 minutes)
-uv run postcode-lookup       # UK practice postcodes to locations and NHS areas (~1 minute)
+uv run dagster dev           # UI at http://localhost:3000; click "Materialize all"
+# or, without the UI:
+uv run dagster job execute -m semaglutide_spread.definitions -j refresh
 ```
 
-The Part D download is about 33 GB of CSVs from data.cms.gov, one file at a time, stored as about 4.6 GB of Parquet in `data/raw/`. Allow about 10 GB of free disk space while it runs. Re-running only fetches years that are new or that CMS has re-published.
-
-Build the warehouse and draw the figures:
-
-```bash
-uv run build-warehouse       # dbt build with all data tests: ~3 minutes, writes data/warehouse.duckdb
-uv run night-lights          # docs/images/{us,uk}_night_lights.gif and a still of each last frame (~45 s);
-                             # --detailed adds the small print, for sharing a map on its own
-uv run night-lights-combined # docs/images/us_uk_night_lights.gif: both countries on one clock (~30 s)
-uv run adoption-curve        # docs/images/{us,uk}_adoption_curve_*.png and uk_nations_adoption_*.png
-uv run comparison-chart      # docs/images/us_uk_comparison_*.png
-uv run specialty-chart       # docs/images/us_unexpected_specialties_*.png
-uv run social-preview        # docs/images/social_preview.png, the image shown when the repo is shared
-```
-
+The first run downloads about 33 GB of Part D CSVs (stored as 4.6 GB of Parquet; allow 10 GB of free disk) and takes over an hour. Later runs only fetch what's new.
 
 ## Roadmap
 
