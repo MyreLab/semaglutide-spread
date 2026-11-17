@@ -95,12 +95,6 @@ The full list, with definitions, is in [docs/methods.md](docs/methods.md), and y
 
 I built this with Claude Code as a pair programmer. I chose the questions and the data sources, laid out the architecture I wanted, and made the analytical decisions. I reviewed every pull request before merging. Claude was confidently wrong more than once: it told me the Welsh data only went back to 2024 when the archive went back to 2018, and its first grouping of medical specialties didn't match who actually manages diabetes, so I reclassified them. The tests were my other safeguard: if a change makes the pipeline give the wrong answers on the test dataset, CI fails and it can't be merged.
 
-## If this were production
-
-- Run dbt on Snowflake instead of DuckDB, with raw files in S3. Most models would carry over as they are; a few DuckDB-specific pieces, like the as-of joins and reading Parquet straight from disk, would need rewriting.
-- Deploy Dagster properly: always-on schedule, Postgres for run history, alerts on failures.
-- Make the largest models incremental instead of rebuilding everything each time.
-
 ## Run it yourself
 
 Requires [uv](https://docs.astral.sh/uv/).
