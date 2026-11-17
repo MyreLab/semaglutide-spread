@@ -32,7 +32,10 @@ flowchart LR
 - **CI.** GitHub Actions runs formatting, lint and all tests on every pull request; `main` only changes through pull requests that pass.
 - **Outputs.** Charts in matplotlib; the maps are drawn with numpy and Pillow.
 
-![One chart's lineage in Dagster, from the raw downloads to the chart](docs/images/dagster_lineage.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/dagster_lineage_dark.png">
+  <img alt="One chart's lineage in Dagster, from the raw downloads to the chart" src="docs/images/dagster_lineage_light.png">
+</picture>
 
 *One chart's lineage in Dagster, from raw downloads to chart.*
 
