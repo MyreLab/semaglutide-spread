@@ -77,7 +77,7 @@ Most of the work was in the data, not the code. A few problems that changed the 
 
 ## Working with Claude Code
 
-I built this with Claude Code as a pair programmer. I chose the questions and the data sources, laid out the architecture I wanted, and made the analytical decisions. I reviewed every pull request before merging. Claude was confidently wrong more than once: it told me the Welsh data only went back to 2024 when the archive went back to 2018, and its first grouping of medical specialties didn't match who actually manages diabetes, so I reclassified them. The tests were my other safeguard: if a change makes the pipeline give the wrong answers on the test dataset, CI fails and it can't be merged.
+I built this with Claude Code as a pair programmer. I defined the questions and the data sources, laid out the architecture, and made the analytical decisions. Claude wrote most of the code, and I reviewed every pull request before merging. Claude was confidently wrong more than once: it told me the Welsh data only went back to 2024 when the archive went back to 2018, and its first grouping of medical specialties didn't match who actually manages diabetes, so I reclassified them. The tests were my other safeguard: if a change makes the pipeline give the wrong answers on the test dataset, CI fails and it can't be merged.
 
 ## Run it yourself
 
