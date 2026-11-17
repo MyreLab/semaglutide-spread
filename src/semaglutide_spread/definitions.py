@@ -1,7 +1,8 @@
-"""Dagster definitions: the dbt models and the charts, as one asset graph.
+"""Dagster definitions: the downloads, the dbt models and the charts, as one asset graph.
 
-Every dbt model, seed and test is loaded from the dbt project, and each chart is an asset
-downstream of the tables it reads, so Dagster knows what to rebuild when a model changes.
+Each downloader writes the raw tables the dbt sources read (sources/assets.py), every dbt
+model, seed and test is loaded from the dbt project, and each chart is an asset downstream of
+the tables it reads, so Dagster knows what to rebuild when anything upstream changes.
 
 Usage:
     uv run dagster dev                               # the UI, at http://localhost:3000
@@ -17,15 +18,20 @@ import duckdb
 from dagster import (
     AssetExecutionContext,
     AssetKey,
+    AssetSelection,
     ConfigurableResource,
+    DefaultScheduleStatus,
     Definitions,
     MaterializeResult,
     MetadataValue,
+    ScheduleDefinition,
     asset,
+    define_asset_job,
 )
 from dagster_dbt import DagsterDbtTranslator, DbtCliResource, DbtProject, dbt_assets
 
 from semaglutide_spread.paths import DATA_DIR, PROJECT_ROOT, WAREHOUSE_PATH
+from semaglutide_spread.sources.assets import DOWNLOADS
 from semaglutide_spread.viz import (
     adoption_curve,
     combined_night_lights,
@@ -161,7 +167,28 @@ CHARTS = [
     unexpected_specialties,
 ]
 
+# --- Schedule ------------------------------------------------------------------------------
+
+refresh = define_asset_job(
+    "refresh",
+    selection=AssetSelection.all(),
+    description="Download anything new, rebuild the warehouse, redraw the charts.",
+)
+
+# Once a month: the UK nations publish monthly, about two months behind, and CMS once a year.
+# The downloaders skip anything already saved and unchanged, so most runs only fetch the new
+# UK months. Off by default, because a first run downloads everything (about 33 GB of Part D
+# CSVs alone): turn it on in the UI under Automation once the data is in place.
+monthly_refresh = ScheduleDefinition(
+    job=refresh,
+    cron_schedule="0 6 20 * *",  # 6am on the 20th
+    execution_timezone="America/Los_Angeles",
+    default_status=DefaultScheduleStatus.STOPPED,
+)
+
 defs = Definitions(
-    assets=[dbt_models, *CHARTS],
+    assets=[*DOWNLOADS, dbt_models, *CHARTS],
+    jobs=[refresh],
+    schedules=[monthly_refresh],
     resources={"dbt": DbtCliResource(project_dir=dbt_project), "charts": Charts()},
 )
