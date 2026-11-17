@@ -99,6 +99,8 @@ uv run dagster dev           # UI at http://localhost:3000; click "Materialize a
 uv run dagster job execute -m semaglutide_spread.definitions -j refresh
 ```
 
+The first run takes over an hour; later runs only fetch what's new.
+
 ## Data sources
 
 | Country | Source | Unit | Time step |
