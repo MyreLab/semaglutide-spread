@@ -75,25 +75,6 @@ Most of the work was in the data, not the code. A few problems that changed the 
 - **Searching for diabetes drugs finds the wrong things.** A text search of Medicare's drug names also returns insulin syringes and metolazone, a diuretic. The drug list is now a dbt seed based on the WHO's diabetes drug group, and a test fails if Medicare publishes a new name nobody has classified.
 - **Paging an API without losing rows.** England's and Scotland's portals return 32,000 rows per request, and without a fixed sort order pages can overlap or skip rows. Every download uses a fixed order and is checked against a separate total before it's saved.
 
-## Data
-
-| Country | Source | Unit | Time step |
-|---|---|---|---|
-| US | [Medicare Part D Prescribers by Provider and Drug](https://data.cms.gov/provider-summary-by-type-of-service/medicare-part-d-prescribers/medicare-part-d-prescribers-by-provider-and-drug) (CMS) | Individual prescriber | Year |
-| England | [English Prescribing Dataset](https://opendata.nhsbsa.net/dataset/english-prescribing-dataset-epd-with-snomed-code) (NHS Business Services Authority) | GP practice | Month |
-| Scotland | [Prescriptions in the Community](https://www.opendata.nhs.scot/dataset/prescriptions-in-the-community) (Public Health Scotland) | GP practice | Month |
-| Northern Ireland | [GP Prescribing Data](https://www.opendatani.gov.uk/dataset/gp-prescribing-data) (Business Services Organisation, via OpenDataNI) | GP practice | Month |
-| Wales | [GP practice prescribing](https://nwssp.nhs.wales/ourservices/primary-care-services/general-information/data-and-publications/prescribing-data-extracts/general-practice-prescribing-data-extract/) (NHS Wales Shared Services Partnership) | GP practice | Month |
-
-The limitations that matter most:
-
-- The US data are Medicare Part D only: mostly people 65 and over, with no private insurance and no Medicaid (Medicaid doesn't publish prescribing by prescriber).
-- CMS hides any prescriber-drug row with fewer than 11 claims, so US adoption is the first year a prescriber becomes visible, not necessarily their first prescription.
-- The UK data count GP practices, not individual prescribers, and leave out private prescriptions, including online weight-loss services.
-- Neither country's data says why semaglutide was prescribed.
-
-The full list, with definitions, is in [docs/methods.md](docs/methods.md), and year-by-year results for each country are in [docs/results.md](docs/results.md).
-
 ## Working with Claude Code
 
 I built this with Claude Code as a pair programmer. I chose the questions and the data sources, laid out the architecture I wanted, and made the analytical decisions. I reviewed every pull request before merging. Claude was confidently wrong more than once: it told me the Welsh data only went back to 2024 when the archive went back to 2018, and its first grouping of medical specialties didn't match who actually manages diabetes, so I reclassified them. The tests were my other safeguard: if a change makes the pipeline give the wrong answers on the test dataset, CI fails and it can't be merged.
@@ -120,17 +101,18 @@ uv run dagster job execute -m semaglutide_spread.definitions -j refresh
 
 The first run downloads about 33 GB of Part D CSVs (stored as 4.6 GB of Parquet; allow 10 GB of free disk) and takes over an hour. Later runs only fetch what's new.
 
-## Roadmap
+## Data sources
 
-- [x] **M1: US adoption.** Part D 2018-2024, population at risk, first adoption, US night-lights GIF
-- [x] **M2: UK.** Monthly GP practice data for England, Scotland, Northern Ireland and Wales, same measures, UK night-lights GIF
-- [x] **M3: Compare.** Who prescribed it first, how fast it spread and where, US vs UK
-- [ ] **M4: Agents.** Claude-powered helpers for drug-name matching, data quality triage and questions
+| Country | Source | Unit | Time step |
+|---|---|---|---|
+| US | [Medicare Part D Prescribers by Provider and Drug](https://data.cms.gov/provider-summary-by-type-of-service/medicare-part-d-prescribers/medicare-part-d-prescribers-by-provider-and-drug) (CMS) | Individual prescriber | Year |
+| England | [English Prescribing Dataset](https://opendata.nhsbsa.net/dataset/english-prescribing-dataset-epd-with-snomed-code) (NHS Business Services Authority) | GP practice | Month |
+| Scotland | [Prescriptions in the Community](https://www.opendata.nhs.scot/dataset/prescriptions-in-the-community) (Public Health Scotland) | GP practice | Month |
+| Northern Ireland | [GP Prescribing Data](https://www.opendatani.gov.uk/dataset/gp-prescribing-data) (Business Services Organisation, via OpenDataNI) | GP practice | Month |
+| Wales | [GP practice prescribing](https://nwssp.nhs.wales/ourservices/primary-care-services/general-information/data-and-publications/prescribing-data-extracts/general-practice-prescribing-data-extract/) (NHS Wales Shared Services Partnership) | GP practice | Month |
 
-## Author
+Limitations and definitions are in [docs/methods.md](docs/methods.md), and year-by-year results for each country are in [docs/results.md](docs/results.md).
 
-Myrela Bauman: epidemiologist, data engineer. [GitHub](https://github.com/MyreLab)
+## Credits and license
 
-## License
-
-MIT
+Built by Myrela Bauman | [@MyreLab](https://github.com/MyreLab). Released under the [MIT license](LICENSE).
